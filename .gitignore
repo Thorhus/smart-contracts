@@ -1,8 +1,10 @@
+package-lock.json
 node_modules
-.idea
+package.lock
 #Hardhat files
 cache
 artifacts
-
+.idea
 .env
-.DS_Store
+yarn.lock
+deployments/contract*
