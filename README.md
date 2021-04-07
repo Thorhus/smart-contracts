@@ -14,6 +14,9 @@ USERNAME=CHAINPORT
 PROJECT=CHAINPORT_PROTOCOL
 ```
 
+#### Create deployments folder
+`$ mkdir deployments`
+
 #### Compile code
 - `npx hardhat clean` (Clears the cache and deletes all artifacts)
 - `npx hardhat compile` (Compiles the entire project, building all artifacts)
