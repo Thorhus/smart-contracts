@@ -1,19 +1,20 @@
 const hre = require("hardhat");
 const { hexify, toChainportDenomination: toChainportDenomination } = require('../test/setup');
-// const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
+const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
 const config = require('../deployments/deploymentConfig.json');
 
 async function main() {
     await hre.run('compile');
 
     const ChainportCongress = await hre.ethers.getContractFactory("ChainportCongress");
+
     const chainportCongress = await ChainportCongress.deploy();
     await chainportCongress.deployed();
 
-    console.log("HordCongress contract deployed to:", chainportCongress.address);
+    console.log("chainport contract deployed to:", chainportCongress.address);
 
-    saveContractAddress(hre.network.name, 'chainportCongress', chainportCongress.address);
-    saveContractBytecode(hre.network.name,'chainportCongress', (await hre.artifacts.readArtifact("ChainportCongress")).bytecode);
+    saveContractAddress(hre.network.name, 'ChainportCongress', chainportCongress.address);
+    saveContractBytecode(hre.network.name,'ChainportCongress', (await hre.artifacts.readArtifact("ChainportCongress")).bytecode);
 
     const ChainportCongressMembersRegistry = await hre.ethers.getContractFactory("ChainportCongressMembersRegistry");
     const chainportCongressMembersRegistry = await ChainportCongressMembersRegistry.deploy(
@@ -25,11 +26,11 @@ async function main() {
 
     console.log("ChainportCongressMembersRegistry contract deployed to:", chainportCongressMembersRegistry.address);
 
-    saveContractAddress(hre.network.name, 'chainportCongressMembersRegistry', chainportCongressMembersRegistry.address);
-    saveContractBytecode(hre.network.name,'chainportCongressMembersRegistry', (await hre.artifacts.readArtifact("ChainportCongressMembersRegistry")).bytecode);
+    saveContractAddress(hre.network.name, 'ChainportCongressMembersRegistry', chainportCongressMembersRegistry.address);
+    saveContractBytecode(hre.network.name,'ChainportCongressMembersRegistry', (await hre.artifacts.readArtifact("ChainportCongressMembersRegistry")).bytecode);
 
 
-    const chainportToken = await hre.ethers.getContractFactory("chainportToken");
+    const chainportToken = await hre.ethers.getContractFactory("ChainportToken");
     const chainport = await chainportToken.deploy(
         config.chainportTokenName,
         config.chainportTokenSymbol,
@@ -38,10 +39,10 @@ async function main() {
     );
     await chainport.deployed();
 
-    console.log("Chainport token deployed to:", hord.address);
+    console.log("Chainport token deployed to:", chainport.address);
 
-    saveContractAddress(hre.network.name, 'chainportToken', hord.address);
-    saveContractBytecode(hre.network.name,'chainportToken', (await hre.artifacts.readArtifact("ChainportToken")).bytecode);
+    saveContractAddress(hre.network.name, 'ChainportToken', chainport.address);
+    saveContractBytecode(hre.network.name,'ChainportToken', (await hre.artifacts.readArtifact("ChainportToken")).bytecode);
 
 
     await chainportCongress.setMembersRegistry(chainportCongressMembersRegistry.address);

@@ -4,12 +4,7 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "../interfaces/IERC20.sol";
 
-/**
- * LongTermTokenPool contract.
- * @author Idan Portal
- * Date created: 07.04.21.
- * Github: 4tal
- */
+
 abstract contract TokenPool is Initializable {
 
     uint256 public initialSupply;

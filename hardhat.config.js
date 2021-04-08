@@ -1,7 +1,7 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-ethers')
-require("@nomiclabs/hardhat-web3")
-require('@openzeppelin/hardhat-upgrades')
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-web3");
+require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 
 require('dotenv').config();
@@ -10,12 +10,12 @@ require('dotenv').config();
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
 task('accounts', 'Prints the list of accounts', async () => {
-  const accounts = await ethers.getSigners()
+  const accounts = await ethers.getSigners();
 
   for (const account of accounts) {
     console.log(await account.getAddress())
   }
-})
+});
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -65,5 +65,5 @@ module.exports = {
     username: process.env.USERNAME,
     project: process.env.PROJECT
   },
-}
+};
 
