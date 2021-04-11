@@ -40,14 +40,14 @@ module.exports = {
       gasPrice: 5000000000,
       timeout: 50000
     },
-    mainnet: {
-      // Infura public nodes
-      url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
-      accounts: [process.env.PK],
-      chainId: 1,
-      gasPrice: 115000000000, // 44 GWEI gas price for deployment.
-      timeout: 10000000
-    },
+    // mainnet: {
+    //   // Infura public nodes
+    //   url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
+    //   accounts: [process.env.PK],
+    //   chainId: 1,
+    //   gasPrice: 115000000000, // 44 GWEI gas price for deployment.
+    //   timeout: 10000000
+    // },
     local: {
       url: 'http://localhost:8545',
     },
