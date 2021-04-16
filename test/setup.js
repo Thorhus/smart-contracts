@@ -67,7 +67,7 @@ function hexify(names) {
     return resp;
 }
 
-const decimals = "1000000000000000000"
+const decimals = "1000000000000000000";
 
 function toChainportDenomination (x) {
     return BigNumber.from(x).mul(decimals)

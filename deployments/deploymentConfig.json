@@ -7,5 +7,8 @@
   ],
   "initialCongressMembersNames": [
     "Idan"
-  ]
+  ],
+  "ethErc20tokenName": "TestEthToken",
+  "ethErc20tokenSymbol": "TET",
+  "ethErc20tokenSupply": 320000000
 }
