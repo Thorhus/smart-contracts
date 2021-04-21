@@ -28,8 +28,6 @@ contract MaintainersRegistry is Initializable{
     public
     initializer
     {
-        addMaintainer(msg.sender);
-
         for(uint i = 0; i < _maintainers.length; i++) {
             addMaintainer(_maintainers[i]);
         }
