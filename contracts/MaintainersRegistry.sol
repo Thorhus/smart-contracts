@@ -23,7 +23,7 @@ contract MaintainersRegistry is Initializable{
      * @notice      Function to perform initialization
      */
     function initialize(
-        address [] _maintainers
+        address [] memory _maintainers
     )
     public
     initializer
