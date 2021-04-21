@@ -41,12 +41,6 @@ async function sendEther(privateKey, to) {
 async function main() {
     await hre.run('compile');
 
-
-    // const provider = new ethers.providers.JsonRpcProvider();
-
-    // console.log(wallet);
-    // console.log(wallet.address);
-    // console.log(hre);
     let accounts = await ethers.getSigners();
 
     const deploymentNetwork = process.env.HARDHAT_NETWORK;
@@ -60,22 +54,9 @@ async function main() {
         await accounts[0].getAddress();
     }
 
-
-    // // let owner = accounts[0]
-    // console.log(owner);
-    // let ownerAddr = await owner.getAddress()
-    // console.log(ownerAddr);
-    // let anotherAccount = accounts[8]
-    // console.log(anotherAccount);
-    // let anotherAccountAddr = await anotherAccount.getAddress()
-    // console.log(anotherAccountAddr);
-
     throw new Error('test');
-    // sendEther(account)
-
 
     const ChainportBridgeEth = await hre.ethers.getContractFactory("ChainportBridgeEth");
-
     const chainportBridgeEth = await ChainportBridgeEth.deploy();
     await chainportBridgeEth.deployed();
 
