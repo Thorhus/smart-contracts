@@ -16,6 +16,9 @@ contract MaintainersRegistry is Initializable{
     // Arrays
     address [] public allMaintainers;
 
+    // Hord congress authorized address to modify maintainers
+    address public hordCongress;
+
     // Events
     event MaintainerStatusChanged(address maintainer, bool isMember);
 
@@ -23,11 +26,15 @@ contract MaintainersRegistry is Initializable{
      * @notice      Function to perform initialization
      */
     function initialize(
-        address [] memory _maintainers
+        address [] memory _maintainers,
+        address _hordCongress
     )
     public
     initializer
     {
+        // Register congress
+        hordCongress = _hordCongress;
+
         for(uint i = 0; i < _maintainers.length; i++) {
             addMaintainer(_maintainers[i]);
         }
@@ -40,8 +47,9 @@ contract MaintainersRegistry is Initializable{
     function addMaintainer(
         address _address
     )
-    internal
+    public
     {
+        require(msg.sender == hordCongress, 'MaintainersRegistry :: Only congress can add maintainer');
         require(isMaintainer[_address] == false);
 
         // Adds new maintainer to an array
@@ -60,8 +68,9 @@ contract MaintainersRegistry is Initializable{
     function removeMaintainer(
         address _maintainer
     )
-    internal
+    public
     {
+        require(msg.sender == hordCongress, 'MaintainersRegistry :: Only congress can remove maintainer');
         require(isMaintainer[_maintainer] == true);
 
         uint length = allMaintainers.length;
