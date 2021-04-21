@@ -1,6 +1,6 @@
 {
   "chainportTokenName" : "Bridge Token",
-  "chainportTokenSymbol" : "Brd",
+  "chainportTokenSymbol" : "BRD",
   "chainportTotalSupply" : 320000000,
   "initialCongressMembers": [
     "0x83453d40198982beA848d982CE4d056D3ddFb41D",
