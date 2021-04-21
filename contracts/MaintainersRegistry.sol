@@ -11,13 +11,14 @@ contract MaintainersRegistry {
     string constant _numberOfMaintainers = "numberOfMaintainers";
     string constant _numberOfActiveMaintainers = "numberOfActiveMaintainers";
 
-    bool initialized;
+    mapping(bytes32 => uint) uintStorage;
+    mapping(bytes32 => address) addressStorage;
+    mapping(bytes32 => bool) boolStorage;
 
-    address public PROXY_STORAGE_CONTRACT;
+    bool initialized;
 
     function setInitialParams(
         //address _twoKeySingletonRegistry,
-        //address _proxyStorage,
         address [] _maintainers
         //address [] _coreDevs
     )
@@ -50,8 +51,9 @@ contract MaintainersRegistry {
 
         incrementNumberOfActiveMaintainers();
 
-        PROXY_STORAGE_CONTRACT.setAddress(keyHashIdToMaintainer, _maintainer);
-        PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, true);
+        addressStorage[keyHashIdToMaintainer] = _maintainer;
+        boolStorage[keyHashIsMaintainer] = true;
+
     }
 
     function removeMaintainer(
@@ -61,25 +63,25 @@ contract MaintainersRegistry {
     {
         bytes32 keyHashIsMaintainer = keccak256(_isMaintainer, _maintainer);
         decrementNumberOfActiveMaintainers();
-        PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, false);
+        boolStorage[keyHashIsMaintainer] = false;
     }
 
     function incrementNumberOfMaintainers() internal {
-        uint numberOfMaintainers = PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfMaintainers));
+        uint numberOfMaintainers = uintStorage[keccak256(_numberOfMaintainers)];
         numberOfMaintainers.add(1);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_numberOfMaintainers), numberOfMaintainers);
+        uintStorage[keccak256(_numberOfMaintainers)] = numberOfMaintainers;
     }
 
     function incrementNumberOfActiveMaintainers() internal {
-        uint numberOfActiveMaintainers = PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfActiveMaintainers));
+        uint numberOfActiveMaintainers = uintStorage[keccak256(_numberOfActiveMaintainers)];
         numberOfActiveMaintainers.add(1);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_numberOfActiveMaintainers), numberOfActiveMaintainers);
+        uintStorage[keccak256(_numberOfActiveMaintainers)] = numberOfActiveMaintainers;
     }
 
     function decrementNumberOfActiveMaintainers() internal {
-        uint numberOfActiveMaintainers = PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfActiveMaintainers));
+        uint numberOfActiveMaintainers = uintStorage[keccak256(_numberOfActiveMaintainers)];
         numberOfActiveMaintainers.sub(1);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_numberOfActiveMaintainers), numberOfActiveMaintainers);
+        uintStorage[keccak256(_numberOfActiveMaintainers)] = numberOfActiveMaintainers;
     }
 
     function isAddressMaintainer(
@@ -89,7 +91,7 @@ contract MaintainersRegistry {
     view
     returns(bool)
     {
-        return PROXY_STORAGE_CONTRACT.getBool(keccak256(_isMaintainer, _address));
+        return boolStorage[keccak256(_isMaintainer, _address)];
     }
 
     function getNumberOfMaintainers()
@@ -97,7 +99,7 @@ contract MaintainersRegistry {
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfMaintainers));
+        return uintStorage[keccak256(_numberOfMaintainers)];
     }
 
     function getAllMaintainers()
@@ -128,6 +130,6 @@ contract MaintainersRegistry {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_idToMaintainer, _id));
+        return addressStorage[keccak256(_idToMaintainer, _id)];
     }
 }
