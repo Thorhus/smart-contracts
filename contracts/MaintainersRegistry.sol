@@ -2,134 +2,92 @@ pragma solidity ^0.6.12;
 
 import "./libraries/SafeMath.sol";
 
-contract MaintainersRegistry {
+import "@openzeppelin/contracts/proxy/Initializable.sol";
+
+contract MaintainersRegistry is Initializable{
 
     using SafeMath for uint;
 
-    string constant _isMaintainer = "isMaintainer";
-    string constant _idToMaintainer = "idToMaintainer";
-    string constant _numberOfMaintainers = "numberOfMaintainers";
-    string constant _numberOfActiveMaintainers = "numberOfActiveMaintainers";
+    // Mappings
+    mapping(address => bool) isMaintainer;
 
-    mapping(bytes32 => uint) uintStorage;
-    mapping(bytes32 => address) addressStorage;
-    mapping(bytes32 => bool) boolStorage;
+    // Singular types
 
-    bool initialized;
+    // Arrays
+    address [] public allMaintainers;
 
-    function setInitialParams(
-        //address _twoKeySingletonRegistry,
+    // Events
+    event MaintainerStatusChanged(address maintainer, bool isMember);
+
+    /**
+     * @notice      Function to perform initialization
+     */
+    function initialize(
         address [] _maintainers
-        //address [] _coreDevs
     )
     public
+    initializer
     {
-        require(initialized == false);
-
         addMaintainer(msg.sender);
 
         for(uint i = 0; i < _maintainers.length; i++) {
             addMaintainer(_maintainers[i]);
         }
-
-        initialized = true;
-
     }
 
+    /**
+     * @notice      Function that serves for adding maintainer
+     * @param       _address is the address that we want to give maintainer privileges to
+     */
     function addMaintainer(
-        address _maintainer
+        address _address
     )
     internal
     {
-        bytes32 keyHashIsMaintainer = keccak256(_isMaintainer, _maintainer);
+        require(isMaintainer[_address] == false);
 
-        uint id = getNumberOfMaintainers();
+        // Adds new maintainer to an array
+        allMaintainers.push(_maintainer);
+        // Sets that address is now maintainer
+        isMaintainer[_address] = true;
 
-        bytes32 keyHashIdToMaintainer = keccak256(_idToMaintainer, id);
-
-        incrementNumberOfMaintainers();
-
-        incrementNumberOfActiveMaintainers();
-
-        addressStorage[keyHashIdToMaintainer] = _maintainer;
-        boolStorage[keyHashIsMaintainer] = true;
-
+        // Emits event for change of address status to maintainer
+        emit MaintainerStatusChanged(_address, true);
     }
 
+    /**
+     * @notice      Function that serves for removing maintainer
+     * @param       _maintainer is target address of the maintainer we want to remove
+     */
     function removeMaintainer(
         address _maintainer
     )
     internal
     {
-        bytes32 keyHashIsMaintainer = keccak256(_isMaintainer, _maintainer);
-        decrementNumberOfActiveMaintainers();
-        boolStorage[keyHashIsMaintainer] = false;
-    }
+        require(isMaintainer[_maintainer] == true);
 
-    function incrementNumberOfMaintainers() internal {
-        uint numberOfMaintainers = uintStorage[keccak256(_numberOfMaintainers)];
-        numberOfMaintainers.add(1);
-        uintStorage[keccak256(_numberOfMaintainers)] = numberOfMaintainers;
-    }
+        uint length = allMaintainers.length;
 
-    function incrementNumberOfActiveMaintainers() internal {
-        uint numberOfActiveMaintainers = uintStorage[keccak256(_numberOfActiveMaintainers)];
-        numberOfActiveMaintainers.add(1);
-        uintStorage[keccak256(_numberOfActiveMaintainers)] = numberOfActiveMaintainers;
-    }
+        uint i = 0;
 
-    function decrementNumberOfActiveMaintainers() internal {
-        uint numberOfActiveMaintainers = uintStorage[keccak256(_numberOfActiveMaintainers)];
-        numberOfActiveMaintainers.sub(1);
-        uintStorage[keccak256(_numberOfActiveMaintainers)] = numberOfActiveMaintainers;
-    }
-
-    function isAddressMaintainer(
-        address _address
-    )
-    public
-    view
-    returns(bool)
-    {
-        return boolStorage[keccak256(_isMaintainer, _address)];
-    }
-
-    function getNumberOfMaintainers()
-    public
-    view
-    returns (uint)
-    {
-        return uintStorage[keccak256(_numberOfMaintainers)];
-    }
-
-    function getAllMaintainers()
-    public
-    view
-    returns (address[])
-    {
-        uint numberOfMaintainersTotal = getNumberOfMaintainers();
-        uint numberOfActiveMaintainers = getNumberOfActiveMaintainers();
-        address [] memory activeMaintainers = new Address[](numberOfActiveMaintainers);
-
-        uint counter = 0;
-        for(uint i=0; i < numberOfMaintainersTotal; i++) {
-            address maintainer = getMaintainerPerId(i);
-            if(isMaintainer(maintainer)){
-                activeMaintainers[counter] = maintainer;
-                counter = counter.add(1);
+        // While loop for finding position of targeted address
+        while(allMaintainers[i] != _maintainer){
+            if(i == length){
+                revert();
             }
+            i++;
         }
 
-        return activeMaintainers;
-    }
+        // Removes address from maintainers array
+        allMaintainers[i] = allMaintainers[length - 1];
 
-    function getMaintainerById(
-        uint _id
-    )
-    public
-    view
-    returns (address)
-    {
-        return addressStorage[keccak256(_idToMaintainer, _id)];
+        // Removes last element from an array
+        allMaintainers.pop();
+
+        // Sets that address is no longer maintainer
+        isMaintainer[_maintainer] = false;
+
+        // Emits event for change of address status to non-maintainer
+        emit MaintainerStatusChanged(_maintainer, false);
     }
 }
