@@ -8,3 +8,4 @@ artifacts
 .env
 yarn.lock
 deployments/contract*
+/.DS_Store

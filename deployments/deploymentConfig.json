@@ -1,0 +1,14 @@
+{
+  "chainportTokenName" : "Bridge Token",
+  "chainportTokenSymbol" : "Brd",
+  "chainportTotalSupply" : 320000000,
+  "initialCongressMembers": [
+    "0x83453d40198982beA848d982CE4d056D3ddFb41D"
+  ],
+  "initialCongressMembersNames": [
+    "Idan"
+  ],
+  "ethErc20tokenName": "TestEthToken",
+  "ethErc20tokenSymbol": "TET",
+  "ethErc20tokenSupply": 320000000
+}

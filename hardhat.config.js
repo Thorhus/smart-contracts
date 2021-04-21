@@ -1,7 +1,7 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-ethers')
-require("@nomiclabs/hardhat-web3")
-require('@openzeppelin/hardhat-upgrades')
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-web3");
+require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 
 require('dotenv').config();
@@ -10,12 +10,12 @@ require('dotenv').config();
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
 task('accounts', 'Prints the list of accounts', async () => {
-  const accounts = await ethers.getSigners()
+  const accounts = await ethers.getSigners();
 
   for (const account of accounts) {
     console.log(await account.getAddress())
   }
-})
+});
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -40,14 +40,22 @@ module.exports = {
       gasPrice: 5000000000,
       timeout: 50000
     },
-    mainnet: {
+    binancetest: {
       // Infura public nodes
-      url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       accounts: [process.env.PK],
-      chainId: 1,
-      gasPrice: 115000000000, // 44 GWEI gas price for deployment.
-      timeout: 10000000
+      chainId: 97,
+      gasPrice: 40000000000,
+      timeout: 50000
     },
+    // mainnet: {
+    //   // Infura public nodes
+    //   url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
+    //   accounts: [process.env.PK],
+    //   chainId: 1,
+    //   gasPrice: 115000000000, // 44 GWEI gas price for deployment.
+    //   timeout: 10000000
+    // },
     local: {
       url: 'http://localhost:8545',
     },
@@ -65,5 +73,5 @@ module.exports = {
     username: process.env.USERNAME,
     project: process.env.PROJECT
   },
-}
+};
 
