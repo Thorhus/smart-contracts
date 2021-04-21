@@ -5,14 +5,13 @@ let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
     await hre.run('compile');
-
     const config = c[hre.network.name];
 
     const ChainportCongress = await hre.ethers.getContractFactory("ChainportCongress");
     const chainportCongress = await ChainportCongress.deploy();
     await chainportCongress.deployed();
     console.log("ChainportCongress contract deployed to:", chainportCongress.address);
-    saveContractAddress(hre.network.name, 'chainportCongress', chainportCongress.address);
+    saveContractAddress(hre.network.name, 'ChainportCongress', chainportCongress.address);
 
     const ChainportCongressMembersRegistry = await hre.ethers.getContractFactory("ChainportCongressMembersRegistry");
     const chainportCongressMembersRegistry = await ChainportCongressMembersRegistry.deploy(
@@ -22,7 +21,7 @@ async function main() {
     );
     await chainportCongressMembersRegistry.deployed();
     console.log("ChainportCongressMembersRegistry contract deployed to:", chainportCongressMembersRegistry.address);
-    saveContractAddress(hre.network.name, 'chainportCongressMembersRegistry', chainportCongressMembersRegistry.address);
+    saveContractAddress(hre.network.name, 'ChainportCongressMembersRegistry', chainportCongressMembersRegistry.address);
 
 
     const ChainportToken = await hre.ethers.getContractFactory("ChainportToken");
@@ -33,8 +32,8 @@ async function main() {
         chainportCongress.address
     );
     await chainportToken.deployed();
-    console.log("Hord token deployed to:", chainportToken.address);
-    saveContractAddress(hre.network.name, 'hordToken', chainportToken.address);
+    console.log("Chainport token deployed to:", chainportToken.address);
+    saveContractAddress(hre.network.name, 'ChainportToken', chainportToken.address);
 
     await chainportCongress.setMembersRegistry(chainportCongressMembersRegistry.address);
     console.log('ChainportCongress.setMembersRegistry(',chainportCongressMembersRegistry.address,') set successfully.');
