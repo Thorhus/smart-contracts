@@ -45,7 +45,7 @@ contract MaintainersRegistry is Initializable{
         require(isMaintainer[_address] == false);
 
         // Adds new maintainer to an array
-        allMaintainers.push(_maintainer);
+        allMaintainers.push(_address);
         // Sets that address is now maintainer
         isMaintainer[_address] = true;
 
