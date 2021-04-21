@@ -2,16 +2,15 @@
 
 Implementation of Chainport protocol
 
-
 ### Developer instructions
+
 #### Instal dependencies
 `yarn install`
 
 #### Create .env file and make sure it's having following information:
 ```
 PK=YOUR_PRIVATE_KEY 
-USERNAME=CHAINPORT
-PROJECT=CHAINPORT_PROTOCOL
+USERNAME=2key
 ```
 
 #### Create deployments folder
