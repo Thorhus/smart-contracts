@@ -7,14 +7,10 @@ async function main() {
     await hre.run('compile');
 
     const ChainportBridgeBsc = await hre.ethers.getContractFactory("ChainportBridgeBsc");
-
     const chainportBridgeBsc = await ChainportBridgeBsc.deploy();
     await chainportBridgeBsc.deployed();
-
     console.log("chainport bsc contract deployed to:", chainportBridgeBsc.address);
-
     saveContractAddress(hre.network.name, 'ChainportBridgeBsc', chainportBridgeBsc.address);
-    saveContractBytecode(hre.network.name,'ChainportBridgeBsc', (await hre.artifacts.readArtifact("ChainportBridgeBsc")).bytecode);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

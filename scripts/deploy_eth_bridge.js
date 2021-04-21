@@ -39,8 +39,6 @@ async function sendEther(privateKey, to) {
 
 
 async function main() {
-    console.log(process.env);
-    console.log(process.env.HARDHAT_NETWORK);
     await hre.run('compile');
 
 
@@ -76,9 +74,6 @@ async function main() {
     // sendEther(account)
 
 
-
-
-
     const ChainportBridgeEth = await hre.ethers.getContractFactory("ChainportBridgeEth");
 
     const chainportBridgeEth = await ChainportBridgeEth.deploy();
@@ -87,7 +82,6 @@ async function main() {
     console.log("chainport contract deployed to:", chainportBridgeEth.address);
 
     saveContractAddress(hre.network.name, 'ChainportBridgeEth', chainportBridgeEth.address);
-    saveContractBytecode(hre.network.name,'ChainportBridgeEth', (await hre.artifacts.readArtifact("ChainportBridgeEth")).bytecode);
 
     console.log(process.env);
 
@@ -103,9 +97,7 @@ async function main() {
     console.log("ERC20 test token deployed to:", ercTokenInstance.address);
 
     await chainportCongress.setMembersRegistry(chainportCongressMembersRegistry.address);
-
     saveContractAddress(hre.network.name, 'ChainportToken', ercTokenInstance.address);
-    saveContractBytecode(hre.network.name,'ChainportToken', (await hre.artifacts.readArtifact("ChainportToken")).bytecode);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
