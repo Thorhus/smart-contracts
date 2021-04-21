@@ -1,21 +1,38 @@
-require('@nomiclabs/hardhat-waffle');
-require('@nomiclabs/hardhat-ethers');
-require("@nomiclabs/hardhat-web3");
-require('@openzeppelin/hardhat-upgrades');
+require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-ethers')
+require("@nomiclabs/hardhat-web3")
+require('@openzeppelin/hardhat-upgrades')
 require("@tenderly/hardhat-tenderly");
-
 require('dotenv').config();
+const branch = require('git-branch');
 
 
-// This is a sample Buidler task. To learn how to create your own go to
-// https://buidler.dev/guides/create-task.html
+
 task('accounts', 'Prints the list of accounts', async () => {
-  const accounts = await ethers.getSigners();
-
+  const accounts = await ethers.getSigners()
   for (const account of accounts) {
     console.log(await account.getAddress())
   }
-});
+})
+
+const branchToEnv = {
+  "develop" : "test",
+  "staging" : "staging",
+  "master" : "prod",
+};
+
+const networkToBlockchain = {
+  'ropsten' : 'eth',
+  'ropstenStaging' : 'eth',
+  'binancetest' : 'bsc',
+  'binancetestStaging' : 'bsc'
+};
+
+const generateTenderlySlug = () => {
+  let gitBranch = branch.sync();
+  let network = process.argv[4]
+  return `chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`
+}
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -32,15 +49,23 @@ module.exports = {
       gasPrice: 40000000000,
       timeout: 50000
     },
-    kovan: {
+    ropstenStaging: {
       // Infura public nodes
-      url: 'https://kovan.infura.io/v3/8632b09b72044f2c9b9ca1f621220e72',
+      url: 'https://ropsten.infura.io/v3/34ee2e319e7945caa976d4d1e24db07f',
       accounts: [process.env.PK],
-      chainId: 42,
-      gasPrice: 5000000000,
+      chainId: 3,
+      gasPrice: 40000000000,
       timeout: 50000
     },
     binancetest: {
+      // Infura public nodes
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      accounts: [process.env.PK],
+      chainId: 97,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    binancetestStaging: {
       // Infura public nodes
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       accounts: [process.env.PK],
@@ -71,7 +96,6 @@ module.exports = {
   },
   tenderly: {
     username: process.env.USERNAME,
-    project: process.env.PROJECT
+    project: generateTenderlySlug()
   },
-};
-
+}
