@@ -7,6 +7,5 @@ artifacts
 .idea
 .env
 yarn.lock
-deployments/contract*
 /.DS_Store
 tenderly/deployNetwork.json

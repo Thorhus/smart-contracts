@@ -11,6 +11,9 @@
       "Idan",
       "Nikola"
     ],
+    "maintainers": [
+      "0x83453d40198982beA848d982CE4d056D3ddFb41D"
+    ],
     "ethErc20tokenName": "TestEthToken",
     "ethErc20tokenSymbol": "TET",
     "ethErc20tokenSupply": 320000000

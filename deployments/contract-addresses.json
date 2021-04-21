@@ -1,0 +1,7 @@
+{
+    "ropsten": {
+        "ChainportCongress": "0x399dDeC6D3B5919e4294eadc6ca21D2830d1095b",
+        "ChainportCongressMembersRegistry": "0x1743eD1daf2f392284F69377069202a02cb78d8A",
+        "ChainportToken": "0x79c3FD3fB8c6F5246CEF1a65BF1F9861732eBfE1"
+    }
+}
