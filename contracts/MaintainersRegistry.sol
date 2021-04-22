@@ -9,7 +9,7 @@ contract MaintainersRegistry is Initializable{
     using SafeMath for uint;
 
     // Mappings
-    mapping(address => bool) isMaintainer;
+    mapping(address => bool) _isMaintainer;
 
     // Singular types
 
@@ -47,15 +47,15 @@ contract MaintainersRegistry is Initializable{
     function addMaintainer(
         address _address
     )
-    public
+    external
     {
         require(msg.sender == hordCongress, 'MaintainersRegistry :: Only congress can add maintainer');
-        require(isMaintainer[_address] == false);
+        require(_isMaintainer[_address] == false);
 
         // Adds new maintainer to an array
         allMaintainers.push(_address);
         // Sets that address is now maintainer
-        isMaintainer[_address] = true;
+        _isMaintainer[_address] = true;
 
         // Emits event for change of address status to maintainer
         emit MaintainerStatusChanged(_address, true);
@@ -68,10 +68,10 @@ contract MaintainersRegistry is Initializable{
     function removeMaintainer(
         address _maintainer
     )
-    public
+    external
     {
         require(msg.sender == hordCongress, 'MaintainersRegistry :: Only congress can remove maintainer');
-        require(isMaintainer[_maintainer] == true);
+        require(_isMaintainer[_maintainer] == true);
 
         uint length = allMaintainers.length;
 
@@ -92,9 +92,22 @@ contract MaintainersRegistry is Initializable{
         allMaintainers.pop();
 
         // Sets that address is no longer maintainer
-        isMaintainer[_maintainer] = false;
+        _isMaintainer[_maintainer] = false;
 
         // Emits event for change of address status to non-maintainer
         emit MaintainerStatusChanged(_maintainer, false);
+    }
+
+
+    /**
+     * @notice      Function to check if wallet is maintainer
+     * @param       _address is the wallet to check
+     */
+    function isMaintainer(address _address)
+    external
+    view
+    returns (bool)
+    {
+        return _isMaintainer[_address];
     }
 }
