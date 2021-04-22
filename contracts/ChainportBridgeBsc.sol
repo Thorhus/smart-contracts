@@ -3,7 +3,7 @@ pragma solidity ^0.6.12;
 import "./BridgeMintableToken.sol";
 
 
-contract ChainportBridgeBsc{
+contract ChainportBridgeBsc {
 
     mapping(address => uint) public balancesByAddresses;
     mapping(address => address) public bep20ByErc20Address;

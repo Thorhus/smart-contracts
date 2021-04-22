@@ -41,6 +41,7 @@ const generateTenderlySlug = () => {
   } else {
     network = getDeploymentBlockchain()['network'];
   }
+  console.log(`chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`)
   return `chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`;
 }
 

@@ -47,7 +47,7 @@ contract MaintainersRegistry is Initializable{
     function addMaintainer(
         address _address
     )
-    external
+    public
     {
         require(msg.sender == hordCongress, 'MaintainersRegistry :: Only congress can add maintainer');
         require(_isMaintainer[_address] == false);
