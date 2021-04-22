@@ -4,7 +4,7 @@ import "./libraries/SafeMath.sol";
 
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 
-contract MaintainersRegistry is Initializable{
+contract MaintainersRegistry is Initializable {
 
     using SafeMath for uint;
 
