@@ -32,7 +32,7 @@ contract("MaintainersRegistry", (accounts) => {
                 assert.equal(await contractInstance.isMaintainer(user), true);
             })
 
-            it("Should not add a maintainer if address already is a maintainer", async () => {
+            it("Should not add same maintainer second time", async () => {
                 await contractInstance.addMaintainer(user, {from: chainportCongress});
                 assert.equal(await contractInstance.isMaintainer(user), true);
                 utils.shouldThrow(contractInstance.addMaintainer(user, {from: chainportCongress}));
@@ -48,7 +48,7 @@ contract("MaintainersRegistry", (accounts) => {
                 assert.equal(await contractInstance.isMaintainer(user), false);
             })
 
-            it("Should not remove maintainer if it doesn't exits", async () => {
+            it("Should not remove maintainer if address isn't a maintainer", async () => {
                 utils.shouldThrow(contractInstance.removeMaintainer(user, {from: chainportCongress}));
             })
         })
