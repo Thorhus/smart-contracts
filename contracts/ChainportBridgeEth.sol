@@ -53,6 +53,7 @@ contract ChainportBridgeEth is Initializable{
     // Function to approve token release
     function approve(address token) internal onlyChainportCongress {
         isApprovedByCongress[address(token)] = true;
+        timeLock[address(token)] = 0;
     }
 
     // Function to reset asset state
@@ -80,7 +81,7 @@ contract ChainportBridgeEth is Initializable{
         }
 
         // Require that assets are either approved by the congress or time-lock is ended
-        require(block.timestamp > timeLock[address(token)] || isApprovedByCongress[address(token)], "ChainportBridgeEth :: Congress must approve token release first");
+        require(block.timestamp > timeLock[address(token)], "ChainportBridgeEth :: Congress must approve token release");
 
         IERC20 ercToken = IERC20(token);
         ercToken.transfer(address(receiver), amount);
