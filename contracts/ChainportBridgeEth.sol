@@ -39,19 +39,24 @@ contract ChainportBridgeEth is Initializable{
     }
 
     // Function used to mark assets as protected
-    function protectAssets(address token) internal onlyMaintainer {
+    function protectAssets(address token) public onlyMaintainer {
         // Mark the assets
         isProtected[address(token)] = true;
     }
 
     // Function to set a time lock on specified asset
-    function setTimeLock(address token) internal onlyMaintainer {
+    function setTimeLock(address token) public onlyMaintainer {
         // Secure assets with time lock
         timeLock[address(token)] = block.timestamp + TIMELOCK;
     }
 
+    // Function to set minimal value that is considered important by quantity
+    function setThreshold(uint threshold) public onlyMaintainer{
+        needsToBeDelayedThreshold = threshold;
+    }
+
     // Function to approve token release
-    function approve(address token) internal onlyChainportCongress {
+    function approve(address token) public onlyChainportCongress {
         isApprovedByCongress[address(token)] = true;
         timeLock[address(token)] = 0;
     }
