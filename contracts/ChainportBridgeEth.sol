@@ -1,11 +1,14 @@
 pragma solidity ^0.6.12;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-
-import "./MaintainersRegistry.sol";
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 
+import "./MaintainersRegistry.sol";
+import "./libraries/SafeMath.sol";
+
 contract ChainportBridgeEth is Initializable{
+
+    using SafeMath for uint;
 
     mapping(address => uint) public balancesByAddresses;
     // Mapping for marking the assets
@@ -71,7 +74,7 @@ contract ChainportBridgeEth is Initializable{
 
         ercToken.transferFrom(address(msg.sender), address(this), amount);
 
-        balancesByAddresses[address(ercToken)] = balancesByAddresses[address(ercToken)] + amount;
+        balancesByAddresses[address(ercToken)] = balancesByAddresses[address(ercToken)].add(amount);
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -90,7 +93,7 @@ contract ChainportBridgeEth is Initializable{
 
         IERC20 ercToken = IERC20(token);
         ercToken.transfer(address(receiver), amount);
-        balancesByAddresses[address(token)] = balancesByAddresses[address(token)] - amount;
+        balancesByAddresses[address(token)] = balancesByAddresses[address(token)].sub(amount);
 
         // This line is for securing that approval serves only for one transaction
         resetAssetState(token);
