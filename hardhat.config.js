@@ -1,18 +1,18 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-ethers')
-require("@nomiclabs/hardhat-web3")
-require('@openzeppelin/hardhat-upgrades')
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-web3");
+require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 require('dotenv').config();
 const branch = require('git-branch');
-const { getDeploymentBlockchain, saveDeploymentBlockchain } = require('./scripts/utils')
+const { getDeploymentBlockchain, saveDeploymentBlockchain } = require('./scripts/utils');
 
 task('accounts', 'Prints the list of accounts', async () => {
-  const accounts = await ethers.getSigners()
+  const accounts = await ethers.getSigners();
   for (const account of accounts) {
     console.log(await account.getAddress())
   }
-})
+});
 
 const branchToEnv = {
   "develop" : "test",
@@ -33,8 +33,10 @@ const networkToBlockchain = {
  */
 const generateTenderlySlug = () => {
   let gitBranch = branch.sync();
-  let network;
 
+  let network;
+  console.log(process.argv);
+  console.log(process.argv.length);
   if(process.argv.length > 2) {
     network = process.argv[4];
     saveDeploymentBlockchain(network);
@@ -43,12 +45,13 @@ const generateTenderlySlug = () => {
   }
   console.log(`chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`)
   return `chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`;
-}
+};
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
+
 module.exports = {
   defaultNetwork: 'local',
   networks: {
@@ -109,4 +112,4 @@ module.exports = {
     username: process.env.USERNAME,
     project: generateTenderlySlug()
   },
-}
+};
