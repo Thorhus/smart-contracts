@@ -18,27 +18,29 @@ contract ChainportBridgeEth is Initializable{
     // Mapping for congress approval
     mapping(address => bool) isApprovedByCongress;
 
-    uint private needsToBeDelayedThreshold; // Set value;
+    uint private safetyThreshold; // Set value from backend
     uint private constant TIMELOCK = 2 days; // Length of time lock
 
-    address MaintainersRegistryAddress;
+    address private maintainersRegistryAddress;
 
     event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
     event TokensFreezed(address tokenAddress, address issuer, uint amount);
+    event TimeLockSet(address tokenAddress, address issuer, uint amount, uint startTime, uint endTime);
+    event ApprovedByChainportCongress(address tokenAddress, uint time);
 
     modifier onlyMaintainer {
-        require(MaintainersRegistry(MaintainersRegistryAddress).isMaintainer(msg.sender));
+        require(MaintainersRegistry(maintainersRegistryAddress).isMaintainer(msg.sender));
         _;
     }
 
     modifier onlyChainportCongress {
-        require(msg.sender == MaintainersRegistry(MaintainersRegistryAddress).chainportCongress());
+        require(msg.sender == MaintainersRegistry(maintainersRegistryAddress).chainportCongress());
         _;
     }
 
     // Initialization function
     function initialize(address _maintainersRegistryAddress) public initializer {
-        MaintainersRegistryAddress = _maintainersRegistryAddress;
+        maintainersRegistryAddress = _maintainersRegistryAddress;
     }
 
     // Function used to mark assets as protected
@@ -48,20 +50,22 @@ contract ChainportBridgeEth is Initializable{
     }
 
     // Function to set a time lock on specified asset
-    function setTimeLock(address token) public onlyMaintainer {
+    function setTimeLock(address token, uint amount) internal {
         // Secure assets with time lock
         timeLock[address(token)] = block.timestamp + TIMELOCK;
+        emit TimeLockSet(token, msg.sender, amount, block.timestamp, timeLock[address(token)]);
     }
 
     // Function to set minimal value that is considered important by quantity
     function setThreshold(uint threshold) public onlyMaintainer{
-        needsToBeDelayedThreshold = threshold;
+        safetyThreshold = threshold;
     }
 
     // Function to approve token release
     function approve(address token) public onlyChainportCongress {
         isApprovedByCongress[address(token)] = true;
-        timeLock[address(token)] = 0;
+        timeLock[address(token)] = now;
+        emit ApprovedByChainportCongress(address(token), now);
     }
 
     // Function to reset asset state
@@ -83,9 +87,11 @@ contract ChainportBridgeEth is Initializable{
         require(balancesByAddresses[address(token)] >= amount, "ChainportBridgeEth :: Not enough funds");
 
         // Check if assets are protected, amount is considered important by its quantity and congress has not approved the release
-        if(isProtected[address(token)] && amount >= needsToBeDelayedThreshold && !isApprovedByCongress[address(token)]){
+        if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]){
             // Set the time lock
-            setTimeLock(token);
+            if(block.timestamp > timeLock[address(token)]){
+                setTimeLock(token, amount);
+            }
         }
 
         // Require that assets are either approved by the congress or time-lock is ended
