@@ -1,11 +1,8 @@
 {
     "ropsten": {
-        "ChainportCongress": "0x399dDeC6D3B5919e4294eadc6ca21D2830d1095b",
-        "ChainportCongressMembersRegistry": "0x1743eD1daf2f392284F69377069202a02cb78d8A",
-        "ChainportToken": "0x79c3FD3fB8c6F5246CEF1a65BF1F9861732eBfE1",
-        "ChainportBridgeEth": "0xa02370658f389dbD58dFC95A8B04FDa8c2DB7356"
+        "ChainportBridgeEth": "0x182104D63E199e00D53Ee9Ab90bcBC1566287DEb"
     },
     "binancetest": {
-        "ChainportBridgeBsc": "0x7C9fA4Ca88E9C0D8D997f6990EA9eF2a791B3736"
+        "ChainportBridgeBsc": "0x706c758e3951881Dc3F1F66979B93bA32A43D02d"
     }
 }
