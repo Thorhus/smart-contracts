@@ -1,8 +1,9 @@
 pragma solidity ^0.6.12;
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 
+import "./governance/ChainportCongressMembersRegistry.sol";
 import "./MaintainersRegistry.sol";
 import "./libraries/SafeMath.sol";
 
@@ -22,6 +23,7 @@ contract ChainportBridgeEth is Initializable{
     uint private constant TIMELOCK = 2 days; // Length of time lock
 
     address private maintainersRegistryAddress;
+    address private congressMembersRegistryAddress;
 
     event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
     event TokensFreezed(address tokenAddress, address issuer, uint amount);
@@ -34,12 +36,13 @@ contract ChainportBridgeEth is Initializable{
     }
 
     modifier onlyChainportCongress {
-        require(msg.sender == MaintainersRegistry(maintainersRegistryAddress).chainportCongress());
+        require(ChainportCongressMembersRegistry(congressMembersRegistryAddress).isMember(msg.sender));
         _;
     }
 
     // Initialization function
-    function initialize(address _maintainersRegistryAddress) public initializer {
+    function initialize(address _maintainersRegistryAddress, address _congressMembersRegistryAddress) public initializer {
+        congressMembersRegistryAddress = _congressMembersRegistryAddress;
         maintainersRegistryAddress = _maintainersRegistryAddress;
     }
 
