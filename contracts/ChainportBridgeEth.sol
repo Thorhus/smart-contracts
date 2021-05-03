@@ -19,8 +19,8 @@ contract ChainportBridgeEth is Initializable{
     // Mapping for congress approval
     mapping(address => bool) isApprovedByCongress;
 
-    uint private safetyThreshold; // Set value from backend
-    uint private constant TIMELOCK = 2 days; // Length of time lock
+    uint private safetyThreshold;
+    uint private timeLockLength;
 
     address private maintainersRegistryAddress;
     address private congressMembersRegistryAddress;
@@ -55,13 +55,18 @@ contract ChainportBridgeEth is Initializable{
     // Function to set a time lock on specified asset
     function setTimeLock(address token, uint amount) internal {
         // Secure assets with time lock
-        timeLock[address(token)] = block.timestamp + TIMELOCK;
+        timeLock[address(token)] = block.timestamp + timeLockLength;
         emit TimeLockSet(token, msg.sender, amount, block.timestamp, timeLock[address(token)]);
     }
 
+    // Function to set length of the time lock
+    function setTimeLockLength(uint _timeLockLength) public onlyMaintainer{
+        timeLockLength = _timeLockLength;
+    }
+
     // Function to set minimal value that is considered important by quantity
-    function setThreshold(uint threshold) public onlyMaintainer{
-        safetyThreshold = threshold;
+    function setThreshold(uint _safetyThreshold) public onlyMaintainer{
+        safetyThreshold = _safetyThreshold;
     }
 
     // Function to approve token release
