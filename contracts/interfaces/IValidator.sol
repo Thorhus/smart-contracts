@@ -8,5 +8,5 @@ pragma solidity ^0.6.12;
  */
 interface IValidator {
     function verifyWithdraw(bytes memory signedMessage, address token, uint256 amount, address beneficiary) external view returns (bool);
-    function recoverSignature(bytes memory signedMessage, address beneficiary, address token, uint256 amount) public view returns (address);
+    function recoverSignature(bytes memory signedMessage, address beneficiary, address token, uint256 amount) external view returns (address);
 }
