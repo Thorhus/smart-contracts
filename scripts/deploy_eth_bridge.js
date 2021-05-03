@@ -1,14 +1,26 @@
-const hre = require("hardhat");
-const { hexify, toChainportDenomination: toChainportDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
-const config = require('../deployments/deploymentConfig.json');
+const hre = require("hardhat")
+const { saveContractAddress, getSavedContractAddresses } = require('./utils')
+let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
     await hre.run('compile');
 
-    const ChainportBridgeEth = await hre.ethers.getContractFactory("ChainportBridgeEth");
-    const chainportBridgeEth = await ChainportBridgeEth.deploy();
-    await chainportBridgeEth.deployed();
+    const config = c[hre.network.name];
+
+    // Load all deployed addresses
+    let addresses = getSavedContractAddresses()[hre.network.name];
+
+    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
+    const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [addresses["ChainportCongress"], [config.maintainers]]);
+    await maintainersRegistry.deployed()
+    console.log('MaintainersRegistry deployed to:', maintainersRegistry.address);
+    saveContractAddress(hre.network.name, 'MaintainersRegistry', maintainersRegistry.address)
+
+    addresses = getSavedContractAddresses()[hre.network.name];
+
+    const ChainportBridgeEth = await ethers.getContractFactory('ChainportBridgeEth')
+    const chainportBridgeEth = await upgrades.deployProxy(ChainportBridgeEth,[addresses["MaintainersRegistry"], addresses["ChainportCongress"]]);
+    await chainportBridgeEth.deployed()
     console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
     saveContractAddress(hre.network.name, 'ChainportBridgeEth', chainportBridgeEth.address);
 }
