@@ -3,13 +3,15 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Initializable.sol";
 
-import "./governance/ChainportCongressMembersRegistry.sol";
-import "./MaintainersRegistry.sol";
 import "./libraries/SafeMath.sol";
+import "./interfaces/IMaintainersRegistry.sol";
 
 contract ChainportBridgeEth is Initializable {
 
     using SafeMath for uint;
+
+    address public chainportCongress;
+    IMaintainersRegistry public maintainersRegistry;
 
     mapping(address => uint) public balancesByAddresses;
     // Mapping for marking the assets
@@ -22,33 +24,39 @@ contract ChainportBridgeEth is Initializable {
     uint private safetyThreshold; // Set value from backend
     uint private constant TIMELOCK = 2 days; // Length of time lock
 
-    address private maintainersRegistryAddress;
-    address private congressMembersRegistryAddress;
-
+    // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
     event TokensFreezed(address tokenAddress, address issuer, uint amount);
     event TimeLockSet(address tokenAddress, address issuer, uint amount, uint startTime, uint endTime);
     event ApprovedByChainportCongress(address tokenAddress, uint time);
 
+    // Only maintainer modifier
     modifier onlyMaintainer {
-        require(MaintainersRegistry(maintainersRegistryAddress).isMaintainer(msg.sender));
+        require(maintainersRegistry.isMaintainer(msg.sender));
         _;
     }
 
+    // Only chainport congress modifier
     modifier onlyChainportCongress {
-        require(ChainportCongressMembersRegistry(congressMembersRegistryAddress).isMember(msg.sender));
+        require(msg.sender == chainportCongress, "Error: Restricted only to ChainportCongress");
         _;
     }
 
     // Initialization function
-    function initialize(address _maintainersRegistryAddress, address _congressMembersRegistryAddress) public initializer {
-        congressMembersRegistryAddress = _congressMembersRegistryAddress;
-        maintainersRegistryAddress = _maintainersRegistryAddress;
+    function initialize(
+        address _maintainersRegistryAddress,
+        address _chainportCongress
+    )
+    public
+    initializer
+    {
+        maintainersRegistry = IMaintainersRegistry(_maintainersRegistryAddress);
+        chainportCongress = _chainportCongress;
     }
 
-    // Function used to mark assets as protected
-    function protectAssets(address token) public onlyMaintainer {
-        // Mark the assets
+    // Function used to mark asset as protected
+    function protectAsset(address token) public onlyMaintainer {
+        // Mark the asset
         isProtected[address(token)] = true;
     }
 
