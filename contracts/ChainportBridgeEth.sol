@@ -74,6 +74,7 @@ contract ChainportBridgeEth is Initializable{
     // Function to reset asset state
     function resetAssetState(address token) internal {
         isApprovedByCongress[address(token)] = false;
+        timeLock[address(token)] = 0;
     }
 
     function freezeToken(address token, uint256 amount) public payable {
@@ -92,7 +93,7 @@ contract ChainportBridgeEth is Initializable{
         // Check if assets are protected, amount is considered important by its quantity and congress has not approved the release
         if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]){
             // Set the time lock
-            if(block.timestamp > timeLock[address(token)]){
+            if(timeLock[address(token)] == 0){
                 setTimeLock(token, amount);
             }
         }
