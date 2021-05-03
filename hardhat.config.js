@@ -35,15 +35,13 @@ const generateTenderlySlug = () => {
   let gitBranch = branch.sync();
 
   let network;
-  console.log(process.argv);
-  console.log(process.argv.length);
   if(process.argv.length > 2) {
     network = process.argv[4];
     saveDeploymentBlockchain(network);
   } else {
     network = getDeploymentBlockchain()['network'];
   }
-  console.log(`chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`)
+  // console.log(`chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`)
   return `chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`;
 };
 
