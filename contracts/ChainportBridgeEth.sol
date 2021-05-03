@@ -7,7 +7,7 @@ import "./governance/ChainportCongressMembersRegistry.sol";
 import "./MaintainersRegistry.sol";
 import "./libraries/SafeMath.sol";
 
-contract ChainportBridgeEth is Initializable{
+contract ChainportBridgeEth is Initializable {
 
     using SafeMath for uint;
 
@@ -91,7 +91,7 @@ contract ChainportBridgeEth is Initializable{
         require(balancesByAddresses[address(token)] >= amount, "ChainportBridgeEth :: Not enough funds");
 
         // Check if assets are protected, amount is considered important by its quantity and congress has not approved the release
-        if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]){
+        if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]) {
             // Set the time lock
             if(timeLock[address(token)] == 0){
                 setTimeLock(token, amount);
