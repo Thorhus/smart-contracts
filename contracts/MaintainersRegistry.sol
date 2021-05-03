@@ -1,8 +1,7 @@
 pragma solidity ^0.6.12;
 
-import "./libraries/SafeMath.sol";
-
 import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "./libraries/SafeMath.sol";
 
 contract MaintainersRegistry is Initializable {
 
