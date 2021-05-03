@@ -13,6 +13,7 @@ async function main() {
     console.log("ChainportCongress contract deployed to:", chainportCongress.address);
     saveContractAddress(hre.network.name, 'ChainportCongress', chainportCongress.address);
 
+
     const ChainportCongressMembersRegistry = await hre.ethers.getContractFactory("ChainportCongressMembersRegistry");
     const chainportCongressMembersRegistry = await ChainportCongressMembersRegistry.deploy(
         config.initialCongressMembers,
@@ -34,6 +35,21 @@ async function main() {
     await chainportToken.deployed();
     console.log("Chainport token deployed to:", chainportToken.address);
     saveContractAddress(hre.network.name, 'ChainportToken', chainportToken.address);
+
+
+    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
+    const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, chainportCongress.address]);
+    await maintainersRegistry.deployed()
+    console.log('MaintainersRegistry deployed to:', maintainersRegistry.address);
+    saveContractAddress(hre.network.name, 'MaintainersRegistry', maintainersRegistry.address)
+
+
+    const ChainportBridgeEth = await ethers.getContractFactory('ChainportBridgeEth')
+    const chainportBridgeEth = await upgrades.deployProxy(ChainportBridgeEth,[maintainersRegistry.address, chainportCongress.address]);
+    await chainportBridgeEth.deployed()
+    console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
+    saveContractAddress(hre.network.name, 'ChainportBridgeEth', chainportBridgeEth.address);
+
 
     await chainportCongress.setMembersRegistry(chainportCongressMembersRegistry.address);
     console.log('ChainportCongress.setMembersRegistry(',chainportCongressMembersRegistry.address,') set successfully.');
