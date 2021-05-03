@@ -37,7 +37,6 @@ contract ChainportToken is Context, IERC20, IERC20Metadata {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
-    uint8 private _decimals;
 
     string private _name;
     string private _symbol;
@@ -51,10 +50,9 @@ contract ChainportToken is Context, IERC20, IERC20Metadata {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor (string memory name_, string memory symbol_, uint8 decimals_, uint256 totalSupply_, address beneficiary) public {
+    constructor (string memory name_, string memory symbol_, uint256 totalSupply_, address beneficiary) public {
         _name = name_;
         _symbol = symbol_;
-        _decimals = decimals_;
         _totalSupply = totalSupply_;
         _balances[beneficiary] = totalSupply_;
         emit Transfer(address(0x0), beneficiary, totalSupply_);
@@ -89,7 +87,7 @@ contract ChainportToken is Context, IERC20, IERC20Metadata {
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
     function decimals() public view virtual override returns (uint8) {
-        return _decimals;
+        return 18;
     }
 
     /**
