@@ -1,3 +1,4 @@
+//"SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/proxy/Initializable.sol";
@@ -25,6 +26,7 @@ contract Validator is Initializable {
         address _signatoryAddress,
         address _chainportCongress
     )
+    public
     initializer
     {
         signatoryAddress = _signatoryAddress;
@@ -59,7 +61,7 @@ contract Validator is Initializable {
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signatoryAddress, token, amount, beneficiary);
+        address messageSigner = recoverSignature(signedMessage, beneficiary, token, amount);
         return messageSigner == signatoryAddress;
     }
 
@@ -77,19 +79,19 @@ contract Validator is Initializable {
         uint256 amount
     )
     public
-    view
+    pure
     returns (address)
     {
         // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked('bytes binding user withdrawal')),
-                keccak256(abi.encodePacked(beneficiary,token, amount))
+                keccak256(abi.encodePacked(beneficiary, token, amount))
             )
         );
 
         // Recover signer message from signature
-        return Call.recoverHash(hash,signature,0);
+        return Call.recoverHash(hash,signedMessage,0);
     }
 
 }
