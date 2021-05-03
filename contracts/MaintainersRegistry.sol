@@ -35,20 +35,28 @@ contract MaintainersRegistry is Initializable {
         chainportCongress = _chainportCongress;
 
         for(uint i = 0; i < _maintainers.length; i++) {
-            addMaintainer(_maintainers[i]);
+            addMaintainerInternal(_maintainers[i]);
         }
     }
 
-    /**
-     * @notice      Function that serves for adding maintainer
-     * @param       _address is the address that we want to give maintainer privileges to
-     */
     function addMaintainer(
         address _address
     )
     public
     {
         require(msg.sender == chainportCongress, 'MaintainersRegistry :: Only congress can add maintainer');
+        addMaintainerInternal(_address);
+    }
+
+    /**
+     * @notice      Function that serves for adding maintainer
+     * @param       _address is the address that we want to give maintainer privileges to
+     */
+    function addMaintainerInternal(
+        address _address
+    )
+    internal
+    {
         require(_isMaintainer[_address] == false);
 
         // Adds new maintainer to an array
