@@ -17,7 +17,7 @@ contract ChainportCongressMembersRegistry {
     /// @notice Event to fire every time someone is added or removed from members
     event MembershipChanged(address member, bool isMember);
 
-    /// @notice Hord congress pointer
+    /// @notice Chainport congress pointer
     address public chainportCongress;
 
     //The minimum number of voting members that must be in attendance
@@ -49,7 +49,7 @@ contract ChainportCongressMembersRegistry {
     constructor(
         address[] memory initialCongressMembers,
         bytes32[] memory initialCongressMemberNames,
-        address _hordCongress
+        address _chainportCongress
     )
     public
     {
@@ -62,7 +62,7 @@ contract ChainportCongressMembersRegistry {
             );
         }
 
-        chainportCongress = _hordCongress;
+        chainportCongress = _chainportCongress;
     }
 
 
