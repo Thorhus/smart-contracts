@@ -1,113 +1,215 @@
+//"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./libraries/SafeMath.sol";
 import "./ChainportUpgradables.sol";
+import "./interfaces/IValidator.sol";
 
 contract ChainportBridgeEth is ChainportUpgradables {
 
     using SafeMath for uint;
 
+    IValidator public signatureValidator;
+
+    struct PendingWithdrawal {
+        uint256 amount;
+        address beneficiary;
+        uint256 unlockingTime;
+    }
+
+    // Mapping the pending withdrawal which frozen temporarily asset circulation
+    mapping(address => PendingWithdrawal) tokenToPendingWithdrawal;
+    // Mapping per token to check if there's any pending withdrawal attempt
+    mapping(address => bool) isTokenHavingPendingWithdrawal;
     // Mapping for marking the assets
-    mapping(address => bool) isProtected;
-    // Mapping for setting time locks
-    mapping(address => uint) timeLock;
-    // Mapping for congress approval
-    mapping(address => bool) isApprovedByCongress;
+    mapping(address => bool) public isAssetProtected;
+    // Check if signature is being used
+    mapping(bytes => bool) isSignatureUsed;
+    // % of the tokens, must be whole number, no decimals pegging
+    uint256 public safetyThreshold;
+    // Length of the timeLock
+    uint256 public timeLockLength;
 
-
-    //TODO: Make it configurable from congress
-    uint private safetyThreshold;
-
-    //TODO: Make it configurable from congress
-    uint private constant TIMELOCK = 2 days;
 
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
     event TokensFreezed(address tokenAddress, address issuer, uint amount);
-    event TimeLockSet(address tokenAddress, address issuer, uint amount, uint startTime, uint endTime);
-    event ApprovedByChainportCongress(address tokenAddress, uint time);
-
+    event CreatedPendingWithdrawal(address token, address beneficiary, uint amount, uint unlockingTime);
 
     // Initialization function
     function initialize(
         address _maintainersRegistryAddress,
-        address _chainportCongress
+        address _chainportCongress,
+        address _signatureValidator,
+        uint256 _timeLockLength,
+        uint256 _safetyThreshold
     )
     public
     initializer
     {
+        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
+
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
+        signatureValidator = IValidator(_signatureValidator);
+        timeLockLength = _timeLockLength;
+        safetyThreshold = _safetyThreshold;
     }
 
-    // Function used to mark asset as protected
-    function setAssetProtection(address tokenAddress, bool _isProtected) public onlyMaintainer {
-        isProtected[tokenAddress] = _isProtected;
+
+    // Function to mark specific asset as protected
+    function setAssetProtection(
+        address tokenAddress,
+        bool _isProtected
+    )
+    public
+    onlyChainportCongress
+    {
+        isAssetProtected[tokenAddress] = _isProtected;
     }
 
-    // Function to set a time lock on specified asset
-    function setTimeLock(address token, uint amount) internal {
-        // Secure assets with time lock
-        timeLock[address(token)] = block.timestamp + TIMELOCK;
-        emit TimeLockSet(token, msg.sender, amount, block.timestamp, timeLock[address(token)]);
+    // Function to set timelock
+    function setTimeLockLength(
+        uint length
+    )
+    public
+    onlyChainportCongress
+    {
+        timeLockLength = length;
     }
+
 
     // Function to set minimal value that is considered important by quantity
-    function setThreshold(uint _safetyThreshold) public onlyChainportCongress {
+    function setThreshold(
+        uint _safetyThreshold
+    )
+    public
+    onlyChainportCongress
+    {
         // This is representing % of every asset on the contract
         // Example: 32% is safety threshold
         safetyThreshold = _safetyThreshold;
     }
 
-    // Function to approve token release
-    function approve(address token) public onlyChainportCongress {
-        isApprovedByCongress[address(token)] = true;
-        timeLock[address(token)] = now;
-        emit ApprovedByChainportCongress(address(token), now);
-    }
-
-    // Function to reset asset state
-    function resetAssetState(address token) internal {
-        isApprovedByCongress[address(token)] = false;
-        timeLock[address(token)] = 0;
-    }
-
-    function freezeToken(address token, uint256 amount) public {
+    //TODO: Idan explain this
+    function freezeToken(
+        address token,
+        uint256 amount
+    )
+    public
+    {
         IERC20 ercToken = IERC20(token);
         ercToken.transferFrom(address(msg.sender), address(this), amount);
         emit TokensFreezed(token, msg.sender, amount);
     }
 
-    function releaseTokens(bytes memory signature, address token, uint amount) public {
-        //todo: Add check that bridge has >= amount of tokens on it's wallet
-        //todo: receiver = msg.sender
-        //todo: Add an option that maintainer can call this function and submit receiver
-        //todo: do the math that if amount >= safetyThreshold * balance(token) / 100
-        //todo: If user tries to withdraw more than x tokens of protected asset which is not approved by congress,
-        //todo: contract should set a timelock of N hours
-        //todo: Congress should come and remove that timelock and approve the withdrawal, should in the same transaction
-        //todo: transfer the funds to the user
-        //todo: releaseTokens (attempt by user)
-        //todo: approveWithdrawalForUser(attempt by congress)
-        // Check if assets are protected, amount is considered important by its quantity and congress has not approved the release
+    function releaseTokensByMaintainer(
+        bytes memory signature,
+        address token,
+        uint amount,
+        address beneficiary
+    )
+    public
+    onlyMaintainer
+    {
+        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
-        if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]) {
-            // Set the time lock
-            if(timeLock[address(token)] == 0) {
-                setTimeLock(token, amount);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
+        require(isMessageValid == true, "Error: Signature is not valid.");
+        IERC20(token).transfer(beneficiary, amount);
+
+        // TODO: Check with Idan
+        emit TokensUnfreezed(token, beneficiary, amount);
+    }
+
+    function releaseTokensTimelockPassed(
+        bytes memory signature,
+        address token,
+        uint256 amount
+    )
+    public
+    {
+        // Check if freeze time has passed and same user is calling again
+        if(isTokenHavingPendingWithdrawal[token] == true) {
+            PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
+            if(p.amount == amount && p.beneficiary == msg.sender && p.unlockingTime <= block.timestamp) {
+                // Verify the signature user is submitting
+                bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary);
+                require(isMessageValid == true, "Error: Signature is not valid.");
+
+                IERC20(token).transfer(p.beneficiary, p.amount);
+                emit TokensUnfreezed(token, p.beneficiary, p.amount);
+                // Clear up the state and remove pending flag
+                delete tokenToPendingWithdrawal[token];
+                isTokenHavingPendingWithdrawal[token] = false;
             }
+        } else {
+            revert("Invalid function call");
         }
+    }
 
-        // Require that assets are either approved by the congress or time-lock is ended
-//        require(block.timestamp > timeLock[address(token)], "ChainportBridgeEth :: Congress must approve token release");
+    // Function to release tokens
+    function releaseTokens(
+        bytes memory signature,
+        address token,
+        uint amount
+    )
+    public
+    {
+        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        // msg.sender is beneficiary address
+        address beneficiary = msg.sender;
+        // Verify the signature user is submitting
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
+        require(isMessageValid == true, "Error: Signature is not valid.");
 
-//        IERC20 ercToken = IERC20(token);
-//        ercToken.transfer(address(receiver), amount);
+        if(isAboveThreshold(token, amount) && isAssetProtected[token] == true) {
+            PendingWithdrawal memory p = PendingWithdrawal({
+                amount: amount,
+                beneficiary: beneficiary,
+                unlockingTime: now.add(timeLockLength)
+            });
 
-        // This line is for securing that approval serves only for one transaction
-//        resetAssetState(token);
+            tokenToPendingWithdrawal[token] = p;
+            isTokenHavingPendingWithdrawal[token] = true;
 
-//        emit TokensUnfreezed(token, msg.sender, amount);
+            // Fire an event
+            emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
+        } else {
+            IERC20(token).transfer(beneficiary, amount);
+            // TODO: Check with Idan
+            emit TokensUnfreezed(token, beneficiary, amount);
+        }
+    }
+
+    // Function for congress to approve withdrawal and transfer funds
+    function approveWithdrawalAndTransferFunds(
+        address token
+    )
+    public
+    onlyChainportCongress
+    {
+        require(isTokenHavingPendingWithdrawal[token] == true);
+        // Get current pending withdrawal attempt
+        PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
+        // Transfer funds to user
+        IERC20(token).transfer(p.beneficiary, p.amount);
+        // Emit event
+        emit TokensUnfreezed(token, p.beneficiary, p.amount);
+
+        // Clear up the state and remove pending flag
+        delete tokenToPendingWithdrawal[token];
+        isTokenHavingPendingWithdrawal[token] = false;
+    }
+
+    // Function to check if amount is above threshold
+    function isAboveThreshold(address token, uint amount) public view returns (bool) {
+        return amount.mul(safetyThreshold).div(100) >= getTokenBalance(token);
+    }
+
+    // Get contract balance of specific token
+    function getTokenBalance(address token) internal view returns (uint256) {
+        return IERC20(token).balanceOf(address(this));
     }
 }
