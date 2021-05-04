@@ -1,8 +1,8 @@
 //"SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./libraries/Call.sol";
+import "./ChainportUpgradables.sol";
 
 /**
  * Validator contract.
@@ -10,27 +10,23 @@ import "./libraries/Call.sol";
  * Date created: 3.5.21.
  * Github: madjarevicn
  */
-contract Validator is Initializable {
+contract Validator is ChainportUpgradables {
+
     using Call for *;
 
     address public signatoryAddress;
-    address public chainportCongress;
-
-    modifier onlyChainportCongress {
-        require(msg.sender == chainportCongress);
-        _;
-    }
 
     // Set initial signatory address and Chainport congress
     function initialize(
         address _signatoryAddress,
-        address _chainportCongress
+        address _chainportCongress,
+        address _maintainersRegistry
     )
     public
     initializer
     {
         signatoryAddress = _signatoryAddress;
-        chainportCongress = _chainportCongress;
+        setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
     // Set / change signatory address

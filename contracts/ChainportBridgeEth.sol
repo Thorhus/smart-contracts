@@ -1,17 +1,13 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
 
 import "./libraries/SafeMath.sol";
-import "./interfaces/IMaintainersRegistry.sol";
+import "./ChainportUpgradables.sol";
 
-contract ChainportBridgeEth is Initializable {
+contract ChainportBridgeEth is ChainportUpgradables {
 
     using SafeMath for uint;
-
-    address public chainportCongress;
-    IMaintainersRegistry public maintainersRegistry;
 
     // Mapping for marking the assets
     mapping(address => bool) isProtected;
@@ -33,17 +29,6 @@ contract ChainportBridgeEth is Initializable {
     event TimeLockSet(address tokenAddress, address issuer, uint amount, uint startTime, uint endTime);
     event ApprovedByChainportCongress(address tokenAddress, uint time);
 
-    // Only maintainer modifier
-    modifier onlyMaintainer {
-        require(maintainersRegistry.isMaintainer(msg.sender), "Error: Restricted only to Maintainer");
-        _;
-    }
-
-    // Only chainport congress modifier
-    modifier onlyChainportCongress {
-        require(msg.sender == chainportCongress, "Error: Restricted only to ChainportCongress");
-        _;
-    }
 
     // Initialization function
     function initialize(
@@ -53,8 +38,7 @@ contract ChainportBridgeEth is Initializable {
     public
     initializer
     {
-        maintainersRegistry = IMaintainersRegistry(_maintainersRegistryAddress);
-        chainportCongress = _chainportCongress;
+        setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
     }
 
     // Function used to mark asset as protected
@@ -116,14 +100,14 @@ contract ChainportBridgeEth is Initializable {
         }
 
         // Require that assets are either approved by the congress or time-lock is ended
-        require(block.timestamp > timeLock[address(token)], "ChainportBridgeEth :: Congress must approve token release");
+//        require(block.timestamp > timeLock[address(token)], "ChainportBridgeEth :: Congress must approve token release");
 
-        IERC20 ercToken = IERC20(token);
-        ercToken.transfer(address(receiver), amount);
+//        IERC20 ercToken = IERC20(token);
+//        ercToken.transfer(address(receiver), amount);
 
         // This line is for securing that approval serves only for one transaction
-        resetAssetState(token);
+//        resetAssetState(token);
 
-        emit TokensUnfreezed(token, msg.sender, amount);
+//        emit TokensUnfreezed(token, msg.sender, amount);
     }
 }
