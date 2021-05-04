@@ -13,7 +13,6 @@ contract ChainportBridgeEth is Initializable {
     address public chainportCongress;
     IMaintainersRegistry public maintainersRegistry;
 
-    mapping(address => uint) public balancesByAddresses;
     // Mapping for marking the assets
     mapping(address => bool) isProtected;
     // Mapping for setting time locks
@@ -21,8 +20,12 @@ contract ChainportBridgeEth is Initializable {
     // Mapping for congress approval
     mapping(address => bool) isApprovedByCongress;
 
+
+    //TODO: Make it configurable from congress
     uint private safetyThreshold;
-    uint private timeLockLength;
+
+    //TODO: Make it configurable from congress
+    uint private constant TIMELOCK = 2 days;
 
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
@@ -32,7 +35,7 @@ contract ChainportBridgeEth is Initializable {
 
     // Only maintainer modifier
     modifier onlyMaintainer {
-        require(maintainersRegistry.isMaintainer(msg.sender));
+        require(maintainersRegistry.isMaintainer(msg.sender), "Error: Restricted only to Maintainer");
         _;
     }
 
@@ -55,25 +58,21 @@ contract ChainportBridgeEth is Initializable {
     }
 
     // Function used to mark asset as protected
-    function protectAsset(address token) public onlyMaintainer {
-        // Mark the asset
-        isProtected[address(token)] = true;
+    function setAssetProtection(address tokenAddress, bool _isProtected) public onlyMaintainer {
+        isProtected[tokenAddress] = _isProtected;
     }
 
     // Function to set a time lock on specified asset
     function setTimeLock(address token, uint amount) internal {
         // Secure assets with time lock
-        timeLock[address(token)] = block.timestamp + timeLockLength;
+        timeLock[address(token)] = block.timestamp + TIMELOCK;
         emit TimeLockSet(token, msg.sender, amount, block.timestamp, timeLock[address(token)]);
     }
 
-    // Function to set length of the time lock
-    function setTimeLockLength(uint _timeLockLength) public onlyMaintainer{
-        timeLockLength = _timeLockLength;
-    }
-
     // Function to set minimal value that is considered important by quantity
-    function setThreshold(uint _safetyThreshold) public onlyMaintainer{
+    function setThreshold(uint _safetyThreshold) public onlyChainportCongress {
+        // This is representing % of every asset on the contract
+        // Example: 32% is safety threshold
         safetyThreshold = _safetyThreshold;
     }
 
@@ -90,23 +89,28 @@ contract ChainportBridgeEth is Initializable {
         timeLock[address(token)] = 0;
     }
 
-    function freezeToken(address token, uint256 amount) public payable {
+    function freezeToken(address token, uint256 amount) public {
         IERC20 ercToken = IERC20(token);
-
         ercToken.transferFrom(address(msg.sender), address(this), amount);
-
-        balancesByAddresses[address(ercToken)] = balancesByAddresses[address(ercToken)].add(amount);
-
         emit TokensFreezed(token, msg.sender, amount);
     }
 
-    function releaseTokens(address token, address receiver, uint amount) public {
-        require(balancesByAddresses[address(token)] >= amount, "ChainportBridgeEth :: Not enough funds");
-
+    function releaseTokens(bytes memory signature, address token, uint amount) public {
+        //todo: Add check that bridge has >= amount of tokens on it's wallet
+        //todo: receiver = msg.sender
+        //todo: Add an option that maintainer can call this function and submit receiver
+        //todo: do the math that if amount >= safetyThreshold * balance(token) / 100
+        //todo: If user tries to withdraw more than x tokens of protected asset which is not approved by congress,
+        //todo: contract should set a timelock of N hours
+        //todo: Congress should come and remove that timelock and approve the withdrawal, should in the same transaction
+        //todo: transfer the funds to the user
+        //todo: releaseTokens (attempt by user)
+        //todo: approveWithdrawalForUser(attempt by congress)
         // Check if assets are protected, amount is considered important by its quantity and congress has not approved the release
+
         if(isProtected[address(token)] && amount >= safetyThreshold && !isApprovedByCongress[address(token)]) {
             // Set the time lock
-            if(timeLock[address(token)] == 0){
+            if(timeLock[address(token)] == 0) {
                 setTimeLock(token, amount);
             }
         }
@@ -116,7 +120,6 @@ contract ChainportBridgeEth is Initializable {
 
         IERC20 ercToken = IERC20(token);
         ercToken.transfer(address(receiver), amount);
-        balancesByAddresses[address(token)] = balancesByAddresses[address(token)].sub(amount);
 
         // This line is for securing that approval serves only for one transaction
         resetAssetState(token);
