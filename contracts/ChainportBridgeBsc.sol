@@ -33,7 +33,8 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     public
     onlyMaintainer
     {
-        //TODO: Check if token exists previously -- require
+        require(erc20ToBep20Address[address(erc20_address)] == address(0), "MintNewToken: Token already exists.");
+
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
         erc20ToBep20Address[address(erc20_address)] = address(newToken);
