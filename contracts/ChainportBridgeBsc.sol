@@ -2,10 +2,10 @@
 pragma solidity ^0.6.12;
 
 import "./BridgeMintableToken.sol";
+import "./ChainportUpgradables.sol";
 
 
-// TODO: Add Upgradability along with congress and maintainers registry contracts
-contract ChainportBridgeBsc {
+contract ChainportBridgeBsc is ChainportUpgradables {
 
     mapping(address => address) public erc20ToBep20Address;
 
@@ -13,8 +13,26 @@ contract ChainportBridgeBsc {
     event TokensBurned(address tokenAddress, address issuer, uint amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
 
-    // TODO: onlyMaintainer
-    function mintNewToken(address erc20_address, string memory tokenName, string memory tokenSymbol, uint8 decimals) public {
+    // Set initial addresses
+    function initialize(
+        address _chainportCongress,
+        address _maintainersRegistry
+    )
+    public
+    initializer
+    {
+        setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
+    }
+
+    function mintNewToken(
+        address erc20_address,
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint8 decimals
+    )
+    public
+    onlyMaintainer
+    {
         //TODO: Check if token exists previously -- require
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
@@ -22,8 +40,14 @@ contract ChainportBridgeBsc {
         TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
 
-    // TODO: onlyMaintainer
-    function mintTokens(address token, address receiver, uint256 amount) public {
+    function mintTokens(
+        address token,
+        address receiver,
+        uint256 amount
+    )
+    public
+    onlyMaintainer
+    {
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
