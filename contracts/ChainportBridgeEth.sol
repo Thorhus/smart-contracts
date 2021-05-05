@@ -38,6 +38,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
     event TokensFreezed(address tokenAddress, address issuer, uint amount);
     event CreatedPendingWithdrawal(address token, address beneficiary, uint amount, uint unlockingTime);
 
+    event WithdrawalApproved(address token, address beneficiary, uint amount);
+    event WithdrawalRejected(address token, address beneficiary, uint amount);
+
     // Initialization function
     function initialize(
         address _maintainersRegistryAddress,
@@ -195,9 +198,26 @@ contract ChainportBridgeEth is ChainportUpgradables {
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Transfer funds to user
         IERC20(token).transfer(p.beneficiary, p.amount);
-        // Emit event
+        // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
+        emit WithdrawalApproved(token, p.beneficiary, p.amount);
 
+        // Clear up the state and remove pending flag
+        delete tokenToPendingWithdrawal[token];
+        isTokenHavingPendingWithdrawal[token] = false;
+    }
+
+    // Function to reject withdrawal from congress
+    function rejectWithdrawal(
+        address token
+    )
+    public
+    onlyChainportCongress
+    {
+        require(isTokenHavingPendingWithdrawal[token] == true);
+        // Get current pending withdrawal attempt
+        PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
+        emit WithdrawalRejected(token, p.beneficiary, p.amount);
         // Clear up the state and remove pending flag
         delete tokenToPendingWithdrawal[token];
         isTokenHavingPendingWithdrawal[token] = false;
