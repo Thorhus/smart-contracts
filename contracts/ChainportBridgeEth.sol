@@ -9,6 +9,8 @@ import "./interfaces/IValidator.sol";
 
 contract ChainportBridgeEth is ChainportUpgradables {
 
+    //TODO: NOMENCLATURE ON ALL CONTRACTS
+
     using SafeMath for uint;
 
     IValidator public signatureValidator;
@@ -19,6 +21,10 @@ contract ChainportBridgeEth is ChainportUpgradables {
         uint256 unlockingTime;
     }
 
+    // Mapping if bridge is Frozen
+    bool public isFrozen;
+    // Mapping function name to maintainer nonce
+    mapping(string => uint256) public functionNameToNonce;
     // Mapping the pending withdrawal which frozen temporarily asset circulation
     mapping(address => PendingWithdrawal) tokenToPendingWithdrawal;
     // Mapping per token to check if there's any pending withdrawal attempt
@@ -41,6 +47,13 @@ contract ChainportBridgeEth is ChainportUpgradables {
     event WithdrawalApproved(address token, address beneficiary, uint amount);
     event WithdrawalRejected(address token, address beneficiary, uint amount);
 
+
+    modifier isNotFrozen {
+        require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
+        _;
+    }
+
+
     // Initialization function
     function initialize(
         address _maintainersRegistryAddress,
@@ -56,10 +69,23 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
         signatureValidator = IValidator(_signatureValidator);
-        timeLockLength = _timeLockLength;
+        timeLockLength = _timeLockLength; //todo: freeze length
         safetyThreshold = _safetyThreshold;
     }
 
+    function freezeBridge()
+    public
+    onlyMaintainer
+    {
+        isFrozen = true;
+    }
+
+    function unfreezeBridge()
+    public
+    onlyChainportCongress
+    {
+        isFrozen = false;
+    }
 
     // Function to mark specific asset as protected
     function setAssetProtection(
@@ -70,6 +96,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
+        //TODO: Add events
     }
 
     // Function to set timelock
@@ -80,6 +107,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     onlyChainportCongress
     {
         timeLockLength = length;
+        //TODO: Add events
     }
 
 
@@ -95,34 +123,40 @@ contract ChainportBridgeEth is ChainportUpgradables {
         safetyThreshold = _safetyThreshold;
     }
 
-    //TODO: Idan explain this
+
     function freezeToken(
         address token,
         uint256 amount
     )
     public
+    isNotFrozen
     {
         IERC20 ercToken = IERC20(token);
         ercToken.transferFrom(address(msg.sender), address(this), amount);
+
         emit TokensFreezed(token, msg.sender, amount);
     }
 
     function releaseTokensByMaintainer(
         bytes memory signature,
         address token,
-        uint amount,
-        address beneficiary
+        uint256 amount,
+        address beneficiary,
+        uint256 nonce
     )
     public
     onlyMaintainer
+    isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+
+        require(nonce == functionNameToNonce["mintTokens"] + 1);
+        functionNameToNonce["mintTokens"] = nonce;
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
         require(isMessageValid == true, "Error: Signature is not valid.");
         IERC20(token).transfer(beneficiary, amount);
 
-        // TODO: Check with Idan
         emit TokensUnfreezed(token, beneficiary, amount);
     }
 
@@ -132,6 +166,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
         uint256 amount
     )
     public
+    isNotFrozen
     {
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
@@ -159,6 +194,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
         uint amount
     )
     public
+    isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
         // msg.sender is beneficiary address
@@ -181,7 +217,6 @@ contract ChainportBridgeEth is ChainportUpgradables {
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
             IERC20(token).transfer(beneficiary, amount);
-            // TODO: Check with Idan
             emit TokensUnfreezed(token, beneficiary, amount);
         }
     }
@@ -192,6 +227,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     onlyChainportCongress
+    isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == true);
         // Get current pending withdrawal attempt
@@ -213,6 +249,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     onlyChainportCongress
+    isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == true);
         // Get current pending withdrawal attempt

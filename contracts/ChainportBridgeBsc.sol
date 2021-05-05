@@ -3,11 +3,15 @@ pragma solidity ^0.6.12;
 
 import "./BridgeMintableToken.sol";
 import "./ChainportUpgradables.sol";
+import "./interfaces/IValidator.sol";
 
 
 contract ChainportBridgeBsc is ChainportUpgradables {
 
+    IValidator public signatureValidator;
+
     mapping(address => address) public erc20ToBep20Address;
+    mapping(string => uint256) public functionNameToNonce;
 
     event TokensMinted(address tokenAddress, address issuer, uint amount);
     event TokensBurned(address tokenAddress, address issuer, uint amount);
@@ -44,11 +48,15 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     function mintTokens(
         address token,
         address receiver,
-        uint256 amount
+        uint256 amount,
+        uint256 nonce
     )
     public
     onlyMaintainer
     {
+        require(nonce == functionNameToNonce["mintTokens"] + 1);
+        functionNameToNonce["mintTokens"] = nonce;
+
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
