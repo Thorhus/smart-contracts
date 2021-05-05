@@ -13,9 +13,17 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     mapping(address => address) public erc20ToBep20Address;
     mapping(string => uint256) public functionNameToNonce;
 
+    // Mapping if bridge is Frozen
+    bool public isFrozen;
+
     event TokensMinted(address tokenAddress, address issuer, uint amount);
     event TokensBurned(address tokenAddress, address issuer, uint amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
+
+    modifier isNotFrozen {
+        require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
+        _;
+    }
 
     // Set initial addresses
     function initialize(
@@ -28,6 +36,20 @@ contract ChainportBridgeBsc is ChainportUpgradables {
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
+    function freezeBridge()
+    public
+    onlyMaintainer
+    {
+        isFrozen = true;
+    }
+
+    function unfreezeBridge()
+    public
+    onlyChainportCongress
+    {
+        isFrozen = false;
+    }
+
     function mintNewToken(
         address erc20_address,
         string memory tokenName,
@@ -36,6 +58,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     )
     public
     onlyMaintainer
+    isNotFrozen
     {
         require(erc20ToBep20Address[address(erc20_address)] == address(0), "MintNewToken: Token already exists.");
 
@@ -53,6 +76,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     )
     public
     onlyMaintainer
+    isNotFrozen
     {
         require(nonce == functionNameToNonce["mintTokens"] + 1);
         functionNameToNonce["mintTokens"] = nonce;
