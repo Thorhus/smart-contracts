@@ -39,7 +39,7 @@
     "ethErc20tokenSupply": 320000000
   },
 
-  "binanceTest": {
+  "binancetest": {
     "tokenName" : "Bridge Token",
     "tokenSymbol" : "wBRD",
     "totalSupply" : 320000000,

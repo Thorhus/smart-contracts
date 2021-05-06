@@ -33,16 +33,13 @@ async function main() {
     console.log('Validator Proxy deployed to:', validator.address);
 
 
-    const ChainportBridgeEth = await ethers.getContractFactory('ChainportBridgeEth')
-    const chainportBridgeEth = await upgrades.deployProxy(ChainportBridgeEth,[
+    const ChainportBridgeBsc = await ethers.getContractFactory('ChainportBridgeBsc')
+    const chainportBridgebsc = await upgrades.deployProxy(ChainportBridgeBsc,[
         maintainersRegistry.address,
-        contracts.ChainportCongress,
-        validator.address,
-        60, // 60 secs timelock
-        20 // safety threshold 20%
+        contracts.ChainportCongress
     ]);
-    await chainportBridgeEth.deployed()
-    console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
+    await chainportBridgebsc.deployed()
+    console.log("ChainportBridgeBsc contract deployed to:", chainportBridgebsc.address);
 
     let admin = await upgrades.admin.getInstance();
 
@@ -54,9 +51,9 @@ async function main() {
     console.log('Validator Implementation: ', validatorImplementation);
     saveContractAddress(hre.network.name, 'Validator', validatorImplementation)
 
-    let bridgeImplementation = await admin.getProxyImplementation(chainportBridgeEth.address);
+    let bridgeImplementation = await admin.getProxyImplementation(chainportBridgebsc.address);
     console.log('Bridge Implementation: ', bridgeImplementation);
-    saveContractAddress(hre.network.name, 'ChainportBridgeEth', bridgeImplementation);
+    saveContractAddress(hre.network.name, 'ChainportBridgeBsc', bridgeImplementation);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
