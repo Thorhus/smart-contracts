@@ -1,8 +1,0 @@
-{
-    "ropsten": {
-        "ChainportBridgeEth": "0x182104D63E199e00D53Ee9Ab90bcBC1566287DEb"
-    },
-    "binancetest": {
-        "ChainportBridgeBsc": "0x706c758e3951881Dc3F1F66979B93bA32A43D02d"
-    }
-}
