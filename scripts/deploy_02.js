@@ -8,7 +8,7 @@ async function main() {
     const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
 
-    const signatoryAddressTest = '0x83453d40198982beA848d982CE4d056D3ddFb41D';
+    const signatoryAddressTest = '0xA040a4e812306d66746508bCFbE84b3e73De67fA';
 
     const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
