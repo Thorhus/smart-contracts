@@ -1,7 +1,6 @@
 //"SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
 
-import "./libraries/Call.sol";
 import "./ChainportUpgradables.sol";
 
 /**
@@ -11,8 +10,6 @@ import "./ChainportUpgradables.sol";
  * Github: madjarevicn
  */
 contract Validator is ChainportUpgradables {
-
-    using Call for *;
 
     address public signatoryAddress;
 
@@ -87,7 +84,46 @@ contract Validator is ChainportUpgradables {
         );
 
         // Recover signer message from signature
-        return Call.recoverHash(hash,signedMessage,0);
+        return recoverHash(hash,signedMessage,0);
+    }
+
+    function recoverHash(bytes32 hash, bytes memory sig, uint idx) public pure returns (address) {
+        // same as recoverHash in utils/sign.js
+        // The signature format is a compact form of:
+        //   {bytes32 r}{bytes32 s}{uint8 v}
+        // Compact means, uint8 is not padded to 32 bytes.
+        require (sig.length >= 65+idx, 'bad signature length');
+        idx += 32;
+        bytes32 r;
+        assembly
+        {
+            r := mload(add(sig, idx))
+        }
+
+        idx += 32;
+        bytes32 s;
+        assembly
+        {
+            s := mload(add(sig, idx))
+        }
+
+        idx += 1;
+        uint8 v;
+        assembly
+        {
+            v := mload(add(sig, idx))
+        }
+        if (v >= 32) { // handle case when signature was made with ethereum web3.eth.sign or getSign which is for signing ethereum transactions
+            v -= 32;
+            bytes memory prefix = "\x19Ethereum Signed Message:\n32"; // 32 is the number of bytes in the following hash
+            hash = keccak256(abi.encodePacked(prefix, hash));
+        }
+        if (v <= 1) v += 27;
+        require(v==27 || v==28,'bad sig v');
+        //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/cryptography/ECDSA.sol#L57
+        require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, 'bad sig s');
+        return ecrecover(hash, v, r, s);
+
     }
 
 }

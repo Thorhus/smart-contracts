@@ -6,8 +6,9 @@ let c = require('../deployments/deploymentConfig.json');
 async function main() {
     await hre.run('compile');
     const config = c[hre.network.name];
-    const signatoryAddressTest = '0x83453d40198982beA848d982CE4d056D3ddFb41D';
     const contracts = getSavedContractAddresses()[hre.network.name];
+
+    const signatoryAddressTest = '0x83453d40198982beA848d982CE4d056D3ddFb41D';
 
     const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
@@ -20,7 +21,7 @@ async function main() {
     const call = await Call.deploy();
     await call.deployed();
 
-    const Validator = await ethers.getContractFactory('Validator')
+    const Validator = await ethers.getContractFactory('Validator');
     const validator = await upgrades.deployProxy(
         Validator, [
             signatoryAddressTest,

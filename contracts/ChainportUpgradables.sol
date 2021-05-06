@@ -12,7 +12,7 @@ import "./interfaces/IMaintainersRegistry.sol";
  * Date created: 4.5.21.
  * Github: madjarevicn
  */
-abstract contract ChainportUpgradables is Initializable {
+contract ChainportUpgradables is Initializable {
 
     address public chainportCongress;
     IMaintainersRegistry public maintainersRegistry;
