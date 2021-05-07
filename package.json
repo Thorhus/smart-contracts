@@ -1,5 +1,5 @@
 {
-  "name": "Chainport-protocol",
+  "name": "chainport-protocol",
   "dependencies": {
     "@uniswap/lib": "^4.0.1-alpha",
     "@uniswap/v2-core": "^1.0.1",
@@ -17,17 +17,36 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "3.4.0",
-    "@openzeppelin/hardhat-upgrades": "^1.6.0",
+    "@openzeppelin/hardhat-upgrades": "^1.7.0",
     "@tenderly/hardhat-tenderly": "^1.0.12",
     "app-root-path": "^3.0.0",
     "bn-chai": "^1.0.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^3.0.0",
-    "ethers": "^5.1.0",
+    "ethers": "^5.1.4",
     "git-branch": "^2.0.1",
     "hardhat": "^2.2.0",
     "stochasm": "^0.5.0",
     "zos-lib": "^2.4.3"
-  }
+  },
+  "description": "Implementation of Chainport protocol",
+  "version": "1.0.0",
+  "main": "hardhat.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainport/smart-contracts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chainport/smart-contracts/issues"
+  },
+  "homepage": "https://github.com/chainport/smart-contracts#readme"
 }
