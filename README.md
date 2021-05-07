@@ -23,6 +23,15 @@ USERNAME=2key
 #### Deploy code
 - `npx hardhat node` (Starts a JSON-RPC server on top of Hardhat Network)
 - `npx hardhat run --network {network} scripts/{desired_deployment_script}`
+- `rm -r .openzeppelin`
+- `rm -r cache`
+- `rm -r artifacts`
+- `npx hardhat run --network ropsten scripts/deploy_01.js`
+- `npx hardhat run --network ropsten scripts/deploy_02.js`
+- `npx hardhat run --network binancetest scripts/deploy_01.js`
+- `npx hardhat run --network binancetest scripts/deploy_02_binance.js`
+- `npx hardhat run --network ropsten tenderly/tenderly_push.js`
+- `npx hardhat run --network binancetest tenderly/tenderly_push.js`
 
 #### Flatten contracts
 - `npx hardhat flatten` (Flattens and prints contracts and their dependencies)
