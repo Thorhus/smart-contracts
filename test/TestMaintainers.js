@@ -25,6 +25,7 @@ describe("MaintainersRegistry", function () {
             res = await contractInstance.isMaintainer(maintainers[i]);
             expect(res).to.equal(true);
         }
+        expect(await contractInstance.chainportCongress()).to.equal(chainportCongress.address);
     });
 
     describe("Maintainers Functions", function () {
