@@ -1,6 +1,6 @@
 const hre = require("hardhat");
 const { hexify, toChainportDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
+const { saveContractAddress } = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
@@ -36,25 +36,6 @@ async function main() {
     await chainportToken.deployed();
     console.log("Chainport token deployed to:", chainportToken.address);
     saveContractAddress(hre.network.name, 'ChainportToken', chainportToken.address);
-
-
-    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
-    const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, chainportCongress.address]);
-    await maintainersRegistry.deployed()
-
-    let admin = await upgrades.admin.getInstance();
-
-    let implementation = await admin.getProxyImplementation(maintainersRegistry.address);
-    console.log('Implementation: ',implementation)
-    console.log('MaintainersRegistry deployed to:', maintainersRegistry.address);
-    saveContractAddress(hre.network.name, 'MaintainersRegistry', implementation)
-
-
-    // const ChainportBridgeEth = await ethers.getContractFactory('ChainportBridgeEth')
-    // const chainportBridgeEth = await upgrades.deployProxy(ChainportBridgeEth,[maintainersRegistry.address, chainportCongress.address]);
-    // await chainportBridgeEth.deployed()
-    // console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
-    // saveContractAddress(hre.network.name, 'ChainportBridgeEth', chainportBridgeEth.address);
 
 
     await chainportCongress.setMembersRegistry(chainportCongressMembersRegistry.address);
