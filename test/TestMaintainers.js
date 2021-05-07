@@ -1,57 +1,74 @@
-const MaintainersRegistry = artifacts.require("MaintainersRegistry");
-const utils = require("./helpers/utils");
+const { expect } = require("chai");
 
-contract("MaintainersRegistry", (accounts) => {
+describe("MaintainersRegistry", function () {
 
     let contractInstance;
-    let [chainportCongress, user] = accounts; //chainportCongress = accounts[0], user = accounts[1]
-    let addresses = [accounts[2], accounts[3], accounts[4]];
+    let maintainersRegistry;
+    let chainportCongress;
+    let addr1, addr2;
+    let maintainers;
 
-    beforeEach(async () => {
-        contractInstance = await MaintainersRegistry.new();
-    })
+    beforeEach(async function() {
+        maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
+        [chainportCongress, addr1, addr2, ...maintainers] = await ethers.getSigners();
 
-    it("Should initialize and make given addresses maintainers", async () => {
-        await contractInstance.initialize(addresses, chainportCongress);
-
-        for(let i = 0; i < addresses.length; i++){
-            assert.equal(await contractInstance.isMaintainer(addresses[i]), true);
+        contractInstance = await maintainersRegistry.deploy();
+        for(let i = 0; i < maintainers.length; i++) {
+            maintainers[i] = maintainers[i].address;
         }
-    })
+    });
 
-    context("Maintainer functions", async () => {
+    it("Should initialize and make given addresses maintainers", async function () {
+        await contractInstance.initialize(maintainers, chainportCongress.address);
+        let res;
+        for(let i = 0; i < maintainers.length; i++) {
+            res = await contractInstance.isMaintainer(maintainers[i]);
+            expect(res).to.equal(true);
+        }
+    });
 
-        beforeEach(async () => {
-            await contractInstance.initialize(addresses, chainportCongress);
-        })
+    describe("Maintainers Functions", function () {
+        beforeEach(async function () {
+            await contractInstance.initialize(maintainers, chainportCongress.address);
+        });
 
-        context("Adding a maintainer", async () => {
+        describe("Adding a maintainer", function () {
+            it("Should not let a non congress address add a maintainer", async function () {
+                await expect(contractInstance.connect(addr2).addMaintainer(addr1.address))
+                    .to.be.revertedWith("MaintainersRegistry: Restricted only to ChainportCongress");
+            });
 
-            it("Should add a maintainer", async () => {
-                await contractInstance.addMaintainer(user, {from: chainportCongress});
-                assert.equal(await contractInstance.isMaintainer(user), true);
-            })
+            it("Should add a maintainer (by congress)", async function () {
+                await contractInstance.connect(chainportCongress).addMaintainer(addr1.address);
+                expect(await contractInstance.isMaintainer(addr1.address)).to.equal(true);
+            });
 
-            it("Should not add same maintainer second time", async () => {
-                await contractInstance.addMaintainer(user, {from: chainportCongress});
-                assert.equal(await contractInstance.isMaintainer(user), true);
-                utils.shouldThrow(contractInstance.addMaintainer(user, {from: chainportCongress}));
-            })
-        })
+            it("Should not add a same maintainer second time (by congress)", async function () {
+                await contractInstance.connect(chainportCongress).addMaintainer(addr1.address);
+                expect(await contractInstance.isMaintainer(addr1.address)).to.equal(true);
+                await expect(contractInstance.connect(chainportCongress).addMaintainer(addr1.address))
+                    .to.be.revertedWith('MaintainersRegistry :: Address is already a maintainer');
+            });
+        });
 
-        context("Removing a maintainer", async () => {
+        describe("Removing a maintainer", function () {
+            it("Should not let a non congress address remove a maintainer", async function () {
+                await contractInstance.connect(chainportCongress).addMaintainer(addr1.address);
+                expect(await contractInstance.isMaintainer(addr1.address)).to.equal(true);
+                await expect(contractInstance.connect(addr2).removeMaintainer(addr1.address))
+                    .to.be.revertedWith("MaintainersRegistry: Restricted only to ChainportCongress");
+            });
 
-            it("Should remove a maintainer", async () => {
-                await contractInstance.addMaintainer(user, {from: chainportCongress});
-                assert.equal(await contractInstance.isMaintainer(user), true);
-                await contractInstance.removeMaintainer(user, {from: chainportCongress});
-                assert.equal(await contractInstance.isMaintainer(user), false);
-            })
-
-            it("Should not remove maintainer if address isn't a maintainer", async () => {
-                utils.shouldThrow(contractInstance.removeMaintainer(user, {from: chainportCongress}));
-            })
-        })
-    })
-
-})
+            it("Should remove a maintainer (by congress)", async function () {
+                await contractInstance.connect(chainportCongress).addMaintainer(addr1.address);
+                expect(await contractInstance.isMaintainer(addr1.address)).to.equal(true);
+                await contractInstance.connect(chainportCongress).removeMaintainer(addr1.address);
+                expect(await contractInstance.isMaintainer(addr1.address)).to.equal(false);
+            });
+            it("Should not remove a nonexistent maintainer (by congress)", async function () {
+                await expect(contractInstance.connect(chainportCongress).removeMaintainer(addr1.address))
+                    .to.be.revertedWith('MaintainersRegistry :: Address is not a maintainer');
+            });
+        });
+    });
+});
