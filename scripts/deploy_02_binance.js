@@ -10,9 +10,9 @@ async function main() {
 
     const signatoryAddressTest = '0xA040a4e812306d66746508bCFbE84b3e73De67fA';
 
-    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
+    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry');
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
-    await maintainersRegistry.deployed()
+    await maintainersRegistry.deployed();
     console.log('MaintainersRegistry Proxy deployed to:', maintainersRegistry.address);
 
 
@@ -29,16 +29,16 @@ async function main() {
             contracts.ChainportCongress
         ]
     );
-    await validator.deployed()
+    await validator.deployed();
     console.log('Validator Proxy deployed to:', validator.address);
 
 
-    const ChainportBridgeBsc = await ethers.getContractFactory('ChainportBridgeBsc')
+    const ChainportBridgeBsc = await ethers.getContractFactory('ChainportBridgeBsc');
     const chainportBridgebsc = await upgrades.deployProxy(ChainportBridgeBsc,[
-        maintainersRegistry.address,
-        contracts.ChainportCongress
+        contracts.ChainportCongress,
+        maintainersRegistry.address
     ]);
-    await chainportBridgebsc.deployed()
+    await chainportBridgebsc.deployed();
     console.log("ChainportBridgeBsc contract deployed to:", chainportBridgebsc.address);
 
     let admin = await upgrades.admin.getInstance();
@@ -47,9 +47,9 @@ async function main() {
     console.log('Maintainers Implementation: ', maintainersImplementation);
     saveContractAddress(hre.network.name, 'MaintainersRegistry', maintainersImplementation);
 
-    let validatorImplementation = await admin.getProxyImplementation(validator.address)
+    let validatorImplementation = await admin.getProxyImplementation(validator.address);
     console.log('Validator Implementation: ', validatorImplementation);
-    saveContractAddress(hre.network.name, 'Validator', validatorImplementation)
+    saveContractAddress(hre.network.name, 'Validator', validatorImplementation);
 
     let bridgeImplementation = await admin.getProxyImplementation(chainportBridgebsc.address);
     console.log('Bridge Implementation: ', bridgeImplementation);
