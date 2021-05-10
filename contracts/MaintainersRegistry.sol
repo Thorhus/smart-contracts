@@ -22,6 +22,11 @@ contract MaintainersRegistry is Initializable {
     // Events
     event MaintainerStatusChanged(address maintainer, bool isMember);
 
+    modifier onlyChainportCongress{
+        require(msg.sender == chainportCongress, 'MaintainersRegistry: Restricted only to ChainportCongress');
+        _;
+    }
+
     /**
      * @notice      Function to perform initialization
      */
@@ -44,8 +49,8 @@ contract MaintainersRegistry is Initializable {
         address _address
     )
     public
+    onlyChainportCongress
     {
-        require(msg.sender == chainportCongress, 'MaintainersRegistry :: Only congress can add maintainer');
         addMaintainerInternal(_address);
     }
 
@@ -58,7 +63,7 @@ contract MaintainersRegistry is Initializable {
     )
     internal
     {
-        require(_isMaintainer[_address] == false);
+        require(_isMaintainer[_address] == false, 'MaintainersRegistry :: Address is already a maintainer');
 
         // Adds new maintainer to an array
         allMaintainers.push(_address);
@@ -77,9 +82,9 @@ contract MaintainersRegistry is Initializable {
         address _maintainer
     )
     external
+    onlyChainportCongress
     {
-        require(msg.sender == chainportCongress, 'MaintainersRegistry :: Only congress can remove maintainer');
-        require(_isMaintainer[_maintainer] == true);
+        require(_isMaintainer[_maintainer] == true, 'MaintainersRegistry :: Address is not a maintainer');
 
         uint length = allMaintainers.length;
 
