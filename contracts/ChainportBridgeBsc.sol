@@ -12,6 +12,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
 
     mapping(address => address) public erc20ToBep20Address;
     mapping(string => uint256) public functionNameToNonce;
+    mapping(address => bool) public isCreatedByTheBridge;
 
     // Mapping if bridge is Frozen
     bool public isFrozen;
@@ -65,6 +66,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
         erc20ToBep20Address[address(erc20_address)] = address(newToken);
+        isCreatedByTheBridge[address(newToken)] = true;
         TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
 
@@ -88,6 +90,8 @@ contract ChainportBridgeBsc is ChainportUpgradables {
 
 
     function burnTokens(address bep20Token, uint256 amount) public {
+        require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
+
         BridgeMintableToken ercToken = BridgeMintableToken(bep20Token);
         ercToken.burnFrom(address(msg.sender), amount);
         TokensBurned(address(ercToken), msg.sender, amount);
