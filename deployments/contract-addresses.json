@@ -6,19 +6,19 @@
         "ChainportBridgeEth": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
     },
     "ropsten": {
-        "ChainportCongress": "0x38Cd00052d5c4E9c7846C08c482B11F691b6CdB7",
-        "ChainportCongressMembersRegistry": "0x79888b5C166C767E2193A93e1fDDBA2cBb648b51",
-        "ChainportToken": "0xF5Eeb0c032F1Cf14C5DcfFF4BE51B3C102aBf368",
-        "MaintainersRegistry": "0xc38d20aF2467A44e595a358E8A7cb58d175f2de3",
-        "Validator": "0x28e86A4a59D3F2F042Cd84B71e6f99c2495DB422",
-        "ChainportBridgeEth": "0x2a9208204C2C92879Da536B4970c95CA73fFA76C"
+        "ChainportCongress": "0xb14c988B9060DeADa94623aA0f58AfAFBFF0d022",
+        "ChainportCongressMembersRegistry": "0x0866f8b35407436000C71b5Ac8F92311E7E1C014",
+        "ChainportToken": "0xBA89E8E42F75d25555e5cCaf844E2A49A47EddB8",
+        "MaintainersRegistry": "0x4ef7a68485D736972F5C01fD858EF7d517c69CCD",
+        "Validator": "0xeE1b5D8dD809E2E6B650E5771c11F22D43E08780",
+        "ChainportBridgeEth": "0x3bE23dB8B1ecf88Bfc208EC774dAb0e923b972D7"
     },
     "binancetest": {
-        "ChainportCongress": "0x1664f815C5c33D96E45B7E462c27Ec83524FAA78",
-        "ChainportCongressMembersRegistry": "0x36B5c2AC84d137661E83Ab9e6656d82fcc2Cc175",
-        "ChainportToken": "0x2E638F3fc789C80098E4551e2141F28b67c35e14",
-        "MaintainersRegistry": "0xeDf654661b78dED0430Ad8b698c6Cc94096E7A45",
-        "Validator": "0x661a7263EF9F3A36d5b38E4Da027b3b72c4F192D",
-        "ChainportBridgeBsc": "0x547061d79C4a63D00c32117230913fF07E8C7091"
+        "ChainportCongress": "0x6259389910bdF2dB1bb694867c4293FE62827103",
+        "ChainportCongressMembersRegistry": "0x0116ab8A5206F420e6288d62B7767E6a37fC1767",
+        "ChainportToken": "0x3DB37E956Cce5d3FD31Ea7EbaA0E5C0e00AD5Be9",
+        "MaintainersRegistry": "0x757C6CA12Ba1b8625D3B1A42b0f643943c94dDF2",
+        "Validator": "0x98e6AcD6D9181660375e601c84655DdDa7Bf4ae5",
+        "ChainportBridgeBsc": "0xab4D1c132896FBadf01612343f3217e3f146Cc16"
     }
 }
