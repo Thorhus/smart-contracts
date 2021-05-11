@@ -49,6 +49,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
     event TimeLockLengthChanged(uint newTimeLockLength);
     event AssetProtectionChanged(address asset, bool isProtected);
+    event SafetyThresholdChanged(uint newSafetyThreshold);
 
 
     modifier isNotFrozen {
@@ -124,6 +125,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
         // This is representing % of every asset on the contract
         // Example: 32% is safety threshold
         safetyThreshold = _safetyThreshold;
+        emit SafetyThresholdChanged(_safetyThreshold);
     }
 
 
