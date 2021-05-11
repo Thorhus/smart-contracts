@@ -47,6 +47,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
     event WithdrawalApproved(address token, address beneficiary, uint amount);
     event WithdrawalRejected(address token, address beneficiary, uint amount);
 
+    event TimeLockLengthChanged(uint newTimeLockLength);
+    event AssetProtectionChanged(address asset, bool isProtected);
+
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -96,7 +99,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
-        //TODO: Add events
+        emit AssetProtectionChanged(tokenAddress, _isProtected);
     }
 
     // Function to set timelock
@@ -107,7 +110,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     onlyChainportCongress
     {
         timeLockLength = length;
-        //TODO: Add events
+        emit TimeLockLengthChanged(length);
     }
 
 
