@@ -12,9 +12,7 @@ describe("Bridge Ethereum Side", function () {
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
-        [chainportCongress, user1, user2, token, maintainer, ...maintainers] = await ethers.getSigners();
-
-        token = token.address;
+        [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -24,6 +22,9 @@ describe("Bridge Ethereum Side", function () {
         maintainers[maintainers.length] = maintainer.address;
 
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
+
+        token = await ethers.getContractFactory("BridgeMintableToken");
+        token = await token.deploy("","",5);
 
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
@@ -54,7 +55,7 @@ describe("Bridge Ethereum Side", function () {
         });
     });
 
-    describe("Protection, locking, freezing etc.", function () {
+    describe("Main Functions", function () {
 
         beforeEach(async function () {
             await bridgeEthInstance.initialize(
@@ -68,26 +69,26 @@ describe("Bridge Ethereum Side", function () {
 
         describe("Asset protection", function () {
             it("Should protect the asset (by congress)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token, true);
-                expect(await bridgeEthInstance.isAssetProtected(token)).to.equal(true);
+                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
             });
 
             it("Should remove protection on the asset (by congress)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token, true);
-                expect(await bridgeEthInstance.isAssetProtected(token)).to.equal(true);
-                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token, false);
-                expect(await bridgeEthInstance.isAssetProtected(token)).to.equal(false);
+                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
+                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, false);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(false);
             });
 
             it("Should not protect the asset (by user)", async function () {
-                await expect(bridgeEthInstance.connect(user1).setAssetProtection(token, true))
+                await expect(bridgeEthInstance.connect(user1).setAssetProtection(token.address, true))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
             it("Should not remove protection on the asset (by user)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token, true);
-                expect(await bridgeEthInstance.isAssetProtected(token)).to.equal(true);
-                await expect(bridgeEthInstance.connect(user1).setAssetProtection(token, false))
+                await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
+                await expect(bridgeEthInstance.connect(user1).setAssetProtection(token.address, false))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
@@ -118,5 +119,63 @@ describe("Bridge Ethereum Side", function () {
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
+
+        describe("Time Lock Setting", function () {
+            it("Should set time lock (by congress)", async function () {
+                await expect(bridgeEthInstance.connect(chainportCongress).setTimeLockLength(5))
+                    .to.emit(bridgeEthInstance, 'TimeLockLengthChanged')
+                    .withArgs(5);
+                expect(await bridgeEthInstance.timeLockLength()).to.equal(5);
+            });
+
+            it("Should not set time lock (by user)", async function () {
+               await expect(bridgeEthInstance.connect(user1).setTimeLockLength(5))
+                   .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+
+            it("Should not set time lock (by maintainer)", async function () {
+                await expect(bridgeEthInstance.connect(maintainer).setTimeLockLength(5))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
+        describe("Safety Threshold Setting", function () {
+            it("Should set safety threshold (by congress)", async function () {
+                await expect(bridgeEthInstance.connect(chainportCongress).setThreshold(7))
+                    .to.emit(bridgeEthInstance, 'SafetyThresholdChanged')
+                    .withArgs(7);
+                expect(await bridgeEthInstance.safetyThreshold()).to.equal(7);
+            });
+
+            it("Should not set safety threshold (by user)", async function () {
+                await expect(bridgeEthInstance.connect(user1).setThreshold(5))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+
+            it("Should not set safety threshold (by maintainer)", async function () {
+                await expect(bridgeEthInstance.connect(maintainer).setThreshold(5))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
+        describe("Token Freezing", function () {
+            xit("Should freeze the token", async function () {
+                let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
+                bridgeBscInstance = await bridgeBscInstance.deploy();
+
+                //await bridgeBscInstance.mi
+
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 1))
+                    .to.emit(bridgeEthInstance, 'TokensFreezed')
+                    .withArgs(token.address, user1, 1);
+            });
+        });
+
+        describe("Token Releasing (Withdrawal)", function () {
+           xit("Should withdraw tokens using signature", async function () {
+
+           });
+        });
+
     });
 });

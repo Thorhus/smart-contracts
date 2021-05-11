@@ -12,9 +12,10 @@ describe("Bridge Binance Side", function () {
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
-        [chainportCongress, user1, user2, token, maintainer, ...maintainers] = await ethers.getSigners();
+        [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
 
-        token = token.address;
+        token = await ethers.getContractFactory("BridgeMintableToken");
+        token = await token.deploy("","",5);
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -36,7 +37,7 @@ describe("Bridge Binance Side", function () {
         await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
     });
 
-    describe("Protection, locking, freezing etc.", function () {
+    describe("Main functions", function () {
 
         beforeEach(async function () {
             await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
@@ -66,6 +67,48 @@ describe("Bridge Binance Side", function () {
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
                 await expect(bridgeBscInstance.connect(user1).unfreezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
+        describe("Token Minting", function () {
+            it("Should mint a new token (by maintainer)", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+            });
+
+            it("Should not mint same token second time", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+                await expect(bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5))
+                    .to.be.revertedWith("MintNewToken: Token already exists.");
+            });
+
+            it("Should not mint a new token (by user)", async function () {
+                await expect(bridgeBscInstance.connect(user1).mintNewToken(token.address, "", "", 5))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+            });
+
+            xit("Should mint tokens", async function () {
+
+            });
+        });
+
+        describe("Token Burning", function () {
+            xit("Should burn a token made by the bridge (by maintainer)", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+                await bridgeBscInstance.connect(maintainer).burnTokens(
+                    await bridgeBscInstance.erc20ToBep20Address(token.address), 1);
+            });
+
+            xit("Should not burn a token (by user)", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+                await expect(bridgeBscInstance.connect(user1).burnTokens(
+                    await bridgeBscInstance.erc20ToBep20Address(token.address), 1))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+            });
+
+            it("Should not burn a token which was not created by the bridge", async function () {
+                await expect(bridgeBscInstance.connect(maintainer).burnTokens(
+                    await bridgeBscInstance.erc20ToBep20Address(token.address), 1))
+                    .to.be.revertedWith("BurnTokens: Token is not created by the bridge.");
             });
         });
     });
