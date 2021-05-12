@@ -68,6 +68,13 @@ describe("Bridge Binance Side", function () {
                 await expect(bridgeBscInstance.connect(user1).unfreezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
+
+            it("Should not unfreeze the bridge (by maintianer)", async function () {
+                await bridgeBscInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeBscInstance.isFrozen()).to.equal(true);
+                await expect(bridgeBscInstance.connect(maintainer).unfreezeBridge())
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
         });
 
         describe("Token Minting", function () {
@@ -86,8 +93,8 @@ describe("Bridge Binance Side", function () {
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should mint tokens", async function () {
-
+            it("Should mint tokens", async function () {
+                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, 234);
             });
         });
 

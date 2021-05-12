@@ -163,7 +163,7 @@ describe("Bridge Ethereum Side", function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
 
-                //await bridgeBscInstance.mi
+                //await bridgeBscInstance.connect(maintainer).mintNewToken("");
 
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 1))
                     .to.emit(bridgeEthInstance, 'TokensFreezed')
@@ -172,9 +172,9 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Token Releasing (Withdrawal)", function () {
-           xit("Should withdraw tokens using signature", async function () {
+            xit("Should withdraw tokens using signature", async function () {
 
-           });
+            });
         });
 
     });
