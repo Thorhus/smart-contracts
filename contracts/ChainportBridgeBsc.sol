@@ -80,7 +80,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     onlyMaintainer
     isNotFrozen
     {
-        require(nonce == functionNameToNonce["mintTokens"] + 1);
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Nonce is not correct");
         functionNameToNonce["mintTokens"] = nonce;
 
         BridgeMintableToken ercToken = BridgeMintableToken(token);

@@ -94,7 +94,9 @@ describe("Bridge Binance Side", function () {
             });
 
             it("Should mint tokens", async function () {
-                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, 234);
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+
+                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, lastNonce + 1);
             });
         });
 
