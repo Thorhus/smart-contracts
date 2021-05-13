@@ -163,7 +163,10 @@ describe("Bridge Ethereum Side", function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
 
-                //await bridgeBscInstance.connect(maintainer).mintNewToken("");
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 50, lastNonce + 1);
+
+                //token.transferFrom()
 
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 1))
                     .to.emit(bridgeEthInstance, 'TokensFreezed')

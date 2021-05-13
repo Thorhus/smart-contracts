@@ -95,23 +95,35 @@ describe("Bridge Binance Side", function () {
 
             it("Should mint tokens", async function () {
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-
                 await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, lastNonce + 1);
+            });
+
+            it("Should not mint token (by user)", async function () {
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(user1).mintTokens(token.address, user2.address, 3, lastNonce + 1))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+            });
+
+            it("Should not mint token with invalid nonce", async function () {
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, 435))
+                    .to.be.revertedWith("Nonce is not correct");
             });
         });
 
         describe("Token Burning", function () {
             xit("Should burn a token made by the bridge (by maintainer)", async function () {
-                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 18);
+
+                await token.connect(maintainer).increaseAllowance(maintainer.address, 100);
+
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer).mintTokens(
+                    await bridgeBscInstance.erc20ToBep20Address(token.address), user1.address, 50, lastNonce + 1);
+
                 await bridgeBscInstance.connect(maintainer).burnTokens(
                     await bridgeBscInstance.erc20ToBep20Address(token.address), 1);
-            });
-
-            xit("Should not burn a token (by user)", async function () {
-                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
-                await expect(bridgeBscInstance.connect(user1).burnTokens(
-                    await bridgeBscInstance.erc20ToBep20Address(token.address), 1))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
             it("Should not burn a token which was not created by the bridge", async function () {
