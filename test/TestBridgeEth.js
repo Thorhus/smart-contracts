@@ -2,16 +2,9 @@ const { expect } = require("chai");
 
 describe("Bridge Ethereum Side", function () {
 
-    let maintainersRegistry, maintainersRegistryInstance;
-    let bridgeEth, bridgeEthInstance;
-    let validator, validatorInstance;
-    let chainportCongress;
-    let maintainer, maintainers;
-    let user1, user2;
-    let token;
-    let tokenAmount = 50;
-    let nonceIncrease = 1;
-    let decimals = 18;
+    let maintainersRegistry, maintainersRegistryInstance, bridgeEth, bridgeEthInstance,
+    validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18;
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
@@ -37,7 +30,7 @@ describe("Bridge Ethereum Side", function () {
     });
 
     describe("Initialization", function () {
-        xit("Should not initialize when safetyThreshold is 0", async function () {
+        it("Should not initialize when safetyThreshold is 0", async function () {
             await expect(bridgeEthInstance.initialize(
                 maintainersRegistryInstance.address,
                 chainportCongress.address,
@@ -47,7 +40,7 @@ describe("Bridge Ethereum Side", function () {
             )).to.be.revertedWith("Error: % is not valid.");
         });
 
-        xit("Should initialize", async function () {
+        it("Should initialize", async function () {
             await bridgeEthInstance.initialize(
                 maintainersRegistryInstance.address,
                 chainportCongress.address,
@@ -71,24 +64,24 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Asset protection", function () {
-            xit("Should protect the asset (by congress)", async function () {
+            it("Should protect the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
             });
 
-            xit("Should remove protection on the asset (by congress)", async function () {
+            it("Should remove protection on the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, false);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(false);
             });
 
-            xit("Should not protect the asset (by user)", async function () {
+            it("Should not protect the asset (by user)", async function () {
                 await expect(bridgeEthInstance.connect(user1).setAssetProtection(token.address, true))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
-            xit("Should not remove protection on the asset (by user)", async function () {
+            it("Should not remove protection on the asset (by user)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
                 await expect(bridgeEthInstance.connect(user1).setAssetProtection(token.address, false))
@@ -98,24 +91,24 @@ describe("Bridge Ethereum Side", function () {
 
         describe("Bridge Freezing Operations", function () {
 
-            xit("Should freeze the bridge (by maintainer)", async function () {
+            it("Should freeze the bridge (by maintainer)", async function () {
                 await bridgeEthInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeEthInstance.isFrozen()).to.equal(true);
             });
 
-            xit("Should unfreeze the bridge (by congress)", async function () {
+            it("Should unfreeze the bridge (by congress)", async function () {
                 await bridgeEthInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeEthInstance.isFrozen()).to.equal(true);
                 await bridgeEthInstance.connect(chainportCongress).unfreezeBridge();
                 expect(await bridgeEthInstance.isFrozen()).to.equal(false);
             });
 
-            xit("Should not let freeze the bridge (by user)", async function () {
+            it("Should not let freeze the bridge (by user)", async function () {
                 await expect(bridgeEthInstance.connect(user1).freezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should not let unfreeze the bridge (by user)", async function () {
+            it("Should not let unfreeze the bridge (by user)", async function () {
                 await bridgeEthInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeEthInstance.isFrozen()).to.equal(true);
                 await expect(bridgeEthInstance.connect(user1).unfreezeBridge())
@@ -124,45 +117,46 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Time Lock Setting", function () {
-            xit("Should set time lock (by congress)", async function () {
+            it("Should set time lock (by congress)", async function () {
                 await expect(bridgeEthInstance.connect(chainportCongress).setTimeLockLength(5))
                     .to.emit(bridgeEthInstance, 'TimeLockLengthChanged')
                     .withArgs(5);
                 expect(await bridgeEthInstance.timeLockLength()).to.equal(5);
             });
 
-            xit("Should not set time lock (by user)", async function () {
+            it("Should not set time lock (by user)", async function () {
                await expect(bridgeEthInstance.connect(user1).setTimeLockLength(5))
                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
-            xit("Should not set time lock (by maintainer)", async function () {
+            it("Should not set time lock (by maintainer)", async function () {
                 await expect(bridgeEthInstance.connect(maintainer).setTimeLockLength(5))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
 
         describe("Safety Threshold Setting", function () {
-            xit("Should set safety threshold (by congress)", async function () {
+            it("Should set safety threshold (by congress)", async function () {
                 await expect(bridgeEthInstance.connect(chainportCongress).setThreshold(7))
                     .to.emit(bridgeEthInstance, 'SafetyThresholdChanged')
                     .withArgs(7);
                 expect(await bridgeEthInstance.safetyThreshold()).to.equal(7);
             });
 
-            xit("Should not set safety threshold (by user)", async function () {
+            it("Should not set safety threshold (by user)", async function () {
                 await expect(bridgeEthInstance.connect(user1).setThreshold(5))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
-            xit("Should not set safety threshold (by maintainer)", async function () {
+            it("Should not set safety threshold (by maintainer)", async function () {
                 await expect(bridgeEthInstance.connect(maintainer).setThreshold(5))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
 
         describe("Token Freezing", function () {
-            it("Should freeze the token", async function () {
+
+            beforeEach(async function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
 
@@ -173,42 +167,31 @@ describe("Bridge Ethereum Side", function () {
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
 
                 await token.connect(user1).approve(bridgeEthInstance.address, tokenAmount);
-
-                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 1))
+            });
+            it("Should freeze the token", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
                     .to.emit(bridgeEthInstance, 'TokensFreezed')
-                    .withArgs(token.address, user1.address , 1);
+                    .withArgs(token.address, user1.address , tokenAmount - 1);
             });
 
             it("Should not freeze the token if exceeds balance", async function () {
-                let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
-                bridgeBscInstance = await bridgeBscInstance.deploy();
-
-                await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
-
-                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-                await bridgeBscInstance.connect(maintainer)
-                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
-
-                await token.connect(user1).approve(bridgeEthInstance.address, tokenAmount);
-
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
             });
 
             it("Should not freeze the token if exceeds allowance", async function () {
-                let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
-                bridgeBscInstance = await bridgeBscInstance.deploy();
+                await token.connect(user1).approve(bridgeEthInstance.address, 0);
 
-                await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
+                    .to.be.revertedWith("ERC20: transfer amount exceeds allowance");
+            });
 
-                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-                await bridgeBscInstance.connect(maintainer)
-                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
-
-                await token.connect(user1).approve(bridgeEthInstance.address, 5);
+            it("Should not freeze the token if bridge is frozen", async function () {
+                await bridgeEthInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeEthInstance.isFrozen()).to.equal(true);
 
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 10))
-                    .to.be.revertedWith("ERC20: transfer amount exceeds allowance");
+                    .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
 
@@ -230,7 +213,7 @@ describe("Bridge Ethereum Side", function () {
                     .withArgs(token.address, user1.address , tokenAmount);
             });
 
-            it("Should withdraw tokens using signature", async function () {
+            xit("Should withdraw tokens using signature", async function () {
                 //How to generate signature
             });
         });

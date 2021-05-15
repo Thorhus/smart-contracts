@@ -2,20 +2,16 @@ const { expect } = require("chai");
 
 describe("Bridge Binance Side", function () {
 
-    let maintainersRegistry, maintainersRegistryInstance;
-    let bridgeBsc, bridgeBscInstance;
-    let validator, validatorInstance;
-    let chainportCongress;
-    let maintainer, maintainers;
-    let user1, user2;
-    let token;
+    let maintainersRegistry, maintainersRegistryInstance, bridgeBsc, bridgeBscInstance,
+    validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18;
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
         [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
 
         token = await ethers.getContractFactory("BridgeMintableToken");
-        token = await token.deploy("","",5);
+        token = await token.deploy("","",decimals);
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -33,7 +29,7 @@ describe("Bridge Binance Side", function () {
         bridgeBscInstance = await bridgeBsc.deploy();
     });
 
-    xit("Initialization", async function () {
+    it("Initialization", async function () {
         await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
     });
 
@@ -45,31 +41,31 @@ describe("Bridge Binance Side", function () {
 
         describe("Bridge Freezing Operations", function () {
 
-            xit("Should freeze the bridge (by maintainer)", async function () {
+            it("Should freeze the bridge (by maintainer)", async function () {
                 await bridgeBscInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
             });
 
-            xit("Should unfreeze the bridge (by congress)", async function () {
+            it("Should unfreeze the bridge (by congress)", async function () {
                 await bridgeBscInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
                 await bridgeBscInstance.connect(chainportCongress).unfreezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(false);
             });
 
-            xit("Should not let freeze the bridge (by user)", async function () {
+            it("Should not let freeze the bridge (by user)", async function () {
                 await expect(bridgeBscInstance.connect(user1).freezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should not let unfreeze the bridge (by user)", async function () {
+            it("Should not let unfreeze the bridge (by user)", async function () {
                 await bridgeBscInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
                 await expect(bridgeBscInstance.connect(user1).unfreezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
-            xit("Should not unfreeze the bridge (by maintianer)", async function () {
+            it("Should not unfreeze the bridge (by maintianer)", async function () {
                 await bridgeBscInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
                 await expect(bridgeBscInstance.connect(maintainer).unfreezeBridge())
@@ -78,41 +74,57 @@ describe("Bridge Binance Side", function () {
         });
 
         describe("Token Minting", function () {
-            xit("Should mint a new token (by maintainer)", async function () {
-                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
+            it("Should mint a new token (by maintainer)", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
             });
 
-            xit("Should not mint same token second time", async function () {
-                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5);
-                await expect(bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 5))
+            it("Should not mint same token second time", async function () {
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+                await expect(bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals))
                     .to.be.revertedWith("MintNewToken: Token already exists.");
             });
 
-            xit("Should not mint a new token (by user)", async function () {
-                await expect(bridgeBscInstance.connect(user1).mintNewToken(token.address, "", "", 5))
+            it("Should not mint a new token (by user)", async function () {
+                await expect(bridgeBscInstance.connect(user1).mintNewToken(token.address, "", "", decimals))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should mint tokens", async function () {
-                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, lastNonce + 1);
+            it("Should not mint a new token when bridge is frozen", async function () {
+                await bridgeBscInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeBscInstance.isFrozen()).to.equal(true);
+                await expect(bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals))
+                    .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
 
-            xit("Should not mint token (by user)", async function () {
+            it("Should mint tokens", async function () {
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-                await expect(bridgeBscInstance.connect(user1).mintTokens(token.address, user2.address, 3, lastNonce + 1))
+                await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
+            });
+
+            it("Should not mint tokens (by user)", async function () {
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(user1).mintTokens(token.address, user2.address, tokenAmount, lastNonce + nonceIncrease))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should not mint token with invalid nonce", async function () {
+            it("Should not mint tokens with invalid nonce", async function () {
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
-                await expect(bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, 3, 435))
+                await expect(bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, 435))
                     .to.be.revertedWith("Nonce is not correct");
+            });
+
+            it("Should not mint tokens when bridge is frozen", async function () {
+                await bridgeBscInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeBscInstance.isFrozen()).to.equal(true);
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(maintainer)
+                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease))
+                    .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
 
         describe("Token Burning", function () {
-            it("Should burn a token made by the bridge (by maintainer)", async function () {
+            xit("Should burn a token made by the bridge (by maintainer)", async function () {
 
                 await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", 18);
 
@@ -122,12 +134,12 @@ describe("Bridge Binance Side", function () {
 
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
                 await bridgeBscInstance.connect(maintainer).mintTokens(
-                    bepToken, maintainer.address, 50, lastNonce + 1);
+                    bepToken, maintainer.address, 50, lastNonce + nonceIncrease);
 
                 await bridgeBscInstance.connect(maintainer).burnTokens(bepToken, 1);
             });
 
-            xit("Should not burn a token which was not created by the bridge", async function () {
+            it("Should not burn a token which was not created by the bridge", async function () {
                 await expect(bridgeBscInstance.connect(maintainer).burnTokens(
                     await bridgeBscInstance.erc20ToBep20Address(token.address), 1))
                     .to.be.revertedWith("BurnTokens: Token is not created by the bridge.");
