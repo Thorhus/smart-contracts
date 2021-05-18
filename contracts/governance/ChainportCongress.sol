@@ -99,7 +99,7 @@ contract ChainportCongress {
     )
     external
     {
-        require(address(membersRegistry) == address(0x0));
+        require(address(membersRegistry) == address(0x0), "ChainportCongress:setMembersRegistry: membersRegistry is already set");
         membersRegistry = ICongressMembersRegistry(_membersRegistry);
     }
 
@@ -183,7 +183,7 @@ contract ChainportCongress {
             }
 
             // solium-disable-next-line security/no-call-value
-            (bool success,) = proposal.targets[i].call.value(proposal.values[i])(callData);
+            (bool success,) = proposal.targets[i].call{value:proposal.values[i]}(callData);
 
             // Require that transaction went through
             require(success, "ChainportCongress::executeTransaction: Transaction execution reverted.");
@@ -199,9 +199,9 @@ contract ChainportCongress {
     function cancel(uint proposalId) external onlyMember {
         Proposal storage proposal = proposals[proposalId];
         // Require that proposal is not previously executed neither cancelled
-        require(proposal.executed == false && proposal.canceled == false);
-        // 3 days before proposal can get cancelled
-        require(block.timestamp >= proposal.timestamp + 259200);
+        require(proposal.executed == false && proposal.canceled == false, "ChainportCongress:cancel: Proposal already executed or canceled");
+        // 3 days after proposal can get cancelled
+        require(block.timestamp >= proposal.timestamp + 259200, "ChainportCongress:cancel: Time lock hasn't ended yet");
         // Proposal with reached minimalQuorum cant be cancelled
         require(proposal.forVotes < membersRegistry.getMinimalQuorum(), "ChainportCongress:cancel: Proposal already reached quorum");
         // Set that proposal is cancelled
