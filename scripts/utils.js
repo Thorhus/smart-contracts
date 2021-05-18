@@ -18,6 +18,23 @@ function saveContractAddress(network, contract, address) {
     fs.writeFileSync(path.join(__dirname, `../deployments/contract-addresses.json`), JSON.stringify(addrs, null, '    '))
 }
 
+function getSavedContractProxies() {
+    let json
+    try {
+        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-proxies.json`))
+    } catch (err) {
+        json = '{}'
+    }
+    return JSON.parse(json)
+}
+
+function saveContractProxies(network, contract, address) {
+    const addrs = getSavedContractProxies()
+    addrs[network] = addrs[network] || {}
+    addrs[network][contract] = address
+    fs.writeFileSync(path.join(__dirname, `../deployments/contract-proxies.json`), JSON.stringify(addrs, null, '    '))
+}
+
 function getDeploymentBlockchain() {
     let json
     try {
@@ -61,6 +78,8 @@ function saveContractBytecode(network, contract, bytecode, env) {
 module.exports = {
     getSavedContractAddresses,
     saveContractAddress,
+    getSavedContractProxies,
+    saveContractProxies,
     getSavedContractBytecodes,
     saveContractBytecode,
     getDeploymentBlockchain,

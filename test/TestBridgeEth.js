@@ -2,13 +2,9 @@ const { expect } = require("chai");
 
 describe("Bridge Ethereum Side", function () {
 
-    let maintainersRegistry, maintainersRegistryInstance;
-    let bridgeEth, bridgeEthInstance;
-    let validator, validatorInstance;
-    let chainportCongress;
-    let maintainer, maintainers;
-    let user1, user2;
-    let token;
+    let maintainersRegistry, maintainersRegistryInstance, bridgeEth, bridgeEthInstance,
+    validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18;
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
@@ -24,7 +20,7 @@ describe("Bridge Ethereum Side", function () {
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
 
         token = await ethers.getContractFactory("BridgeMintableToken");
-        token = await token.deploy("","",5);
+        token = await token.deploy("","",decimals);
 
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
@@ -159,22 +155,67 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Token Freezing", function () {
-            xit("Should freeze the token", async function () {
+
+            beforeEach(async function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
 
-                //await bridgeBscInstance.mi
+                await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
-                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 1))
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer)
+                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await token.connect(user1).approve(bridgeEthInstance.address, tokenAmount);
+            });
+            it("Should freeze the token", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
                     .to.emit(bridgeEthInstance, 'TokensFreezed')
-                    .withArgs(token.address, user1, 1);
+                    .withArgs(token.address, user1.address , tokenAmount - 1);
+            });
+
+            it("Should not freeze the token if exceeds balance", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
+                    .to.be.revertedWith("ERC20: transfer amount exceeds balance");
+            });
+
+            it("Should not freeze the token if exceeds allowance", async function () {
+                await token.connect(user1).approve(bridgeEthInstance.address, 0);
+
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
+                    .to.be.revertedWith("ERC20: transfer amount exceeds allowance");
+            });
+
+            it("Should not freeze the token if bridge is frozen", async function () {
+                await bridgeEthInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeEthInstance.isFrozen()).to.equal(true);
+
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 10))
+                    .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
 
         describe("Token Releasing (Withdrawal)", function () {
-           xit("Should withdraw tokens using signature", async function () {
+            beforeEach(async function () {
+                let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
+                bridgeBscInstance = await bridgeBscInstance.deploy();
 
-           });
+                await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
+
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer)
+                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await token.connect(user1).approve(bridgeEthInstance.address, tokenAmount);
+
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount))
+                    .to.emit(bridgeEthInstance, 'TokensFreezed')
+                    .withArgs(token.address, user1.address , tokenAmount);
+            });
+
+            xit("Should withdraw tokens using signature", async function () {
+                //How to generate signature
+            });
         });
 
     });
