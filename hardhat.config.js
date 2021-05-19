@@ -4,7 +4,9 @@ require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 require('dotenv').config();
-const branch = require('git-branch');
+
+const { generateTenderlySlug } = require('./scripts/helpers/helpers');
+
 
 task('accounts', 'Prints the list of accounts', async () => {
   const accounts = await ethers.getSigners();
