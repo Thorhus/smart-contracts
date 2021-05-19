@@ -37,6 +37,15 @@ USERNAME=2key
 - `npx hardhat run --network ropsten tenderly/tenderly_push.js`
 - `npx hardhat run --network binancetest tenderly/tenderly_push.js`
 
+#### Tenderly push
+- Generate tenderly access key on the https://dashboard.tenderly.co
+- Add access key to .env file as: 
+  ```
+  ACCESS_KEY=<YOUR_ACCESS_KEY>
+  ```
+- `npx hardhat run --network {network} tenderly/tenderly_push.js`
+
+
 #### Flatten contracts
 - `npx hardhat flatten` (Flattens and prints contracts and their dependencies)
 
