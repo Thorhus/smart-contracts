@@ -5,7 +5,6 @@ require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 require('dotenv').config();
 const branch = require('git-branch');
-const { getDeploymentBlockchain, saveDeploymentBlockchain } = require('./scripts/utils');
 
 task('accounts', 'Prints the list of accounts', async () => {
   const accounts = await ethers.getSigners();
@@ -14,36 +13,6 @@ task('accounts', 'Prints the list of accounts', async () => {
   }
 });
 
-const branchToEnv = {
-  "develop" : "test",
-  "staging" : "staging",
-  "master" : "prod",
-};
-
-const networkToBlockchain = {
-  'ropsten' : 'eth',
-  'ropstenStaging' : 'eth',
-  'binancetest' : 'bsc',
-  'binancetestStaging' : 'bsc'
-};
-
-/**
- * Function to generate tenderly slug
- * @returns {string}
- */
-const generateTenderlySlug = () => {
-  let gitBranch = branch.sync();
-
-  let network;
-  if(process.argv.length > 2) {
-    network = process.argv[4];
-    saveDeploymentBlockchain(network);
-  } else {
-    network = getDeploymentBlockchain()['network'];
-  }
-  // console.log(`chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`)
-  return `chainport-${networkToBlockchain[network]}-${branchToEnv[gitBranch]}`;
-};
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
