@@ -8,7 +8,7 @@ async function main() {
     const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
 
-    const signatoryAddressTest = '0xA040a4e812306d66746508bCFbE84b3e73De67fA';
+    const signatoryAddressTest = '0xD86FC51cAbe595162f1398ffdcDb7E4f69C54078';
 
     const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
@@ -35,8 +35,8 @@ async function main() {
         maintainersRegistry.address,
         contracts.ChainportCongress,
         validator.address,
-        60, // 60 secs timelock
-        20 // safety threshold 20%
+        config.timeLockLength, // 3600 secs timelock
+        config.safetyThreshold // safety threshold 20%
     ]);
     await chainportBridgeEth.deployed()
     saveContractProxies(hre.network.name, "ChainportBridgeEth", chainportBridgeEth.address);
