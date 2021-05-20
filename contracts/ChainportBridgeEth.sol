@@ -267,7 +267,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
     // Function to check if amount is above threshold
     function isAboveThreshold(address token, uint amount) public view returns (bool) {
-        return amount.mul(safetyThreshold).div(100) >= getTokenBalance(token);
+        return amount >= getTokenBalance(token).mul(safetyThreshold).div(100);
     }
 
     // Get contract balance of specific token
