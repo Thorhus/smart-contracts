@@ -26,6 +26,11 @@ contract ChainportBridgeBsc is ChainportUpgradables {
         _;
     }
 
+    modifier isAmountGreaterThanZero(uint amount) {
+        require(amount > 0, "Amount is not greater than zero.");
+        _;
+    }
+
     // Set initial addresses
     function initialize(
         address _chainportCongress,
@@ -79,6 +84,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     public
     onlyMaintainer
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(nonce == functionNameToNonce["mintTokens"] + 1, "Nonce is not correct");
         functionNameToNonce["mintTokens"] = nonce;
@@ -89,7 +95,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     }
 
 
-    function burnTokens(address bep20Token, uint256 amount) public {
+    function burnTokens(address bep20Token, uint256 amount) public isAmountGreaterThanZero(amount){
         require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
 
         BridgeMintableToken ercToken = BridgeMintableToken(bep20Token);
