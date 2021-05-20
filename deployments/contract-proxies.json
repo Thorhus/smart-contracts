@@ -1,0 +1,12 @@
+{
+    "ropstenStaging": {
+        "MaintainersRegistry": "0xe786D7c9968120333dA3cB4BA21aEcd47ca02D41",
+        "Validator": "0x28c22368B2B4Ec14C1379F142668a4342E45E163",
+        "ChainportBridgeEth": "0xEcBe8Ff6F136f0d2e7E4ffac086eE79Ba1da3F82"
+    },
+    "binancetestStaging": {
+        "MaintainersRegistry": "0x2A05D2aaC1ed0C75f42d4f0ec30053eb63b06402",
+        "Validator": "0x8052F47Ad08fDceEc536aB1e25F752Fd8C63850B",
+        "ChainportBridgeBsc": "0x3237AFACDC4Cfb80975621a61Bc4Dca3aaBE1bE5"
+    }
+}

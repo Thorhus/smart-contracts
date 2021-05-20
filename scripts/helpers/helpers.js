@@ -39,7 +39,7 @@ const checksumNetworkAndBranch = (network) => {
     if(network === 'ropsten' || network === 'binancetest') {
         assert.strictEqual(gitBranch ,'develop','Wrong branch');
     }
-    else if(network === 'ropstenStaging' || network === 'binanceStaging') {
+    else if(network === 'ropstenStaging' || network === 'binancetestStaging') {
         assert.strictEqual(gitBranch ,'staging','Wrong branch');
     }
     else if(network === 'mainnet' || network === 'binanceMainnet') {

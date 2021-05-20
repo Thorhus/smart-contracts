@@ -20,5 +20,21 @@
         "MaintainersRegistry": "0x757C6CA12Ba1b8625D3B1A42b0f643943c94dDF2",
         "Validator": "0x98e6AcD6D9181660375e601c84655DdDa7Bf4ae5",
         "ChainportBridgeBsc": "0xab4D1c132896FBadf01612343f3217e3f146Cc16"
+    },
+    "ropstenStaging": {
+        "ChainportCongress": "0x6DC10516166f96cC5829e184D7542688D1B35df1",
+        "ChainportCongressMembersRegistry": "0x98d7fB0977fE24117fC8bD163beE305FAbb47Cd0",
+        "ChainportToken": "0xae03B993cebd683bA2183b277CCA00a962c1A28b",
+        "MaintainersRegistry": "0xe565c42D269b20d57F227e287cbf46288A9c47A4",
+        "Validator": "0xf59f4c5cB9BfCe44595784667B1CE3695E23D50D",
+        "ChainportBridgeEth": "0xAEB6654B13CB550c86668CF47077b87b9748c3A4"
+    },
+    "binancetestStaging": {
+        "ChainportCongress": "0x5ecb143F62327eD41eF9A868191A5d6Bc474A20c",
+        "ChainportCongressMembersRegistry": "0xDB59407884EC6c477801f619c1EF90FEb3F2223B",
+        "ChainportToken": "0x41b811a87C28B381786671fe50A2Edc9b9782Be0",
+        "MaintainersRegistry": "0xDbBe16634Bf4B0A35a1E33b672fc65467053eb40",
+        "Validator": "0x4e527B06ce69D75F50bC0408b091649e5707F828",
+        "ChainportBridgeBsc": "0x7ee2448d55Fc2917077D917e6cb92FaA154E441A"
     }
 }

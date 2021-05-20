@@ -81,7 +81,7 @@
     "ethErc20tokenSupply": 320000000
   },
 
-  "binanceStaging": {
+  "binancetestStaging": {
     "tokenName" : "Chainport",
     "tokenSymbol" : "PORT",
     "totalSupply" : 180000000,
