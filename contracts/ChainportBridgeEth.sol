@@ -57,6 +57,10 @@ contract ChainportBridgeEth is ChainportUpgradables {
         _;
     }
 
+    modifier isAmountGreaterThanZero(uint amount) {
+        require(amount > 0, "Amount is not greater than zero.");
+        _;
+    }
 
     // Initialization function
     function initialize(
@@ -135,8 +139,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
-        require(amount > 0, "Amount is not greater than zero.");
         IERC20 ercToken = IERC20(token);
         bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
         require(response, "Transfer did not go through.");
@@ -154,6 +158,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     onlyMaintainer
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
@@ -175,6 +180,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
@@ -205,6 +211,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
         // msg.sender is beneficiary address
