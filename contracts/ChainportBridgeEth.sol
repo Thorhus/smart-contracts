@@ -137,7 +137,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
     isNotFrozen
     {
         IERC20 ercToken = IERC20(token);
-        ercToken.transferFrom(address(msg.sender), address(this), amount);
+        bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
+        require(response, "Transfer did not go through.");
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -160,7 +161,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
         require(isMessageValid == true, "Error: Signature is not valid.");
-        IERC20(token).transfer(beneficiary, amount);
+        bool response = IERC20(token).transfer(beneficiary, amount);
+        require(response, "Transfer did not go through.");
 
         emit TokensUnfreezed(token, beneficiary, amount);
     }
@@ -181,7 +183,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
                 bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
-                IERC20(token).transfer(p.beneficiary, p.amount);
+                bool response = IERC20(token).transfer(p.beneficiary, p.amount);
+                require(response, "Transfer did not go through.");
+
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 // Clear up the state and remove pending flag
                 delete tokenToPendingWithdrawal[token];
@@ -221,7 +225,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
-            IERC20(token).transfer(beneficiary, amount);
+            bool response = IERC20(token).transfer(beneficiary, amount);
+            require(response, "Transfer did not go through.");
+
             emit TokensUnfreezed(token, beneficiary, amount);
         }
     }
@@ -238,7 +244,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
         // Get current pending withdrawal attempt
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Transfer funds to user
-        IERC20(token).transfer(p.beneficiary, p.amount);
+        bool response = IERC20(token).transfer(p.beneficiary, p.amount);
+        require(response, "Transfer did not go through.");
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
