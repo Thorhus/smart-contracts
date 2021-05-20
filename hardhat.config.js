@@ -64,6 +64,13 @@ module.exports = {
       gasPrice: 115000000000, // 44 GWEI gas price for deployment.
       timeout: 10000000
     },
+    binanceMainnet: {
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: [process.env.PK]
+    },
+
     local: {
       url: 'http://localhost:8545',
     },
