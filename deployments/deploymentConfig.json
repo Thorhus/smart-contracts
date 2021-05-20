@@ -116,13 +116,30 @@
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Nikola"
     ],
     "maintainers" : [
       "0xfE83475880d3592833249BAAacfEC5eD51E29D82"
+    ]
+  },
+
+  "binanceMainnet": {
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
+    "totalSupply" : 180000000,
+    "timeLockLength" : 129600,
+    "safetyThreshold" : 40,
+    "signatoryAddress": "0x75187213Ef5B4DdE3feBdf779B12504E078069B0",
+    "initialCongressMembers" : [
+      "0x894107B7b5051409f279E8300774B2f62Febe057",
+      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
     ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    "initialCongressMembersNames": [
+      "Chainport Foundation 1",
+      "Chainport Nikola"
+    ],
+    "maintainers" : [
+      "0xfE83475880d3592833249BAAacfEC5eD51E29D82"
+    ]
   }
 }
