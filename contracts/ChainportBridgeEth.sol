@@ -136,6 +136,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     isNotFrozen
     {
+        require(amount > 0, "Amount is not greater than zero.");
         IERC20 ercToken = IERC20(token);
         bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
         require(response, "Transfer did not go through.");

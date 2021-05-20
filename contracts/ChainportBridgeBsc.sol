@@ -90,6 +90,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
 
 
     function burnTokens(address bep20Token, uint256 amount) public {
+        require(amount > 0, "Amount is not greater than zero.");
         require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
 
         BridgeMintableToken ercToken = BridgeMintableToken(bep20Token);
