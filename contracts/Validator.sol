@@ -48,13 +48,14 @@ contract Validator is ChainportUpgradables {
         bytes memory signedMessage,
         address token,
         uint256 amount,
-        address beneficiary
+        address beneficiary,
+        uint256 nonce
     )
     external
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signedMessage, beneficiary, token, amount);
+        address messageSigner = recoverSignature(signedMessage, beneficiary, token, amount, nonce);
         return messageSigner == signatoryAddress;
     }
 
@@ -69,7 +70,8 @@ contract Validator is ChainportUpgradables {
         bytes memory signedMessage,
         address beneficiary,
         address token,
-        uint256 amount
+        uint256 amount,
+        uint256 nonce
     )
     public
     pure
@@ -79,7 +81,7 @@ contract Validator is ChainportUpgradables {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked('bytes binding user withdrawal')),
-                keccak256(abi.encodePacked(beneficiary, token, amount))
+                keccak256(abi.encodePacked(beneficiary, token, amount, nonce))
             )
         );
 

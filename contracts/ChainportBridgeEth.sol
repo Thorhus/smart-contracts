@@ -155,10 +155,13 @@ contract ChainportBridgeEth is ChainportUpgradables {
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
+        require(isSignatureUsed[signature] == false, "Already used signature.");
+        isSignatureUsed[signature] = true;
+
         require(nonce == functionNameToNonce["mintTokens"] + 1);
         functionNameToNonce["mintTokens"] = nonce;
 
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
         IERC20(token).transfer(beneficiary, amount);
 
@@ -168,17 +171,21 @@ contract ChainportBridgeEth is ChainportUpgradables {
     function releaseTokensTimelockPassed(
         bytes memory signature,
         address token,
-        uint256 amount
+        uint256 amount,
+        uint256 nonce
     )
     public
     isNotFrozen
     {
+        require(isSignatureUsed[signature] == false, "Signature already used");
+        isSignatureUsed[signature] = true;
+
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
             PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
             if(p.amount == amount && p.beneficiary == msg.sender && p.unlockingTime <= block.timestamp) {
                 // Verify the signature user is submitting
-                bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary);
+                bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary, nonce);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
                 IERC20(token).transfer(p.beneficiary, p.amount);
@@ -196,17 +203,23 @@ contract ChainportBridgeEth is ChainportUpgradables {
     function releaseTokens(
         bytes memory signature,
         address token,
-        uint amount
+        uint amount,
+        uint nonce
     )
     public
     isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+
+        require(isSignatureUsed[signature] == false, "Signature already used");
+        isSignatureUsed[signature] = true;
+
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
+
 
         if(isAboveThreshold(token, amount) && isAssetProtected[token] == true) {
             PendingWithdrawal memory p = PendingWithdrawal({
