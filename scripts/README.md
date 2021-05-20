@@ -77,7 +77,7 @@ function freezeBridge()
 ``` 
 function unfreezeBridge() 
 ```
-<br/>
+
 - No arguments
 
 - _**Step 3:**_ Congress members can now vote (preferably through etherscan) in order to execute the function
@@ -92,7 +92,6 @@ function approveWithdrawalAndTransferFunds(
         address token
     )
 ```
-<br/>
 
 - _Step 2.1:_ token is address of the token we want to withdraw
 
@@ -107,7 +106,6 @@ function rejectWithdrawal(
         address token
     )
 ```
-<br/>
 
 - _Step 2.1:_ token is address of the token we want to reject withdrawal of
 
