@@ -26,13 +26,13 @@ contract ChainportBridgeEth is ChainportUpgradables {
     // Mapping function name to maintainer nonce
     mapping(string => uint256) public functionNameToNonce;
     // Mapping the pending withdrawal which frozen temporarily asset circulation
-    mapping(address => PendingWithdrawal) tokenToPendingWithdrawal;
+    mapping(address => PendingWithdrawal) public tokenToPendingWithdrawal;
     // Mapping per token to check if there's any pending withdrawal attempt
-    mapping(address => bool) isTokenHavingPendingWithdrawal;
+    mapping(address => bool) public isTokenHavingPendingWithdrawal;
     // Mapping for marking the assets
     mapping(address => bool) public isAssetProtected;
     // Check if signature is being used
-    mapping(bytes => bool) isSignatureUsed;
+    mapping(bytes => bool) public isSignatureUsed;
     // % of the tokens, must be whole number, no decimals pegging
     uint256 public safetyThreshold;
     // Length of the timeLock
