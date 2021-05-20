@@ -57,6 +57,10 @@ contract ChainportBridgeEth is ChainportUpgradables {
         _;
     }
 
+    modifier isAmountGreaterThanZero(uint amount) {
+        require(amount > 0, "Amount is not greater than zero.");
+        _;
+    }
 
     // Initialization function
     function initialize(
@@ -135,6 +139,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         IERC20 ercToken = IERC20(token);
         bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
@@ -153,6 +158,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     onlyMaintainer
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
@@ -178,6 +184,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(isSignatureUsed[signature] == false, "Signature already used");
         isSignatureUsed[signature] = true;
@@ -212,6 +219,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    isAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
