@@ -56,3 +56,58 @@ function propose(
 - _**Step 8:**_ Once quorum is reached any member can execute proposal
 
 ---
+
+### Maintainer bridge freezing
+
+- _**Step 1:**_ Select proper method to execute in destination contract
+- _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
+- _**Step 3:**_ Call function:
+``` 
+function freezeBridge() 
+```
+<br/>
+- No arguments
+
+---
+
+### Congress bridge unfreezing
+
+- _**Step 1:**_ Select proper method to execute in destination contract
+- _**Step 2:**_ Call function:
+``` 
+function unfreezeBridge() 
+```
+
+- No arguments
+
+- _**Step 3:**_ Congress members can now vote (preferably through etherscan) in order to execute the function
+
+---
+
+### Congress approve locked withdraw
+- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
+- _**Step 2:**_ Call function:
+```
+function approveWithdrawalAndTransferFunds(
+        address token
+    )
+```
+
+- _Step 2.1:_ token is address of the token we want to withdraw
+
+- _**Step 3:**_ Same as on 'Congress bridge unfreezing' paragraph congress members should perform voting in order to execute function
+---
+
+### Congress reject locked withdraw
+- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
+- _**Step 2:**_ Call function:
+```
+function rejectWithdrawal(
+        address token
+    )
+```
+
+- _Step 2.1:_ token is address of the token we want to reject withdrawal of
+
+- _**Step 3:**_ Same as on 'Congress bridge unfreezing' and 'Approve locked withdraw' paragraph congress members should perform voting in order to execute function
+---

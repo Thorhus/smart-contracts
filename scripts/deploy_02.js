@@ -8,8 +8,6 @@ async function main() {
     const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
 
-    const signatoryAddressTest = '0xD86FC51cAbe595162f1398ffdcDb7E4f69C54078';
-
     const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
     await maintainersRegistry.deployed()
@@ -20,7 +18,7 @@ async function main() {
     const Validator = await ethers.getContractFactory('Validator');
     const validator = await upgrades.deployProxy(
         Validator, [
-            signatoryAddressTest,
+            config.signatoryAddress,
             maintainersRegistry.address,
             contracts.ChainportCongress
         ]
