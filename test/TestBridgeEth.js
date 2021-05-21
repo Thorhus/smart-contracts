@@ -30,6 +30,7 @@ describe("Bridge Ethereum Side", function () {
     });
 
     describe("Initialization", function () {
+
         it("Should not initialize when safetyThreshold is 0", async function () {
             await expect(bridgeEthInstance.initialize(
                 maintainersRegistryInstance.address,
@@ -58,12 +59,13 @@ describe("Bridge Ethereum Side", function () {
                 maintainersRegistryInstance.address,
                 chainportCongress.address,
                 validatorInstance.address,
-                0,
+                60,
                 30
             );
         });
 
         describe("Asset protection", function () {
+
             it("Should protect the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
@@ -117,6 +119,7 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Time Lock Setting", function () {
+
             it("Should set time lock (by congress)", async function () {
                 await expect(bridgeEthInstance.connect(chainportCongress).setTimeLockLength(5))
                     .to.emit(bridgeEthInstance, 'TimeLockLengthChanged')
@@ -136,6 +139,7 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Safety Threshold Setting", function () {
+
             it("Should set safety threshold (by congress)", async function () {
                 await expect(bridgeEthInstance.connect(chainportCongress).setThreshold(7))
                     .to.emit(bridgeEthInstance, 'SafetyThresholdChanged')
@@ -196,6 +200,7 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Token Releasing (Withdrawal)", function () {
+
             beforeEach(async function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
@@ -213,10 +218,60 @@ describe("Bridge Ethereum Side", function () {
                     .withArgs(token.address, user1.address , tokenAmount);
             });
 
-            xit("Should withdraw tokens using signature", async function () {
-                //How to generate signature
+            xit("Should withdraw tokens using signature (by maintainer)", async function () {
+                await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                    "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
+                    token.address,
+                    5,
+                    maintainer.address,
+                    await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                );
+            });
+
+            it("Should not withdraw when singature length is not right (by maintainer)", async function () {
+                await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                    "0x00",
+                    token.address,
+                    5,
+                    maintainer.address,
+                    await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                )).to.be.revertedWith("bad signature length");
+            });
+
+            it("Should not withdraw when bridge is frozen (by maintainer)", async function () {
+                await bridgeEthInstance.connect(maintainer).freezeBridge();
+                expect(await bridgeEthInstance.isFrozen()).to.equal(true);
+
+                await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                    "0x00",
+                    token.address,
+                    5,
+                    maintainer.address,
+                    await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
 
+        describe("Checking amount compared to threshold", function () {
+
+            beforeEach(async function () {
+                let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
+                bridgeBscInstance = await bridgeBscInstance.deploy();
+
+                await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
+
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer)
+                    .mintTokens(token.address, bridgeEthInstance.address, tokenAmount*100, lastNonce + nonceIncrease);
+            });
+
+            it("Should check if amount is below safety threshold", async function () {
+                expect(await bridgeEthInstance.isAboveThreshold(token.address, tokenAmount*10)).to.be.false;
+            });
+
+            it("Should check if amount is above safety threshold", async function () {
+                expect(await bridgeEthInstance.isAboveThreshold(token.address, tokenAmount*55)).to.be.true;
+            });
+        });
     });
 });
