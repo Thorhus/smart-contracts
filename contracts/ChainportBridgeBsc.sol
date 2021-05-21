@@ -1,12 +1,13 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./BridgeMintableToken.sol";
-import "./ChainportUpgradables.sol";
+import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
 
-contract ChainportBridgeBsc is ChainportUpgradables {
+contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 

@@ -1,7 +1,8 @@
 //"SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.12;
 
-import "./ChainportUpgradables.sol";
+import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "./ChainportMiddleware.sol";
 
 /**
  * Validator contract.
@@ -9,7 +10,7 @@ import "./ChainportUpgradables.sol";
  * Date created: 3.5.21.
  * Github: madjarevicn
  */
-contract Validator is ChainportUpgradables {
+contract Validator is Initializable, ChainportMiddleware {
 
     address public signatoryAddress;
 

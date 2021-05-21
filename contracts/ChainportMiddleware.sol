@@ -1,18 +1,15 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
-
-import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./interfaces/IMaintainersRegistry.sol";
 
-
 /**
- * ChainportUpgradables contract.
+ * ChainportMiddleware contract.
  * @author Nikola Madjarevic
  * Date created: 4.5.21.
  * Github: madjarevicn
  */
-contract ChainportUpgradables is Initializable {
+contract ChainportMiddleware {
 
     address public chainportCongress;
     IMaintainersRegistry public maintainersRegistry;

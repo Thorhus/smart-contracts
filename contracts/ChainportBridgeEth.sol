@@ -1,13 +1,14 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./libraries/SafeMath.sol";
-import "./ChainportUpgradables.sol";
+import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
-contract ChainportBridgeEth is ChainportUpgradables {
+contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
 
