@@ -74,6 +74,7 @@ describe("Bridge Binance Side", function () {
         });
 
         describe("Token Minting", function () {
+
             it("Should mint a new token (by maintainer)", async function () {
                 await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
             });
@@ -113,6 +114,12 @@ describe("Bridge Binance Side", function () {
                     .to.be.revertedWith("Nonce is not correct");
             });
 
+            it("Should not mint tokens when amount is below or equal to zero", async function () {
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(maintainer).mintTokens(token.address, user2.address, 0, lastNonce + nonceIncrease))
+                    .to.be.revertedWith("Amount is not greater than zero.");
+            });
+
             it("Should not mint tokens when bridge is frozen", async function () {
                 await bridgeBscInstance.connect(maintainer).freezeBridge();
                 expect(await bridgeBscInstance.isFrozen()).to.equal(true);
@@ -124,6 +131,7 @@ describe("Bridge Binance Side", function () {
         });
 
         describe("Token Burning", function () {
+
             it("Should burn a token made by the bridge (by maintainer)", async function () {
 
                 await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
@@ -155,6 +163,20 @@ describe("Bridge Binance Side", function () {
 
                 await expect(bridgeBscInstance.connect(maintainer).burnTokens(bepToken, 1))
                     .to.be.revertedWith("ERC20: burn amount exceeds allowance");
+            });
+
+            it("Should not burn a token if amount is below or equal to zero", async function () {
+
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+
+                let bepToken = await bridgeBscInstance.erc20ToBep20Address(token.address);
+
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await bridgeBscInstance.connect(maintainer).mintTokens(
+                    bepToken, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await expect(bridgeBscInstance.connect(maintainer).burnTokens(bepToken, 0))
+                    .to.be.revertedWith("Amount is not greater than zero.");
             });
 
             it("Should not burn a token which was not created by the bridge", async function () {
