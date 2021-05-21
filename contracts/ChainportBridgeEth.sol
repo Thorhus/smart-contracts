@@ -39,23 +39,23 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
 
     // Events
-    event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
-    event TokensFreezed(address tokenAddress, address issuer, uint amount);
-    event CreatedPendingWithdrawal(address token, address beneficiary, uint amount, uint unlockingTime);
+    event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
+    event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
+    event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
 
-    event WithdrawalApproved(address token, address beneficiary, uint amount);
-    event WithdrawalRejected(address token, address beneficiary, uint amount);
+    event WithdrawalApproved(address token, address beneficiary, uint256 amount);
+    event WithdrawalRejected(address token, address beneficiary, uint256 amount);
 
-    event TimeLockLengthChanged(uint newTimeLockLength);
+    event TimeLockLengthChanged(uint256 newTimeLockLength);
     event AssetProtectionChanged(address asset, bool isProtected);
-    event SafetyThresholdChanged(uint newSafetyThreshold);
+    event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
     }
 
-    modifier onlyIfAmountGreaterThanZero(uint amount) {
+    modifier onlyIfAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Amount is not greater than zero.");
         _;
     }
@@ -107,7 +107,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
     // Function to set timelock
     function setTimeLockLength(
-        uint length
+        uint256 length
     )
     public
     onlyChainportCongress
@@ -119,7 +119,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
     // Function to set minimal value that is considered important by quantity
     function setThreshold(
-        uint _safetyThreshold
+        uint256 _safetyThreshold
     )
     public
     onlyChainportCongress
@@ -216,8 +216,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
     function releaseTokens(
         bytes memory signature,
         address token,
-        uint amount,
-        uint nonce
+        uint256 amount,
+        uint256 nonce
     )
     public
     isNotFrozen
@@ -300,7 +300,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     }
 
     // Function to check if amount is above threshold
-    function isAboveThreshold(address token, uint amount) public view returns (bool) {
+    function isAboveThreshold(address token, uint256 amount) public view returns (bool) {
         return amount >= getTokenBalance(token).mul(safetyThreshold).div(100);
     }
 

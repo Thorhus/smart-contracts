@@ -17,8 +17,8 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
-    event TokensMinted(address tokenAddress, address issuer, uint amount);
-    event TokensBurned(address tokenAddress, address issuer, uint amount);
+    event TokensMinted(address tokenAddress, address issuer, uint256 amount);
+    event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
 
     modifier isNotFrozen {
@@ -26,7 +26,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
         _;
     }
 
-    modifier isAmountGreaterThanZero(uint amount) {
+    modifier isAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Amount is not greater than zero.");
         _;
     }
