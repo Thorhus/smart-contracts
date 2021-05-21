@@ -66,11 +66,11 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     onlyMaintainer
     isNotFrozen
     {
-        require(erc20ToBep20Address[address(erc20_address)] == address(0), "MintNewToken: Token already exists.");
+        require(erc20ToBep20Address[erc20_address] == address(0), "MintNewToken: Token already exists.");
 
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
-        erc20ToBep20Address[address(erc20_address)] = address(newToken);
+        erc20ToBep20Address[erc20_address] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
         TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
@@ -104,8 +104,8 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     {
         require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
 
-        BridgeMintableToken ercToken = BridgeMintableToken(bep20Token);
-        ercToken.burnFrom(address(msg.sender), amount);
-        TokensBurned(address(ercToken), msg.sender, amount);
+        BridgeMintableToken token = BridgeMintableToken(bep20Token);
+        token.burnFrom(msg.sender, amount);
+        TokensBurned(address(token), msg.sender, amount);
     }
 }
