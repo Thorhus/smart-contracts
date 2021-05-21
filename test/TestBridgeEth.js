@@ -229,6 +229,8 @@ describe("Bridge Ethereum Side", function () {
 
         describe("Token Releasing (Withdrawal)", function () {
 
+            let releaseAmount = 20;
+
             beforeEach(async function () {
                 let bridgeBscInstance = await ethers.getContractFactory("ChainportBridgeBsc");
                 bridgeBscInstance = await bridgeBscInstance.deploy();
@@ -252,7 +254,7 @@ describe("Bridge Ethereum Side", function () {
                     await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
                         "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
                         token.address,
-                        5,
+                        releaseAmount,
                         maintainer.address,
                         await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     );
@@ -262,7 +264,7 @@ describe("Bridge Ethereum Side", function () {
                     await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
                         "0x00",
                         token.address,
-                        5,
+                        releaseAmount,
                         maintainer.address,
                         await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     )).to.be.revertedWith("bad signature length");
@@ -275,7 +277,7 @@ describe("Bridge Ethereum Side", function () {
                     await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
                         "0x00",
                         token.address,
-                        5,
+                        releaseAmount,
                         maintainer.address,
                         await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
@@ -293,19 +295,123 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Release Tokens Time Lock Passed", function () {
+                xit("Should release tokens if time lock passed", async function () {
+                    await bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensTimeLockPassed") + 1
+                    );
+                });
 
+                xit("Should not withdraw when singature length is not right", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
+                        "0x00",
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensTimelockPassed") + 1
+                    )).to.be.revertedWith("bad signature length");
+                });
+
+                it("Should not withdraw when bridge is frozen (by maintainer)", async function () {
+                    await bridgeEthInstance.connect(maintainer).freezeBridge();
+                    expect(await bridgeEthInstance.isFrozen()).to.equal(true);
+
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
+                        "0x00",
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensTimelockPassed") + 1
+                    )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
+                });
+
+                it("Should not withdraw when amount is less or equal to zero", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
+                        "0x00",
+                        token.address,
+                        0,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensTimelockPassed") + 1
+                    )).to.be.revertedWith("Amount is not greater than zero.");
+                });
             });
 
             describe("Release Tokens", function () {
+                xit("Should release tokens", async function () {
+                    await bridgeEthInstance.connect(maintainer).releaseTokens(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokens") + 1
+                    );
+                });
 
+                it("Should not withdraw when singature length is not right", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokens(
+                        "0x00",
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokens") + 1
+                    )).to.be.revertedWith("bad signature length");
+                });
+
+                it("Should not withdraw when bridge is frozen (by maintainer)", async function () {
+                    await bridgeEthInstance.connect(maintainer).freezeBridge();
+                    expect(await bridgeEthInstance.isFrozen()).to.equal(true);
+
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokens(
+                        "0x00",
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokens") + 1
+                    )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
+                });
+
+                it("Should not withdraw when amount is less or equal to zero", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokens(
+                        "0x00",
+                        token.address,
+                        0,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokens") + 1
+                    )).to.be.revertedWith("Amount is not greater than zero.");
+                });
             });
 
             describe("Approve Withdrawal And Transfer Funds", function () {
 
+                xit("Should approve withdrawal and transfer funds (by congress)", async function () {
+
+                });
+
+                xit("Should not approve withdrawal and transfer funds (by maintainer)", async function () {
+
+                });
+
+                xit("Should not approve withdrawal and transfer funds (by user)", async function () {
+
+                });
+
+                xit("Should not approve withdrawal and transfer funds when bridge is frozen", async function () {
+
+                });
             });
 
             describe("Reject Withdrawal", function () {
 
+                xit("Should reject withdrawal (by congress)", async function () {
+
+                });
+
+                xit("Should not reject withdrawal (by maintainer)", async function () {
+
+                });
+
+                xit("Should not reject withdrawal (by user)", async function () {
+
+                });
+
+                xit("Should not reject withdrawal when bridge is frozen", async function () {
+
+                });
             });
         });
 
