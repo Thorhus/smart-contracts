@@ -178,6 +178,11 @@ describe("Bridge Ethereum Side", function () {
                     .withArgs(token.address, user1.address , tokenAmount - 1);
             });
 
+            it("Should not freeze if amount is below or equal to zero", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 0))
+                    .to.be.revertedWith("Amount is not greater than zero.");
+            });
+
             it("Should not freeze the token if exceeds balance", async function () {
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
@@ -249,6 +254,16 @@ describe("Bridge Ethereum Side", function () {
                     maintainer.address,
                     await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                 )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
+            });
+
+            it("Should not withdraw when amount is less or equal to zero (by maintainer)", async function () {
+                await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                    "0x00",
+                    token.address,
+                    0,
+                    maintainer.address,
+                    await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                )).to.be.revertedWith("Amount is not greater than zero.");
             });
         });
 
