@@ -34,7 +34,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     // % of the tokens, must be whole number, no decimals pegging
     uint256 public safetyThreshold;
     // Length of the timeLock
-    uint256 public timeLockLength;
+    uint256 public freezeLength;
 
 
     // Events
@@ -48,7 +48,6 @@ contract ChainportBridgeEth is ChainportUpgradables {
     event TimeLockLengthChanged(uint newTimeLockLength);
     event AssetProtectionChanged(address asset, bool isProtected);
     event SafetyThresholdChanged(uint newSafetyThreshold);
-
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -65,7 +64,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
         address _maintainersRegistryAddress,
         address _chainportCongress,
         address _signatureValidator,
-        uint256 _timeLockLength,
+        uint256 _freezeLength,
         uint256 _safetyThreshold
     )
     public
@@ -75,7 +74,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
         signatureValidator = IValidator(_signatureValidator);
-        timeLockLength = _timeLockLength; //todo: freeze length
+        freezeLength = _freezeLength;
         safetyThreshold = _safetyThreshold;
     }
 
@@ -112,7 +111,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     onlyChainportCongress
     {
-        timeLockLength = length;
+        freezeLength = length;
         emit TimeLockLengthChanged(length);
     }
 
@@ -239,7 +238,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
             PendingWithdrawal memory p = PendingWithdrawal({
                 amount: amount,
                 beneficiary: beneficiary,
-                unlockingTime: now.add(timeLockLength)
+                unlockingTime: now.add(freezeLength)
             });
 
             tokenToPendingWithdrawal[token] = p;
