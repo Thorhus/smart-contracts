@@ -97,8 +97,6 @@ module.exports = {
     saveContractAddress,
     getSavedContractProxies,
     saveContractProxies,
-    getSavedContractBytecodes,
-    saveContractBytecode,
     getDeploymentBlockchain,
     saveDeploymentBlockchain,
     getSavedContractABI,

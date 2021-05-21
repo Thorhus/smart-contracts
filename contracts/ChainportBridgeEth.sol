@@ -1,17 +1,16 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./libraries/SafeMath.sol";
-import "./ChainportUpgradables.sol";
+import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
-contract ChainportBridgeEth is ChainportUpgradables {
+contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
-    //TODO: NOMENCLATURE ON ALL CONTRACTS
-
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     IValidator public signatureValidator;
 
@@ -36,28 +35,27 @@ contract ChainportBridgeEth is ChainportUpgradables {
     // % of the tokens, must be whole number, no decimals pegging
     uint256 public safetyThreshold;
     // Length of the timeLock
-    uint256 public timeLockLength;
+    uint256 public freezeLength;
 
 
     // Events
-    event TokensUnfreezed(address tokenAddress, address issuer, uint amount);
-    event TokensFreezed(address tokenAddress, address issuer, uint amount);
-    event CreatedPendingWithdrawal(address token, address beneficiary, uint amount, uint unlockingTime);
+    event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
+    event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
+    event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
 
-    event WithdrawalApproved(address token, address beneficiary, uint amount);
-    event WithdrawalRejected(address token, address beneficiary, uint amount);
+    event WithdrawalApproved(address token, address beneficiary, uint256 amount);
+    event WithdrawalRejected(address token, address beneficiary, uint256 amount);
 
-    event TimeLockLengthChanged(uint newTimeLockLength);
+    event TimeLockLengthChanged(uint256 newTimeLockLength);
     event AssetProtectionChanged(address asset, bool isProtected);
-    event SafetyThresholdChanged(uint newSafetyThreshold);
-
+    event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
     }
 
-    modifier isAmountGreaterThanZero(uint amount) {
+    modifier onlyIfAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Amount is not greater than zero.");
         _;
     }
@@ -67,7 +65,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
         address _maintainersRegistryAddress,
         address _chainportCongress,
         address _signatureValidator,
-        uint256 _timeLockLength,
+        uint256 _freezeLength,
         uint256 _safetyThreshold
     )
     public
@@ -77,7 +75,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
         signatureValidator = IValidator(_signatureValidator);
-        timeLockLength = _timeLockLength; //todo: freeze length
+        freezeLength = _freezeLength;
         safetyThreshold = _safetyThreshold;
     }
 
@@ -109,19 +107,19 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
     // Function to set timelock
     function setTimeLockLength(
-        uint length
+        uint256 length
     )
     public
     onlyChainportCongress
     {
-        timeLockLength = length;
+        freezeLength = length;
         emit TimeLockLengthChanged(length);
     }
 
 
     // Function to set minimal value that is considered important by quantity
     function setThreshold(
-        uint _safetyThreshold
+        uint256 _safetyThreshold
     )
     public
     onlyChainportCongress
@@ -139,11 +137,12 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
-    isAmountGreaterThanZero(amount)
+    onlyIfAmountGreaterThanZero(amount)
     {
         IERC20 ercToken = IERC20(token);
-        bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
-        require(response, "Transfer did not go through.");
+
+        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
+        require(result, "Transfer did not go through.");
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -158,7 +157,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     onlyMaintainer
     isNotFrozen
-    isAmountGreaterThanZero(amount)
+    onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
@@ -170,8 +169,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
-        bool response = IERC20(token).transfer(beneficiary, amount);
-        require(response, "Transfer did not go through.");
+
+        bool result = IERC20(token).transfer(beneficiary, amount);
+        require(result, "Transfer did not go through.");
 
         emit TokensUnfreezed(token, beneficiary, amount);
     }
@@ -184,7 +184,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
-    isAmountGreaterThanZero(amount)
+    onlyIfAmountGreaterThanZero(amount)
     {
         require(isSignatureUsed[signature] == false, "Signature already used");
         isSignatureUsed[signature] = true;
@@ -197,8 +197,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
                 bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary, nonce);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
-                bool response = IERC20(token).transfer(p.beneficiary, p.amount);
-                require(response, "Transfer did not go through.");
+                bool result = IERC20(token).transfer(p.beneficiary, p.amount);
+                require(result, "Transfer did not go through.");
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 // Clear up the state and remove pending flag
@@ -214,12 +214,12 @@ contract ChainportBridgeEth is ChainportUpgradables {
     function releaseTokens(
         bytes memory signature,
         address token,
-        uint amount,
-        uint nonce
+        uint256 amount,
+        uint256 nonce
     )
     public
     isNotFrozen
-    isAmountGreaterThanZero(amount)
+    onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
 
@@ -230,14 +230,16 @@ contract ChainportBridgeEth is ChainportUpgradables {
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
+        // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
 
         if(isAboveThreshold(token, amount) && isAssetProtected[token] == true) {
+
             PendingWithdrawal memory p = PendingWithdrawal({
                 amount: amount,
                 beneficiary: beneficiary,
-                unlockingTime: now.add(timeLockLength)
+                unlockingTime: now.add(freezeLength)
             });
 
             tokenToPendingWithdrawal[token] = p;
@@ -246,8 +248,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
-            bool response = IERC20(token).transfer(beneficiary, amount);
-            require(response, "Transfer did not go through.");
+            bool result = IERC20(token).transfer(beneficiary, amount);
+            require(result, "Transfer did not go through.");
 
             emit TokensUnfreezed(token, beneficiary, amount);
         }
@@ -265,8 +267,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
         // Get current pending withdrawal attempt
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Transfer funds to user
-        bool response = IERC20(token).transfer(p.beneficiary, p.amount);
-        require(response, "Transfer did not go through.");
+        bool result = IERC20(token).transfer(p.beneficiary, p.amount);
+        require(result, "Transfer did not go through.");
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
@@ -294,7 +296,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     }
 
     // Function to check if amount is above threshold
-    function isAboveThreshold(address token, uint amount) public view returns (bool) {
+    function isAboveThreshold(address token, uint256 amount) public view returns (bool) {
         return amount >= getTokenBalance(token).mul(safetyThreshold).div(100);
     }
 

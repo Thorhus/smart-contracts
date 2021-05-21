@@ -1,12 +1,13 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./BridgeMintableToken.sol";
-import "./ChainportUpgradables.sol";
+import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
 
-contract ChainportBridgeBsc is ChainportUpgradables {
+contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
@@ -17,8 +18,8 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
-    event TokensMinted(address tokenAddress, address issuer, uint amount);
-    event TokensBurned(address tokenAddress, address issuer, uint amount);
+    event TokensMinted(address tokenAddress, address issuer, uint256 amount);
+    event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
 
     modifier isNotFrozen {
@@ -26,7 +27,7 @@ contract ChainportBridgeBsc is ChainportUpgradables {
         _;
     }
 
-    modifier isAmountGreaterThanZero(uint amount) {
+    modifier isAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Amount is not greater than zero.");
         _;
     }
@@ -66,11 +67,11 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     onlyMaintainer
     isNotFrozen
     {
-        require(erc20ToBep20Address[address(erc20_address)] == address(0), "MintNewToken: Token already exists.");
+        require(erc20ToBep20Address[erc20_address] == address(0), "MintNewToken: Token already exists.");
 
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
-        erc20ToBep20Address[address(erc20_address)] = address(newToken);
+        erc20ToBep20Address[erc20_address] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
         TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
@@ -95,11 +96,17 @@ contract ChainportBridgeBsc is ChainportUpgradables {
     }
 
 
-    function burnTokens(address bep20Token, uint256 amount) public isAmountGreaterThanZero(amount){
+    function burnTokens(
+        address bep20Token,
+        uint256 amount
+    )
+    public
+    isAmountGreaterThanZero(amount)
+    {
         require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
 
-        BridgeMintableToken ercToken = BridgeMintableToken(bep20Token);
-        ercToken.burnFrom(address(msg.sender), amount);
-        TokensBurned(address(ercToken), msg.sender, amount);
+        BridgeMintableToken token = BridgeMintableToken(bep20Token);
+        token.burnFrom(msg.sender, amount);
+        TokensBurned(address(token), msg.sender, amount);
     }
 }
