@@ -22,7 +22,7 @@ async function main() {
     const Validator = await ethers.getContractFactory('Validator');
     const validator = await upgrades.deployProxy(
         Validator, [
-            config.signtoryAddress,
+            config.signatoryAddress,
             maintainersRegistry.address,
             contracts.ChainportCongress
         ]
