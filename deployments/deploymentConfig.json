@@ -73,6 +73,7 @@
       "Chainport Foundation 1",
       "Chainport Deployer"
     ],
+    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
     ],
@@ -91,6 +92,7 @@
       "0x894107B7b5051409f279E8300774B2f62Febe057",
       "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
     ],
+    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
       "Chainport Deployer"

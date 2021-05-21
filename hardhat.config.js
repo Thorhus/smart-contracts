@@ -38,7 +38,7 @@ module.exports = {
       accounts: [process.env.PK],
       chainId: 3,
       gasPrice: 80000000000,
-      timeout: 50000
+      timeout: 100000
     },
     binancetest: {
       // Infura public nodes
