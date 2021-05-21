@@ -379,38 +379,50 @@ describe("Bridge Ethereum Side", function () {
             describe("Approve Withdrawal And Transfer Funds", function () {
 
                 xit("Should approve withdrawal and transfer funds (by congress)", async function () {
-
+                    await bridgeEthInstance.connect(chainportCongress).approveWithdrawalAndTransferFunds(token.address);
                 });
 
-                xit("Should not approve withdrawal and transfer funds (by maintainer)", async function () {
-
+                it("Should not approve withdrawal and transfer funds (by maintainer)", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).approveWithdrawalAndTransferFunds(token.address))
+                        .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
                 });
 
-                xit("Should not approve withdrawal and transfer funds (by user)", async function () {
-
+                it("Should not approve withdrawal and transfer funds (by user)", async function () {
+                    await expect(bridgeEthInstance.connect(user1).approveWithdrawalAndTransferFunds(token.address))
+                        .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
                 });
 
-                xit("Should not approve withdrawal and transfer funds when bridge is frozen", async function () {
+                it("Should not approve withdrawal and transfer funds when bridge is frozen", async function () {
+                    await bridgeEthInstance.connect(maintainer).freezeBridge();
+                    expect(await bridgeEthInstance.isFrozen()).to.equal(true);
 
+                    await expect(bridgeEthInstance.connect(chainportCongress).approveWithdrawalAndTransferFunds(token.address))
+                        .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
                 });
             });
 
             describe("Reject Withdrawal", function () {
 
                 xit("Should reject withdrawal (by congress)", async function () {
-
+                    await bridgeEthInstance.connect(chainportCongress).rejectWithdrawal(token.address);
                 });
 
-                xit("Should not reject withdrawal (by maintainer)", async function () {
-
+                it("Should not reject withdrawal (by maintainer)", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).rejectWithdrawal(token.address))
+                        .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
                 });
 
-                xit("Should not reject withdrawal (by user)", async function () {
-
+                it("Should not reject withdrawal (by user)", async function () {
+                    await expect(bridgeEthInstance.connect(user1).rejectWithdrawal(token.address))
+                        .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
                 });
 
-                xit("Should not reject withdrawal when bridge is frozen", async function () {
+                it("Should not reject withdrawal when bridge is frozen", async function () {
+                    await bridgeEthInstance.connect(maintainer).freezeBridge();
+                    expect(await bridgeEthInstance.isFrozen()).to.equal(true);
 
+                    await expect(bridgeEthInstance.connect(chainportCongress).rejectWithdrawal(token.address))
+                        .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
                 });
             });
         });
