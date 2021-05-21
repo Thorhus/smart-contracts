@@ -12,7 +12,9 @@ const networkToBlockchain = {
     'ropsten' : 'eth',
     'ropstenStaging' : 'eth',
     'binancetest' : 'bsc',
-    'binancetestStaging' : 'bsc'
+    'binancetestStaging' : 'bsc',
+    'mainnet': 'eth',
+    'binanceMainnet': 'bsc'
 };
 
 /**
