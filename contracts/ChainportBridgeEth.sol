@@ -10,7 +10,7 @@ import "./interfaces/IValidator.sol";
 
 contract ChainportBridgeEth is ChainportUpgradables {
 
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     IValidator public signatureValidator;
 
