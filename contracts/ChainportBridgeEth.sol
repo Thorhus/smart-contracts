@@ -9,8 +9,6 @@ import "./interfaces/IValidator.sol";
 
 contract ChainportBridgeEth is ChainportUpgradables {
 
-    //TODO: NOMENCLATURE ON ALL CONTRACTS
-
     using SafeMath for uint;
 
     IValidator public signatureValidator;
@@ -142,8 +140,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
     onlyIfAmountGreaterThanZero(amount)
     {
         IERC20 ercToken = IERC20(token);
-        bool response = ercToken.transferFrom(address(msg.sender), address(this), amount);
-        require(response, "Transfer did not go through.");
+
+        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
+        require(result, "Transfer did not go through.");
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -170,8 +169,9 @@ contract ChainportBridgeEth is ChainportUpgradables {
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
-        bool response = IERC20(token).transfer(beneficiary, amount);
-        require(response, "Transfer did not go through.");
+
+        bool result = IERC20(token).transfer(beneficiary, amount);
+        require(result, "Transfer did not go through.");
 
         emit TokensUnfreezed(token, beneficiary, amount);
     }
@@ -197,8 +197,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
                 bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary, nonce);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
-                bool response = IERC20(token).transfer(p.beneficiary, p.amount);
-                require(response, "Transfer did not go through.");
+                bool result = IERC20(token).transfer(p.beneficiary, p.amount);
+                require(result, "Transfer did not go through.");
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 // Clear up the state and remove pending flag
@@ -230,10 +230,12 @@ contract ChainportBridgeEth is ChainportUpgradables {
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
+        // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
 
         if(isAboveThreshold(token, amount) && isAssetProtected[token] == true) {
+
             PendingWithdrawal memory p = PendingWithdrawal({
                 amount: amount,
                 beneficiary: beneficiary,
@@ -246,8 +248,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
-            bool response = IERC20(token).transfer(beneficiary, amount);
-            require(response, "Transfer did not go through.");
+            bool result = IERC20(token).transfer(beneficiary, amount);
+            require(result, "Transfer did not go through.");
 
             emit TokensUnfreezed(token, beneficiary, amount);
         }
@@ -265,8 +267,8 @@ contract ChainportBridgeEth is ChainportUpgradables {
         // Get current pending withdrawal attempt
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Transfer funds to user
-        bool response = IERC20(token).transfer(p.beneficiary, p.amount);
-        require(response, "Transfer did not go through.");
+        bool result = IERC20(token).transfer(p.beneficiary, p.amount);
+        require(result, "Transfer did not go through.");
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
