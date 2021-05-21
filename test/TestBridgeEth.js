@@ -4,7 +4,7 @@ describe("Bridge Ethereum Side", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, bridgeEth, bridgeEthInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
-    tokenAmount = 50, nonceIncrease = 1, decimals = 18;
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18, freezeLength = 60, safetyThreshold = 30;
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
@@ -52,7 +52,7 @@ describe("Bridge Ethereum Side", function () {
         });
     });
 
-    describe("Main Functions", function () {
+    describe("Functions", function () {
 
         beforeEach(async function () {
             await bridgeEthInstance.initialize(
@@ -62,6 +62,24 @@ describe("Bridge Ethereum Side", function () {
                 60,
                 30
             );
+        });
+
+        describe("Check if values are set properly", function () {
+            it("Maintainers registry is set properly", async function () {
+                expect(await bridgeEthInstance.maintainersRegistry()).to.equal(maintainersRegistryInstance.address);
+            });
+            it("Chainport congress address is set properly", async function () {
+                expect(await bridgeEthInstance.chainportCongress()).to.equal(chainportCongress.address);
+            });
+            it("Validator address is set properly", async function () {
+                expect(await bridgeEthInstance.signatureValidator()).to.equal(validatorInstance.address);
+            });
+            it("Freeze length is set properly", async function () {
+                expect(await bridgeEthInstance.freezeLength()).to.equal(freezeLength);
+            });
+            it("Safety threshold is set properly", async function () {
+                expect(await bridgeEthInstance.safetyThreshold()).to.equal(safetyThreshold);
+            });
         });
 
         describe("Asset protection", function () {
@@ -120,40 +138,44 @@ describe("Bridge Ethereum Side", function () {
 
         describe("Time Lock Setting", function () {
 
+            let newFreezeLength = 120;
+
             it("Should set time lock (by congress)", async function () {
-                await expect(bridgeEthInstance.connect(chainportCongress).setTimeLockLength(5))
+                await expect(bridgeEthInstance.connect(chainportCongress).setTimeLockLength(newFreezeLength))
                     .to.emit(bridgeEthInstance, 'TimeLockLengthChanged')
-                    .withArgs(5);
-                expect(await bridgeEthInstance.timeLockLength()).to.equal(5);
+                    .withArgs(newFreezeLength);
+                expect(await bridgeEthInstance.freezeLength()).to.equal(newFreezeLength);
             });
 
             it("Should not set time lock (by user)", async function () {
-               await expect(bridgeEthInstance.connect(user1).setTimeLockLength(5))
+               await expect(bridgeEthInstance.connect(user1).setTimeLockLength(newFreezeLength))
                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
             it("Should not set time lock (by maintainer)", async function () {
-                await expect(bridgeEthInstance.connect(maintainer).setTimeLockLength(5))
+                await expect(bridgeEthInstance.connect(maintainer).setTimeLockLength(newFreezeLength))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
 
         describe("Safety Threshold Setting", function () {
 
+            let newSafetyThreshold = 50;
+
             it("Should set safety threshold (by congress)", async function () {
-                await expect(bridgeEthInstance.connect(chainportCongress).setThreshold(7))
+                await expect(bridgeEthInstance.connect(chainportCongress).setThreshold(newSafetyThreshold))
                     .to.emit(bridgeEthInstance, 'SafetyThresholdChanged')
-                    .withArgs(7);
-                expect(await bridgeEthInstance.safetyThreshold()).to.equal(7);
+                    .withArgs(newSafetyThreshold);
+                expect(await bridgeEthInstance.safetyThreshold()).to.equal(newSafetyThreshold);
             });
 
             it("Should not set safety threshold (by user)", async function () {
-                await expect(bridgeEthInstance.connect(user1).setThreshold(5))
+                await expect(bridgeEthInstance.connect(user1).setThreshold(newSafetyThreshold))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
 
             it("Should not set safety threshold (by maintainer)", async function () {
-                await expect(bridgeEthInstance.connect(maintainer).setThreshold(5))
+                await expect(bridgeEthInstance.connect(maintainer).setThreshold(newSafetyThreshold))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
