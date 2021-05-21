@@ -2,6 +2,7 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./libraries/SafeMath.sol";
 import "./ChainportUpgradables.sol";
@@ -156,6 +157,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     public
     onlyMaintainer
     isNotFrozen
+    nonReentrant
     onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
@@ -183,6 +185,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    nonReentrant
     onlyIfAmountGreaterThanZero(amount)
     {
         require(isSignatureUsed[signature] == false, "Signature already used");
@@ -218,6 +221,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     isNotFrozen
+    nonReentrant
     onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
@@ -260,6 +264,7 @@ contract ChainportBridgeEth is ChainportUpgradables {
     )
     public
     onlyChainportCongress
+    nonReentrant
     isNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == true);
