@@ -54,6 +54,8 @@ async function main() {
     let bridgeImplementation = await admin.getProxyImplementation(chainportBridgebsc.address);
     console.log('Bridge Implementation: ', bridgeImplementation);
     saveContractAddress(hre.network.name, 'ChainportBridgeBsc', bridgeImplementation);
+
+    saveContractProxies(hre.network.name, 'ProxyAdmin', admin.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
