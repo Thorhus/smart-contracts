@@ -1,12 +1,14 @@
 {
     "ropstenStaging": {
-        "MaintainersRegistry": "0xe786D7c9968120333dA3cB4BA21aEcd47ca02D41",
-        "Validator": "0x28c22368B2B4Ec14C1379F142668a4342E45E163",
-        "ChainportBridgeEth": "0xEcBe8Ff6F136f0d2e7E4ffac086eE79Ba1da3F82"
+        "MaintainersRegistry": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A",
+        "Validator": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
+        "ChainportBridgeEth": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
+        "ProxyAdmin": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9"
     },
     "binancetestStaging": {
-        "MaintainersRegistry": "0x2A05D2aaC1ed0C75f42d4f0ec30053eb63b06402",
-        "Validator": "0x8052F47Ad08fDceEc536aB1e25F752Fd8C63850B",
-        "ChainportBridgeBsc": "0x3237AFACDC4Cfb80975621a61Bc4Dca3aaBE1bE5"
+        "MaintainersRegistry": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9",
+        "Validator": "0xca9DC171AB63cC726830ac70670210f332E27Cef",
+        "ChainportBridgeBsc": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
+        "ProxyAdmin": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4"
     }
 }
