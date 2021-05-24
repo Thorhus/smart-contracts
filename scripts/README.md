@@ -61,11 +61,11 @@ function propose(
 
 - _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract (ChainportBridgeEth or ChainportBridgeBsc)
 - _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
-- _**Step 3:**_ Call the following function:
+- _**Step 3:**_ Call the following function through etherscan:
 ``` 
 function freezeBridge() 
 ```
-<br/>
+
 - Function takes no arguments
 
 ---
@@ -81,7 +81,7 @@ function unfreezeBridge()
 ```
 - Takes no arguments
 
-- _Step 2.2:_ Targets are destinations where transfer should go ('')
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'unfreezeBridge()')
 - _Step 2.5:_ Since the function has no arguments we do not need to generate calldata (In the place for calldata argument just put 0x)
@@ -89,7 +89,7 @@ function unfreezeBridge()
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: [""]
+targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
 values: [0]
 signatures: ["unfreezeBridge()"]
 calldatas: [0x]
@@ -114,7 +114,7 @@ function approveWithdrawalAndTransferFunds(
 
 - _Args:_ token is address of the token we want to withdraw
 
-- _Step 2.2:_ Targets are destinations where transfer should go (in our case '')
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'approveWithdrawalAndTransferFunds(address)')
 - _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
@@ -123,10 +123,10 @@ function approveWithdrawalAndTransferFunds(
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: [""]
+targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
 values: [0]
 signatures: ["approveWithdrawalAndTransferFunds(address)"]
-calldatas: [CALLDATA]           //Put here calldata we just generated
+calldatas: [CALLDATA]           // Put here calldata we just generated (without the quotes)
 description: ["Approve withdrawal and transfer funds."]
 ```
 - _**Step 4:**_ Call the propose method with given arguments (through etherscan)
@@ -148,7 +148,7 @@ function rejectWithdrawal(
 
 - _Args:_ token is address of the token we want to withdraw
 
-- _Step 2.2:_ Targets are destinations where transfer should go (in our case '')
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'rejectWithdrawal(address)')
 - _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
@@ -157,10 +157,10 @@ function rejectWithdrawal(
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: [""]
+targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
 values: [0]
 signatures: ["rejectWithdrawal(address)"]
-calldatas: [CALLDATA]           // Put here calldata we just generated
+calldatas: [CALLDATA]           // Put here calldata we just generated (without the quotes)
 description: ["Reject token withdrawal."]
 ```
 - _**Step 4:**_ Call the propose method with given arguments (through etherscan)
