@@ -81,7 +81,7 @@ function unfreezeBridge()
 ```
 - Takes no arguments
 
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'unfreezeBridge()')
 - _Step 2.5:_ Since the function has no arguments we do not need to generate calldata (In the place for calldata argument just put 0x)
@@ -89,7 +89,7 @@ function unfreezeBridge()
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
 values: [0]
 signatures: ["unfreezeBridge()"]
 calldatas: [0x]
@@ -112,9 +112,9 @@ function approveWithdrawalAndTransferFunds(
     )
 ```
 
-- _Args:_ token is address of the token we want to withdraw
+_Args:_ token is address of the token we want to withdraw
 
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'approveWithdrawalAndTransferFunds(address)')
 - _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
@@ -123,7 +123,7 @@ function approveWithdrawalAndTransferFunds(
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
 values: [0]
 signatures: ["approveWithdrawalAndTransferFunds(address)"]
 calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
@@ -146,18 +146,18 @@ function rejectWithdrawal(
     )
 ```
 
-- _Args:_ token is address of the token we want to withdraw
+_Args:_ token is address of the token we want to withdraw
 
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target)
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
 - _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'rejectWithdrawal(address)')
-- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
+- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to reject withdraw of):
 ``` $ node encodedParams.js 'address' 'TOKEN_ADDRESS'  ``` 
 - _Step 2.6:_ Description should be action that we want to perform (Reject token withdrawal.) 
 
 - _**Step 3:**_ Put everything together like bellow:
 ```
-targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
 values: [0]
 signatures: ["rejectWithdrawal(address)"]
 calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
