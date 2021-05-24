@@ -95,7 +95,7 @@ signatures: ["unfreezeBridge()"]
 calldatas: [0x]
 description: ["Unfreeze the bridge."]
 ```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan)
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, ChainportCongress contract)
 - _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
 - _**Step 6:**_ Members can vote
 - _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
@@ -126,10 +126,10 @@ function approveWithdrawalAndTransferFunds(
 targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
 values: [0]
 signatures: ["approveWithdrawalAndTransferFunds(address)"]
-calldatas: [CALLDATA]           // Put here calldata we just generated (without the quotes)
+calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
 description: ["Approve withdrawal and transfer funds."]
 ```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan)
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, ChainportCongress contract)
 - _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
 - _**Step 6:**_ Members can vote
 - _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
@@ -160,11 +160,16 @@ function rejectWithdrawal(
 targets: ["TARGET ADDRESS"]                   // Put the target address here (with quotes)
 values: [0]
 signatures: ["rejectWithdrawal(address)"]
-calldatas: [CALLDATA]           // Put here calldata we just generated (without the quotes)
+calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
 description: ["Reject token withdrawal."]
 ```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan)
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, ChainportCongress contract)
 - _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
 - _**Step 6:**_ Members can vote
 - _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
+
 ---
+
+### Find contracts on etherscan
+- _**ChainportBridge ->**_ https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
+- _**ChainportCongress ->**_ https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1
