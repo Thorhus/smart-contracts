@@ -59,7 +59,7 @@ function propose(
 
 ### Maintainer bridge freezing
 
-- _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract (ChainportBridgeEth or ChainportBridgeBsc)
+- _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](hhttps://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
 - _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
 - _**Step 3:**_ Call the following function through etherscan:
 ``` 
@@ -72,7 +72,7 @@ function freezeBridge()
 
 ### Congress bridge unfreezing
 
-- _**Step 1:**_ Select proper method to execute (unfreezeBridge) in destination contract (ChainportBridgeEth or ChainportBridgeBsc)
+- _**Step 1:**_ Select proper method to execute (unfreezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
 - _Step 1.1:_ Keep in mind that given function should be called only when the bridge is already frozen
 - _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
 - _Step 2.1:_ First take a look at the function
@@ -103,7 +103,7 @@ description: ["Unfreeze the bridge."]
 ---
 
 ### Congress approve locked withdraw
-- _**Step 1:**_ Select proper method to execute (approveWithdrawalAndTransferFunds) in destination contract (ChainportBridgeEth.sol)
+- _**Step 1:**_ Select proper method to execute (approveWithdrawalAndTransferFunds) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
 - _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
 - _Step 2.1:_ First take a look at the function
 ```
@@ -137,7 +137,7 @@ description: ["Approve withdrawal and transfer funds."]
 ---
 
 ### Congress reject locked withdraw
-- _**Step 1:**_ Select proper method to execute (rejectWithdrawal) in destination contract (ChainportBridgeEth.sol)
+- _**Step 1:**_ Select proper method to execute (rejectWithdrawal) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
 - _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
 - _Step 2.1:_ First take a look at the function
 ```
@@ -171,5 +171,6 @@ description: ["Reject token withdrawal."]
 ---
 
 ### Find contracts on etherscan
-- _**ChainportBridge ->**_ https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
+- _**ChainportBridgeEth ->**_ https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
+- _**ChainportBridgeBsc ->**_ https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
 - _**ChainportCongress ->**_ https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1
