@@ -66,7 +66,7 @@ function propose(
 function freezeBridge() 
 ```
 
-- Function takes no arguments
+Function takes no arguments
 
 ---
 
@@ -79,7 +79,7 @@ function freezeBridge()
 ``` 
 function unfreezeBridge() 
 ```
-- Takes no arguments
+Function takes no arguments
 
 - _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
 - _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
