@@ -59,29 +59,42 @@ function propose(
 
 ### Maintainer bridge freezing
 
-- _**Step 1:**_ Select proper method to execute in destination contract
+- _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract (ChainportBridgeEth or ChainportBridgeBsc)
 - _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
-- _**Step 3:**_ Call function:
+- _**Step 3:**_ Call the following function:
 ``` 
 function freezeBridge() 
 ```
 <br/>
-- No arguments
+- Function takes no arguments
 
 ---
 
 ### Congress bridge unfreezing
 
-- _**Step 1:**_ Select proper method to execute in destination contract
-- _**Step 2:**_ Call function:
+- _**Step 1:**_ Select proper method to execute (unfreezeBridge) in destination contract (ChainportBridgeEth or ChainportBridgeBsc)
+- _Step 1.1:_ Keep in mind that given function should be called only when the bridge is already frozen
+- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
+- _Step 2.1:_ First take a look at the function
 ``` 
 function unfreezeBridge() 
 ```
+- Takes no arguments
 
-- No arguments
+- _Step 2.2:_ Targets are destinations where transfer should go ('')
+- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
+- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'unfreezeBridge()')
+- _Step 2.5:_ Since the function has no arguments we do not need to generate calldata (In the place for calldata argument just put 0x)
+- _Step 2.6:_ Description should be action that we want to perform (Unfreeze the bridge) 
 
-- _**Step 3:**_ Congress members can now vote (preferably through etherscan) in order to execute the function
-
+- _**Step 3:**_ Put everything together like bellow:
+```
+targets: [""]
+values: [0]
+signatures: ["unfreezeBridge()"]
+calldatas: [0x]
+description: ["Unfreeze the bridge."]
+```
 ---
 
 ### Congress approve locked withdraw
