@@ -1,7 +1,6 @@
 //"SPDX-License-Identifier: UNLICENSED"
-pragma solidity ^0.6.12;
+pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 
 /**
@@ -10,7 +9,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
  * Date created: 21.4.21.
  * Github: madjarevicn
  */
-contract BridgeMintableToken is ERC20, ERC20Burnable {
+contract BridgeMintableToken is ERC20Burnable {
+
+    address public binanceBridgeContract;
 
     constructor(
         string memory tokenName_,
@@ -21,6 +22,7 @@ contract BridgeMintableToken is ERC20, ERC20Burnable {
     ERC20(tokenName_, tokenSymbol_)
     {
         _setupDecimals(decimals_);
+        binanceBridgeContract = msg.sender;
     }
 
     event Mint(address indexed to, uint256 amount);
@@ -31,7 +33,8 @@ contract BridgeMintableToken is ERC20, ERC20Burnable {
     )
     public
     {
+        require(msg.sender == binanceBridgeContract, "Only Bridge contract can mint new tokens.");
         _mint(_to, _amount);
-        Mint(_to, _amount);
+        emit Mint(_to, _amount);
     }
 }
