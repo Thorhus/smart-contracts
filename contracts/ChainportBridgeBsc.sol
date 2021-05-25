@@ -111,7 +111,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     }
 
     // Function to clear up the state and delete mistakenly minted tokens.
-    function deleteMintedTokens(address [] erc20addresses) public onlyMaintainer {
+    function deleteMintedTokens(address [] memory erc20addresses) public onlyMaintainer {
         for(uint i = 0; i < erc20addresses.length; i++) {
             isCreatedByTheBridge[erc20ToBep20Address[erc20addresses[i]]] = false;
             delete erc20ToBep20Address[erc20addresses[i]];
