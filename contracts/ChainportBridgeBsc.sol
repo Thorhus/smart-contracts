@@ -73,7 +73,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
         erc20ToBep20Address[erc20_address] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
-        TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
+        emit TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
 
     function mintTokens(
@@ -107,6 +107,14 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
         BridgeMintableToken token = BridgeMintableToken(bep20Token);
         token.burnFrom(msg.sender, amount);
-        TokensBurned(address(token), msg.sender, amount);
+        emit TokensBurned(address(token), msg.sender, amount);
+    }
+
+    // Function to clear up the state and delete mistakenly minted tokens.
+    function deleteMintedTokens(address [] memory erc20addresses) public onlyMaintainer {
+        for(uint i = 0; i < erc20addresses.length; i++) {
+            isCreatedByTheBridge[erc20ToBep20Address[erc20addresses[i]]] = false;
+            delete erc20ToBep20Address[erc20addresses[i]];
+        }
     }
 }

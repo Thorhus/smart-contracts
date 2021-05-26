@@ -36,5 +36,20 @@
         "MaintainersRegistry": "0x326eB9271F0427c31bD646381a59E04713Ab6FB2",
         "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
         "ChainportBridgeBsc": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A"
+    },
+    "mainnet": {
+        "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
+        "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
+        "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
+        "MaintainersRegistry": "0x83B3d4B7651aC4E4aaA8B9ccbfccD66C76D94402",
+        "Validator": "0xfE96f0902Ce65C644bF607d3eCC800790a8240a4",
+        "ChainportBridgeEth": "0x931a22bB1267b2890D4630b59d92daa42EBF1912"
+    },
+    "binanceMainnet": {
+        "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
+        "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
+        "MaintainersRegistry": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
+        "Validator": "0xfa09cc64dc2C3C59AF926c028AB3214103e3C78a",
+        "ChainportBridgeBsc": "0x71B4EA7aF852bbbDCe96348974C7EA1f34C48aA0"
     }
 }

@@ -10,5 +10,17 @@
         "Validator": "0xca9DC171AB63cC726830ac70670210f332E27Cef",
         "ChainportBridgeBsc": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
         "ProxyAdmin": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4"
+    },
+    "mainnet": {
+        "MaintainersRegistry": "0x1F13AF55ed6062895bf25DAcFCfb2d0B008d0CFf",
+        "Validator": "0x7a90b52DD8C7729d7AE7eA65C79CE4ba5e2C2768",
+        "ChainportBridgeEth": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
+        "ProxyAdmin": "0x5bAE376BC4923a78C185CD93dD80eb42f30228EB"
+    },
+    "binanceMainnet": {
+        "MaintainersRegistry": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
+        "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
+        "ChainportBridgeBsc": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
+        "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
     }
 }
