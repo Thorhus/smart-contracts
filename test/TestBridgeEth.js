@@ -20,7 +20,7 @@ describe("Bridge Ethereum Side", function () {
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
 
         token = await ethers.getContractFactory("BridgeMintableToken");
-        token = await token.deploy("","",decimals);
+        token = await token.deploy("", "", decimals);
 
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
@@ -188,6 +188,7 @@ describe("Bridge Ethereum Side", function () {
 
                 await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
+                await token.connect(chainportCongress).setBinanceBridgeContract(bridgeBscInstance.address);
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
                 await bridgeBscInstance.connect(maintainer)
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
@@ -237,6 +238,7 @@ describe("Bridge Ethereum Side", function () {
 
                 await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
+                await token.connect(chainportCongress).setBinanceBridgeContract(bridgeBscInstance.address);
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
                 await bridgeBscInstance.connect(maintainer)
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
@@ -435,6 +437,7 @@ describe("Bridge Ethereum Side", function () {
 
                 await bridgeBscInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
+                await token.connect(chainportCongress).setBinanceBridgeContract(bridgeBscInstance.address);
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
                 await bridgeBscInstance.connect(maintainer)
                     .mintTokens(token.address, bridgeEthInstance.address, tokenAmount*100, lastNonce + nonceIncrease);

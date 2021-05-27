@@ -4,14 +4,14 @@ describe("Bridge Binance Side", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, bridgeBsc, bridgeBscInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
-    tokenAmount = 50, nonceIncrease = 1, decimals = 18;
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000";
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
         [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
 
         token = await ethers.getContractFactory("BridgeMintableToken");
-        token = await token.deploy("","",decimals);
+        token = await token.deploy("", "", decimals);
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -97,7 +97,26 @@ describe("Bridge Binance Side", function () {
                     .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
 
+            it("Should not mint tokens (by non bridge contract)", async function () {
+                // current bridge contract address is chainportCongress
+                let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
+                await expect(bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease))
+                    .to.be.revertedWith("Only Bridge contract can mint new tokens.");
+            });
+
+            it("Should not change the bridge contract address (by user)", async function() {
+                expect(await token.binanceBridgeContract()).to.equal(chainportCongress.address);
+                await expect(token.connect(user1).setBinanceBridgeContract(maintainer.address)).to.be.reverted;
+            });
+
+            it("Should change the bridge contract address", async function() {
+                expect(await token.binanceBridgeContract()).to.equal(chainportCongress.address);
+                await token.connect(chainportCongress).setBinanceBridgeContract(bridgeBscInstance.address);
+                expect(await token.binanceBridgeContract()).to.equal(bridgeBscInstance.address);
+            });
+
             it("Should mint tokens", async function () {
+                await token.connect(chainportCongress).setBinanceBridgeContract(bridgeBscInstance.address);
                 let lastNonce = await bridgeBscInstance.functionNameToNonce("mintTokens");
                 await bridgeBscInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
             });
@@ -183,6 +202,51 @@ describe("Bridge Binance Side", function () {
                 await expect(bridgeBscInstance.connect(maintainer).burnTokens(
                     await bridgeBscInstance.erc20ToBep20Address(token.address), 1))
                     .to.be.revertedWith("BurnTokens: Token is not created by the bridge.");
+            });
+        });
+
+        describe("Delete Minted Tokens", function () {
+
+            it("Should not delete minted tokens (by user))", async function () {
+                bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
+                expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+                bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
+                expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
+
+                await expect(bridgeBscInstance.connect(user1).deleteMintedTokens([token.address]))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+            });
+
+            it("Should delete minted tokens (by maintainer))", async function () {
+                bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
+                expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
+                await bridgeBscInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+                bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
+                expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
+
+                newToken = await ethers.getContractFactory("BridgeMintableToken");
+                newToken = await newToken.deploy("Fake Token", "FKT", decimals);
+
+                bscNewTokenAddr = await bridgeBscInstance.erc20ToBep20Address(newToken.address);
+                expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
+                await bridgeBscInstance.connect(maintainer).mintNewToken(newToken.address, "", "", decimals);
+                bscNewTokenAddr = await bridgeBscInstance.erc20ToBep20Address(newToken.address);
+                expect(bscNewTokenAddr.toString()).to.not.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.true;
+
+                await bridgeBscInstance.connect(maintainer).deleteMintedTokens([token.address, newToken.address]);
+                bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
+                expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
+                bscNewTokenAddr = await bridgeBscInstance.erc20ToBep20Address(newToken.address);
+                expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
+                expect(await bridgeBscInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
             });
         });
     });
