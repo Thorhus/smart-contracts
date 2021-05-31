@@ -94,6 +94,11 @@ describe("Bridge Ethereum Side", function () {
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
             });
 
+            it("Should protect the asset (by maintainer)", async function () {
+                await bridgeEthInstance.connect(maintainer).protectAssetByMaintainer(token.address);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
+            });
+
             it("Should remove protection on the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
