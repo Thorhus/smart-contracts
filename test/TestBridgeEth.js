@@ -65,18 +65,23 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Check if values are set properly", function () {
+
             it("Maintainers registry is set properly", async function () {
                 expect(await bridgeEthInstance.maintainersRegistry()).to.equal(maintainersRegistryInstance.address);
             });
+
             it("Chainport congress address is set properly", async function () {
                 expect(await bridgeEthInstance.chainportCongress()).to.equal(chainportCongress.address);
             });
+
             it("Validator address is set properly", async function () {
                 expect(await bridgeEthInstance.signatureValidator()).to.equal(validatorInstance.address);
             });
+
             it("Freeze length is set properly", async function () {
                 expect(await bridgeEthInstance.freezeLength()).to.equal(freezeLength);
             });
+
             it("Safety threshold is set properly", async function () {
                 expect(await bridgeEthInstance.safetyThreshold()).to.equal(safetyThreshold);
             });
@@ -86,6 +91,11 @@ describe("Bridge Ethereum Side", function () {
 
             it("Should protect the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
+                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
+            });
+
+            it("Should protect the asset (by maintainer)", async function () {
+                await bridgeEthInstance.connect(maintainer).protectAssetByMaintainer(token.address);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
             });
 
@@ -297,6 +307,7 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Release Tokens Time Lock Passed", function () {
+
                 xit("Should release tokens if time lock passed", async function () {
                     await bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
                         "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
@@ -338,6 +349,7 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Release Tokens", function () {
+
                 xit("Should release tokens", async function () {
                     await bridgeEthInstance.connect(maintainer).releaseTokens(
                         "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature

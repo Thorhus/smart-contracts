@@ -59,55 +59,118 @@ function propose(
 
 ### Maintainer bridge freezing
 
-- _**Step 1:**_ Select proper method to execute in destination contract
+- _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
 - _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
-- _**Step 3:**_ Call function:
+- _**Step 3:**_ Call the following function through etherscan:
 ``` 
 function freezeBridge() 
 ```
-<br/>
-- No arguments
+
+Function takes no arguments
 
 ---
 
 ### Congress bridge unfreezing
 
-- _**Step 1:**_ Select proper method to execute in destination contract
-- _**Step 2:**_ Call function:
+- _**Step 1:**_ Select proper method to execute (unfreezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
+- _Step 1.1:_ Keep in mind that given function should be called only when the bridge is already frozen
+- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
+- _Step 2.1:_ First take a look at the function
 ``` 
 function unfreezeBridge() 
 ```
+Function takes no arguments
 
-- No arguments
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
+- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
+- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'unfreezeBridge()')
+- _Step 2.5:_ Since the function has no arguments we do not need to generate calldata (In the place for calldata argument just put 0x)
+- _Step 2.6:_ Description should be action that we want to perform (Unfreeze the bridge) 
 
-- _**Step 3:**_ Congress members can now vote (preferably through etherscan) in order to execute the function
+- _**Step 3:**_ Put everything together like bellow:
+```
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
+values: [0]
+signatures: ["unfreezeBridge()"]
+calldatas: [0x]
+description: ["Unfreeze the bridge."]
+```
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
+- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
+- _**Step 6:**_ Members can vote
+- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
 
 ---
 
 ### Congress approve locked withdraw
-- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
-- _**Step 2:**_ Call function:
+- _**Step 1:**_ Select proper method to execute (approveWithdrawalAndTransferFunds) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
+- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
+- _Step 2.1:_ First take a look at the function
 ```
 function approveWithdrawalAndTransferFunds(
         address token
     )
 ```
 
-- _Step 2.1:_ token is address of the token we want to withdraw
+_Args:_ token is address of the token we want to withdraw
 
-- _**Step 3:**_ Same as on 'Congress bridge unfreezing' paragraph congress members should perform voting in order to execute function
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
+- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
+- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'approveWithdrawalAndTransferFunds(address)')
+- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
+``` $ node encodedParams.js 'address' 'TOKEN_ADDRESS'  ``` 
+- _Step 2.6:_ Description should be action that we want to perform (Approve withdrawal and transfer funds.) 
+
+- _**Step 3:**_ Put everything together like bellow:
+```
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
+values: [0]
+signatures: ["approveWithdrawalAndTransferFunds(address)"]
+calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
+description: ["Approve withdrawal and transfer funds."]
+```
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
+- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
+- _**Step 6:**_ Members can vote
+- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
+
 ---
 
 ### Congress reject locked withdraw
-- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
-- _**Step 2:**_ Call function:
+- _**Step 1:**_ Select proper method to execute (rejectWithdrawal) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
+- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
+- _Step 2.1:_ First take a look at the function
 ```
 function rejectWithdrawal(
         address token
     )
 ```
 
-- _Step 2.1:_ token is address of the token we want to reject withdrawal of
+_Args:_ token is address of the token we want to withdraw
 
-- _**Step 3:**_ Same as on 'Congress bridge unfreezing' and 'Approve locked withdraw' paragraph congress members should perform voting in order to execute function
+- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
+- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
+- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'rejectWithdrawal(address)')
+- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to reject withdraw of):
+``` $ node encodedParams.js 'address' 'TOKEN_ADDRESS'  ``` 
+- _Step 2.6:_ Description should be action that we want to perform (Reject token withdrawal.) 
+
+- _**Step 3:**_ Put everything together like bellow:
+```
+targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
+values: [0]
+signatures: ["rejectWithdrawal(address)"]
+calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
+description: ["Reject token withdrawal."]
+```
+- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
+- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
+- _**Step 6:**_ Members can vote
+- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
+
 ---
+
+### Find contracts on etherscan
+- _**ChainportBridgeEth ->**_ https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
+- _**ChainportBridgeBsc ->**_ https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
+- _**ChainportCongress ->**_ https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1

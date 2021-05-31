@@ -93,7 +93,6 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         isFrozen = false;
     }
 
-    // Function to mark specific asset as protected
     function setAssetProtection(
         address tokenAddress,
         bool _isProtected
@@ -103,6 +102,16 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     {
         isAssetProtected[tokenAddress] = _isProtected;
         emit AssetProtectionChanged(tokenAddress, _isProtected);
+    }
+
+    function protectAssetByMaintainer(
+        address tokenAddress
+    )
+    public
+    onlyMaintainer
+    {
+        isAssetProtected[tokenAddress] = true;
+        emit AssetProtectionChanged(tokenAddress, true);
     }
 
     // Function to set timelock
