@@ -22,20 +22,20 @@
         "ChainportBridgeBsc": "0xab4D1c132896FBadf01612343f3217e3f146Cc16"
     },
     "ropstenStaging": {
-        "ChainportCongress": "0x02827Cef5B2d219D5Ba8C55233b74D9b8387e1CB",
-        "ChainportCongressMembersRegistry": "0xeFe2b4B5B8213641Fd702c64220C3550E103C689",
-        "ChainportToken": "0x36895520d797517F61aaCe2629DB545ec410cCA2",
-        "MaintainersRegistry": "0xF3ff5F20b1B000D7F7F082bfC0088871cd938189",
-        "Validator": "0x2a79De7adfd493F32D0DEf0fa18F3be25e6D171a",
-        "ChainportBridgeEth": "0xa5dE0C64E1807221eC3B637b05BBB61Fd2C72d69"
+        "ChainportCongress": "0x131dB3b4393619a4064D6540732524C77239d1bb",
+        "ChainportCongressMembersRegistry": "0xD7cC7FA9e491E6B18e684A09B28EC0A9c79DEDB7",
+        "ChainportToken": "0x552cC67fA85f0D2d7070384f09B0B6922f73b57F",
+        "MaintainersRegistry": "0xf5a9fBF923a44fCa773bB82ab4102375836cEd72",
+        "Validator": "0xBFEf17e25B7d848F080BB75Bb22D2Cb64e19e167",
+        "ChainportBridgeEth": "0xD9A044db0A5aC84bc7908Af8a25Ca84389a05af5"
     },
     "binancetestStaging": {
-        "ChainportCongress": "0xd2C43c16bEfb1eF520F3fF1d3175f29F1077cE8f",
-        "ChainportCongressMembersRegistry": "0xC443E88b04CBE9029F0AB0bFA33Ac42A4628ce50",
-        "ChainportToken": "0xFc63095D949B5A6E8A1Bb28f8722bF3bc9Fb41D6",
-        "MaintainersRegistry": "0x6B18168bAF301EF8546BF83d294be87c94B18ada",
-        "Validator": "0x05d50281B45e1c5C84283186fD34abf4c4f5b38D",
-        "ChainportBridgeBsc": "0xB1f97Ad27d885D8fA59654C5d62B5B2BAbE4E982"
+        "ChainportCongress": "0x660dEB7a33bFe78058CEe83Fd1954353958F3a21",
+        "ChainportCongressMembersRegistry": "0x21AEbe5B5b7A33930b3c5c10fbd77117501a9552",
+        "ChainportToken": "0x42D7c7684825bBaA9741CACA45fbB502BE05F662",
+        "MaintainersRegistry": "0x3a535d5C5094420A6603560952f6b28d56434F48",
+        "Validator": "0x104F3152D8ebFC3f679392977356962Ff36566aC",
+        "ChainportBridgeBsc": "0x2245a40c3e4714d831eb651a86d003Ecc47848e4"
     },
     "mainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
