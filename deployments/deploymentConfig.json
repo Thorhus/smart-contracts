@@ -23,6 +23,8 @@
     "tokenName" : "Chainport Token",
     "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
     "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
@@ -44,6 +46,8 @@
     "tokenName" : "Chainport Token",
     "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
     "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
