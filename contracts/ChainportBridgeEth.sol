@@ -51,7 +51,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     event AssetProtectionChanged(address asset, bool isProtected);
     event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
-    event AssetFreezeStateChanged(address asset, bool isAssetFrozen);
+    event AssetFrozen(address asset, bool isAssetFrozen);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -104,7 +104,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isAssetFrozen[tokenAddress] = _isFrozen;
-        emit AssetFreezeStateChanged(tokenAddress, _isFrozen);
+        emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
     function freezeAssetByMaintainer(
@@ -114,7 +114,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isAssetFrozen[tokenAddress] = true;
-        emit AssetFreezeStateChanged(tokenAddress, true);
+        emit AssetFrozen(tokenAddress, true);
     }
 
     function setAssetProtection(
