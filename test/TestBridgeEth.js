@@ -119,6 +119,45 @@ describe("Bridge Ethereum Side", function () {
             });
         });
 
+        describe("Asset freezing", function () {
+
+            it("Should freeze the asset (by congress)", async function () {
+                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
+            });
+
+            it("Should freeze the asset (by maintainer)", async function () {
+                await bridgeEthInstance.connect(maintainer).freezeAssetByMaintainer(token.address);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
+            });
+
+            it("Should unfreeze the asset (by congress)", async function () {
+                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
+                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, false);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(false);
+            });
+
+            it("Should not freeze the asset (by user)", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeAsset(token.address, true))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+
+            it("Should not unfreeze the asset (by user)", async function () {
+                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
+                await expect(bridgeEthInstance.connect(user1).freezeAsset(token.address, false))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+
+            it("Should not unfreeze the asset (by maintainer)", async function () {
+                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
+                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
+                await expect(bridgeEthInstance.connect(maintainer).freezeAsset(token.address, false))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
         describe("Bridge Freezing Operations", function () {
 
             it("Should freeze the bridge (by maintainer)", async function () {
