@@ -36,7 +36,8 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     uint256 public safetyThreshold;
     // Length of the timeLock
     uint256 public freezeLength;
-
+    // Mapping for freezing the assets
+    mapping(address => bool) public isAssetFrozen;
 
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
@@ -49,6 +50,8 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     event TimeLockLengthChanged(uint256 newTimeLockLength);
     event AssetProtectionChanged(address asset, bool isProtected);
     event SafetyThresholdChanged(uint256 newSafetyThreshold);
+
+    event AssetFreezeStateChanged(address asset, bool isAssetFrozen);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -93,6 +96,27 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         isFrozen = false;
     }
 
+    function freezeAsset(
+        address tokenAddress,
+        bool _isFrozen
+    )
+    public
+    onlyChainportCongress
+    {
+        isAssetFrozen[tokenAddress] = _isFrozen;
+        emit AssetFreezeStateChanged(tokenAddress, _isFrozen);
+    }
+
+    function freezeAssetByMaintainer(
+        address tokenAddress
+    )
+    public
+    onlyMaintainer
+    {
+        isAssetFrozen[tokenAddress] = true;
+        emit AssetFreezeStateChanged(tokenAddress, true);
+    }
+
     function setAssetProtection(
         address tokenAddress,
         bool _isProtected
@@ -125,7 +149,6 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         emit TimeLockLengthChanged(length);
     }
 
-
     // Function to set minimal value that is considered important by quantity
     function setThreshold(
         uint256 _safetyThreshold
@@ -138,7 +161,6 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         safetyThreshold = _safetyThreshold;
         emit SafetyThresholdChanged(_safetyThreshold);
     }
-
 
     function freezeToken(
         address token,
