@@ -6,36 +6,36 @@
         "ChainportBridgeEth": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
     },
     "ropsten": {
-        "ChainportCongress": "0xb14c988B9060DeADa94623aA0f58AfAFBFF0d022",
-        "ChainportCongressMembersRegistry": "0x0866f8b35407436000C71b5Ac8F92311E7E1C014",
-        "ChainportToken": "0xBA89E8E42F75d25555e5cCaf844E2A49A47EddB8",
-        "MaintainersRegistry": "0x4ef7a68485D736972F5C01fD858EF7d517c69CCD",
-        "Validator": "0xeE1b5D8dD809E2E6B650E5771c11F22D43E08780",
-        "ChainportBridgeEth": "0x3bE23dB8B1ecf88Bfc208EC774dAb0e923b972D7"
+        "ChainportCongress": "0x28f0178A20f8D423c139188a09FdCCC70Ab1414F",
+        "ChainportCongressMembersRegistry": "0xDA61b22c426966768F017e40A99aE570830Dc99c",
+        "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
+        "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
+        "Validator": "0x570BbC3cfD1846fb160D751F41ADaB1188d560C8",
+        "ChainportBridgeEth": "0x1b4351a75DC03031fe4d2Ffe5bCdF134a776Ec23"
     },
     "binancetest": {
-        "ChainportCongress": "0x6259389910bdF2dB1bb694867c4293FE62827103",
-        "ChainportCongressMembersRegistry": "0x0116ab8A5206F420e6288d62B7767E6a37fC1767",
-        "ChainportToken": "0x3DB37E956Cce5d3FD31Ea7EbaA0E5C0e00AD5Be9",
-        "MaintainersRegistry": "0x757C6CA12Ba1b8625D3B1A42b0f643943c94dDF2",
-        "Validator": "0x98e6AcD6D9181660375e601c84655DdDa7Bf4ae5",
-        "ChainportBridgeBsc": "0xab4D1c132896FBadf01612343f3217e3f146Cc16"
+        "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
+        "ChainportCongressMembersRegistry": "0x6381d6d8377393231988C314052EE216199e7641",
+        "ChainportToken": "0xb965b288fb7d225c185Ac0e288ed291d2F923eEb",
+        "MaintainersRegistry": "0x4e89b05487f89c3f2c03e8e3215284A7f4c59ae9",
+        "Validator": "0x7303CD0e18B657dF967E039AA9E5a9034A5d9F40",
+        "ChainportBridgeBsc": "0xD0F3b585fCd0605CaD520f6d41ae890E4666bb5f"
     },
     "ropstenStaging": {
-        "ChainportCongress": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
-        "ChainportCongressMembersRegistry": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
-        "ChainportToken": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
-        "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
-        "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportBridgeEth": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
+        "ChainportCongress": "0x02827Cef5B2d219D5Ba8C55233b74D9b8387e1CB",
+        "ChainportCongressMembersRegistry": "0xeFe2b4B5B8213641Fd702c64220C3550E103C689",
+        "ChainportToken": "0x36895520d797517F61aaCe2629DB545ec410cCA2",
+        "MaintainersRegistry": "0xF3ff5F20b1B000D7F7F082bfC0088871cd938189",
+        "Validator": "0x2a79De7adfd493F32D0DEf0fa18F3be25e6D171a",
+        "ChainportBridgeEth": "0xa5dE0C64E1807221eC3B637b05BBB61Fd2C72d69"
     },
     "binancetestStaging": {
-        "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
-        "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
-        "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
-        "MaintainersRegistry": "0x326eB9271F0427c31bD646381a59E04713Ab6FB2",
-        "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportBridgeBsc": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A"
+        "ChainportCongress": "0xd2C43c16bEfb1eF520F3fF1d3175f29F1077cE8f",
+        "ChainportCongressMembersRegistry": "0xC443E88b04CBE9029F0AB0bFA33Ac42A4628ce50",
+        "ChainportToken": "0xFc63095D949B5A6E8A1Bb28f8722bF3bc9Fb41D6",
+        "MaintainersRegistry": "0x6B18168bAF301EF8546BF83d294be87c94B18ada",
+        "Validator": "0x05d50281B45e1c5C84283186fD34abf4c4f5b38D",
+        "ChainportBridgeBsc": "0xB1f97Ad27d885D8fA59654C5d62B5B2BAbE4E982"
     },
     "mainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
