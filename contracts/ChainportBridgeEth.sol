@@ -232,6 +232,8 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
                 require(result, "Transfer did not go through.");
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
+                emit WithdrawalApproved(token, p.beneficiary, p.amount);
+
                 // Clear up the state and remove pending flag
                 delete tokenToPendingWithdrawal[token];
                 isTokenHavingPendingWithdrawal[token] = false;
