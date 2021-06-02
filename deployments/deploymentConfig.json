@@ -1,7 +1,7 @@
 {
   "local": {
-    "tokenName" : "Bridge Token",
-    "tokenSymbol" : "BRD",
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
