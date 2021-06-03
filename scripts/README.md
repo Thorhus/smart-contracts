@@ -24,6 +24,17 @@ $ node encodeParams.js 'address,uint256' '0xf3B39c28bF4c5c13346eEFa8F90e88B78A61
 
 ---
 
+### upgradeContract.js
+
+- First and only argument is name of contract we want to upgrade
+
+- Example of upgrading ChainportBridgeEth contract:
+```angular2html
+$ node upgradeContract.js 'ChainportBridgeEth'
+```
+
+---
+
 ### Congress submit proposal and vote
 
 - _**Step 1:**_ Select method to execute and destination contract
