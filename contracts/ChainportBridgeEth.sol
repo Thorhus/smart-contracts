@@ -299,16 +299,16 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         require(isTokenHavingPendingWithdrawal[token] == true);
         // Get current pending withdrawal attempt
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
+        // Clear up the state and remove pending flag
+        delete tokenToPendingWithdrawal[token];
+        isTokenHavingPendingWithdrawal[token] = false;
+
         // Transfer funds to user
         bool result = IERC20(token).transfer(p.beneficiary, p.amount);
         require(result, "Transfer did not go through.");
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
-
-        // Clear up the state and remove pending flag
-        delete tokenToPendingWithdrawal[token];
-        isTokenHavingPendingWithdrawal[token] = false;
     }
 
     // Function to reject withdrawal from congress
