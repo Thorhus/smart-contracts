@@ -4,6 +4,7 @@ require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 require('dotenv').config();
+require("solidity-coverage");
 
 const { generateTenderlySlug } = require('./scripts/helpers/helpers');
 
