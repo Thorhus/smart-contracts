@@ -10,8 +10,8 @@ async function main() {
     const proxies = getSavedContractProxies()[hre.network.name];
     let contractName = 'ChainportBridgeEth';
 
-    const contract = await ethers.getContractFactory(contractName);
-    const upgradedContract = await upgrades.upgradeProxy(proxies[contractName], contract);
+    // const contract = await ethers.getContractFactory(contractName);
+    // const upgradedContract = await upgrades.upgradeProxy(proxies[contractName], contract);
 
     const admin = await upgrades.admin.getInstance();
 
