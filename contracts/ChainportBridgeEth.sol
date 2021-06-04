@@ -228,15 +228,15 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
                 bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary, nonce);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
+                // Clear up the state and remove pending flag
+                delete tokenToPendingWithdrawal[token];
+                isTokenHavingPendingWithdrawal[token] = false;
+
                 bool result = IERC20(token).transfer(p.beneficiary, p.amount);
                 require(result, "Transfer did not go through.");
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 emit WithdrawalApproved(token, p.beneficiary, p.amount);
-
-                // Clear up the state and remove pending flag
-                delete tokenToPendingWithdrawal[token];
-                isTokenHavingPendingWithdrawal[token] = false;
             }
         } else {
             revert("Invalid function call");
