@@ -40,6 +40,24 @@ describe('ChainportToken:ERC20', () => {
         await setupContractAndAccounts()
     })
 
+    describe('name', () => {
+        it('returns token name', async () => {
+            (await chainportToken.name()).should.equal(config['local'].tokenName)
+        })
+    })
+
+    describe('symbol', () => {
+        it('returns token symbol', async () => {
+            (await chainportToken.symbol()).should.equal(config['local'].tokenSymbol)
+        })
+    })
+
+    describe('decimals', () => {
+        it('returns token decimals', async () => {
+            (await chainportToken.decimals()).should.equal(18)
+        })
+    })
+
     describe('totalSupply', () => {
         it('returns the total amount of tokens', async () => {
             (await chainportToken.totalSupply()).should.equal(INITIAL_SUPPLY)
@@ -59,11 +77,35 @@ describe('ChainportToken:ERC20', () => {
             })
         })
     })
+
+    describe('burn', () => {
+        it('should not burn more than account balance', async () => {
+            let oldBalance = await chainportToken.balanceOf(ownerAddr)
+            await expect(chainportToken.burn(oldBalance.add(unitTokenAmount))).to.be.revertedWith("ERC20: burn amount exceeds balance")
+        })
+
+        it('burn tokens', async () => {
+            let oldBalance = await chainportToken.balanceOf(ownerAddr)
+            await chainportToken.burn(unitTokenAmount);
+            let newBalance = await chainportToken.balanceOf(ownerAddr)
+            expect(newBalance.add(unitTokenAmount)).to.be.equal(oldBalance)
+            let totalSupply = await chainportToken.totalSupply();
+            expect(totalSupply.add(unitTokenAmount)).to.be.equal(INITIAL_SUPPLY)
+        })
+    })
 })
 
 describe('ChainportToken:ERC20:transfer', () => {
     before('setup ChainportToken contract', async () => {
         await setupContractAndAccounts()
+    })
+
+    describe('when the sender is invalid address', () => {
+        it('reverts', async () => {
+            expect(
+                await isEthException(chainportToken.transfer(ZERO_ADDRESS, overdraftAmount))
+            ).to.be.true
+        })
     })
 
     describe('when the sender does NOT have enough balance', () => {
@@ -341,6 +383,40 @@ describe('ChainportToken:ERC20:increaseAllowance', () => {
                     expect(r.events[0].args.owner).to.equal(ownerAddr)
                     expect(r.events[0].args.spender).to.equal(anotherAccountAddr)
                     r.events[0].args.value.should.equal(overdraftAmountPlusOne)
+                })
+            })
+        })
+    })
+});
+
+describe('ChainportToken:ERC20:decreaseAllowance', () => {
+    before('setup ChainportToken contract', async () => {
+        await setupContractAndAccounts()
+    })
+
+    describe('when the spender is NOT the zero address', () => {
+        describe('when the sender has enough balance', () => {
+            describe('when there was no approved amount before', () => {
+                before(async () => {
+                    await chainportToken.approve(anotherAccountAddr, transferAmount)
+                    r = await (await chainportToken.decreaseAllowance(anotherAccountAddr, unitTokenAmount)).wait()
+                })
+
+                it('should not decrease allowance more than current allowance', async () => {
+                    let currentAllowance = await chainportToken.allowance(ownerAddr, anotherAccountAddr);
+                    await expect(chainportToken.decreaseAllowance(anotherAccountAddr, currentAllowance.add(unitTokenAmount))).to.be.revertedWith("ERC20: decreased allowance below zero")
+                })
+
+                it('approves the requested amount', async () => {
+                    (await chainportToken.allowance(ownerAddr, anotherAccountAddr)).should.equal(transferAmountMinusOne)
+                })
+
+                it('emits an approval event', async () => {
+                    expect(r.events.length).to.equal(1)
+                    expect(r.events[0].event).to.equal('Approval')
+                    expect(r.events[0].args.owner).to.equal(ownerAddr)
+                    expect(r.events[0].args.spender).to.equal(anotherAccountAddr)
+                    r.events[0].args.value.should.equal(transferAmountMinusOne)
                 })
             })
         })
