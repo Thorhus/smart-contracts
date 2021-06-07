@@ -24,13 +24,21 @@ $ node encodeParams.js 'address,uint256' '0xf3B39c28bF4c5c13346eEFa8F90e88B78A61
 
 ---
 
-### upgradeContract.js
+### How to use contract upgrading scripts (ex. upgradeChainportContract.js)
 
-- First and only argument is name of contract we want to upgrade
-
-- Example of upgrading ChainportBridgeEth contract:
+- __*Step 1:*__ Start node in the project directory using terminal:
 ```angular2html
-$ node upgradeContract.js 'ChainportBridgeEth'
+$ npx hardhat node
+```
+
+
+- __*Step 2:*__ Upgrade contract with hardhat using this template:
+```angular2html
+$ npx hardhat run --network {desired_network_name} scripts/{desired_upgrading_script}
+```
+- __Ex:__ Upgrade ChainportBridgeEth on ropsten network:
+```angular2html
+$ npx hardhat run --network ropsten scripts/upgradeChainportBridgeEth.js
 ```
 
 ---
