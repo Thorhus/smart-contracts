@@ -7,7 +7,7 @@ function sleep(ms) {
 
 async function main() {
     await hre.run('compile');
-    const contractName = 'ChainportBridgeBsc';
+    const contractName = 'ChainportBridgeEth';
     const proxy = getSavedContractProxies()[hre.network.name][contractName];
     const oldImplementation = getSavedContractAddresses()[hre.network.name][contractName];
 
