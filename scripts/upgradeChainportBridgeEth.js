@@ -1,23 +1,37 @@
 const hre = require("hardhat");
-const { hexify, toChainportDenomination } = require('../test/setup');
-const { saveContractAddress , getSavedContractProxies, saveContractProxies } = require('./utils');
-let c = require('../deployments/deploymentConfig.json');
+const { getSavedContractAddresses, saveContractAddress , getSavedContractProxies, saveContractProxies } = require('./utils');
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function main() {
-
     await hre.run('compile');
-    const config = c[hre.network.name];
-    const proxies = getSavedContractProxies()[hre.network.name];
-    let contractName = 'ChainportBridgeEth';
+    const contractName = 'ChainportBridgeBsc';
+    const proxy = getSavedContractProxies()[hre.network.name][contractName];
+    const oldImplementation = getSavedContractAddresses()[hre.network.name][contractName];
 
-    // const contract = await ethers.getContractFactory(contractName);
-    // const upgradedContract = await upgrades.upgradeProxy(proxies[contractName], contract);
+    console.log("Upgrading proxy...");
+    const contract = await ethers.getContractFactory(contractName);
+    await upgrades.upgradeProxy(proxy, contract);
+    let implementation = oldImplementation;
+    console.log("Proxy upgraded.");
 
-    const admin = await upgrades.admin.getInstance();
+    let admin = await upgrades.admin.getInstance();
+    console.log("Waiting for a new block...");
 
-    const implementation = await admin.getProxyImplementation(proxies[contractName]);
+    while(implementation === oldImplementation){
+        await sleep(5000);
+        implementation = await admin.getProxyImplementation(proxy);
+        console.log("Still waiting...")
+    }
+
+    console.log("Block arrived.");
+
+    console.log("Implementation changed successfully: " + '\n' + oldImplementation + " -> " + implementation);
     console.log('New implementation is: ', implementation);
     saveContractAddress(hre.network.name, contractName, implementation);
+    console.log("Upgrade complete!")
 }
 
 // We recommend this pattern to be able to use async/await everywhere
