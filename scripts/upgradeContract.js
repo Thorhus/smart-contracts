@@ -1,17 +1,15 @@
 const hre = require("hardhat");
 const { hexify, toChainportDenomination } = require('../test/setup');
 const { saveContractAddress , getSavedContractProxies, saveContractProxies } = require('./utils')
-let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
 
     let contractName = process.argv[2];
     await hre.run('compile');
-    const config = c[hre.network.name];
     const proxies = getSavedContractProxies()[hre.network.name];
 
     const contract = await ethers.getContractFactory(contractName);
-    const upgradedContract = await upgrades.upgradeProxy(proxies[contractName], contract);
+    await upgrades.upgradeProxy(proxies[contractName], contract);
 
     const admin = await upgrades.admin.getInstance();
 
