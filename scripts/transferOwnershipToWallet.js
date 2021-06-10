@@ -11,6 +11,8 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
     let admin = await upgrades.admin.getInstance();
     await admin.transferOwnership(newOwner);
+    console.log("Ownership transfered to: " + newOwner);
+    console.log("Action completed.");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
