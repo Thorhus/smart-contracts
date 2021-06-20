@@ -18,9 +18,16 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
+    string[] public supportedBlockchains;
+    uint8 public numberOfBlockchains;
+
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
+    event TokensTransfer(address tokenAddress, address issuer, uint256 amount, uint8 chainId);
+
+    event BlockchainAdded(string blockchainName, uint8 chainId);
+    event BlockchainRemoved(string blockchainName, uint8 chianId);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -40,6 +47,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     public
     initializer
     {
+
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
@@ -116,5 +124,47 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
             isCreatedByTheBridge[erc20ToBep20Address[erc20addresses[i]]] = false;
             delete erc20ToBep20Address[erc20addresses[i]];
         }
+    }
+
+    function crossChainTransfer(
+        address bep20Token,
+        uint256 amount,
+        uint8 chainId
+    )
+    public
+    isAmountGreaterThanZero(amount)
+    {
+        require(chainId < numberOfBlockchains && bytes(supportedBlockchains[chainId]).length != 0, "Invalid blockchain ID.");
+
+        require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
+        BridgeMintableToken token = BridgeMintableToken(bep20Token);
+        token.burnFrom(msg.sender, amount);
+
+        emit TokensTransfer(bep20Token, msg.sender, amount, chainId);
+    }
+
+    function addSupportedBlockchain(
+        string memory blockchainName
+    )
+    public
+    onlyMaintainer
+    {
+        require(bytes(blockchainName).length != 0, "Invalid blockchain name");
+
+        supportedBlockchains.push(blockchainName);
+        numberOfBlockchains++;
+
+        emit BlockchainAdded(blockchainName, uint8(supportedBlockchains.length) - 1);
+    }
+
+    function removeSupportedBlockchain(
+        uint8 chainId
+    )
+    public
+    onlyChainportCongress
+    {
+        string memory blockchainName = supportedBlockchains[chainId];
+        delete supportedBlockchains[chainId];
+        emit BlockchainRemoved(blockchainName, chainId);
     }
 }
