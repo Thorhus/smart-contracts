@@ -18,7 +18,13 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
-    string[] public supportedBlockchains;
+    struct Network {
+        string chainName;
+        uint8 chainId;
+    }
+
+    mapping (string => bool) isBlockchainSupported;
+
     uint8 public numberOfBlockchains;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
