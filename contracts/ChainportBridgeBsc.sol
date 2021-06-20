@@ -21,9 +21,11 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     struct Network {
         string chainName;
         uint8 chainId;
+        bool isSupported;
     }
 
-    mapping (string => bool) isBlockchainSupported;
+    // uint represents local id, starts from 1
+    mapping (uint => Network) networks;
 
     uint8 public numberOfBlockchains;
 
