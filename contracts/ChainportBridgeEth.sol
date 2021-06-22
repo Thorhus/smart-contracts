@@ -39,6 +39,13 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
 
+    // Network mappings
+    mapping(uint8 => string) public networkNameById;
+    mapping(uint8 => bool) public isNetworkActivated;
+
+    // Number of networks used also for id
+    uint8 public numberOfNetworks;
+
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
     event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
@@ -52,6 +59,12 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
     event AssetFrozen(address asset, bool isAssetFrozen);
+
+    event NetworkAdded(string networkName, uint8 networkId);
+    event NetworkActivated(string networkName, uint8 networkId);
+    event NetworkDeactivated(string networkName, uint8 networkId);
+
+    event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint8 networkId);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -336,5 +349,56 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     // Get contract balance of specific token
     function getTokenBalance(address token) internal view returns (uint256) {
         return IERC20(token).balanceOf(address(this));
+    }
+
+    function depositTokens(
+        address token,
+        uint256 amount,
+        uint8 networkId
+    )
+    public
+    isNotFrozen
+    onlyIfAmountGreaterThanZero(amount)
+    {
+        IERC20 ercToken = IERC20(token);
+
+        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
+        require(result, "Transfer did not go through.");
+
+        emit TokensDeposited(token, msg.sender, amount, networkId);
+    }
+
+    function addNetwork(
+        string memory networkName
+    )
+    public
+    onlyMaintainer
+    {
+        // Using numberOfNetworks as an id for new network
+        networkNameById[numberOfNetworks] = networkName;
+        isNetworkActivated[numberOfNetworks] = true;
+
+        emit NetworkAdded(networkName, numberOfNetworks);
+        numberOfNetworks++;
+    }
+
+    function activateSupportedNetwork(
+        uint8 networkId
+    )
+    public
+    onlyMaintainer
+    {
+        isNetworkActivated[networkId] = true;
+        emit NetworkActivated(networkNameById[networkId], networkId);
+    }
+
+    function deactivateSupportedNetwork(
+        uint8 networkId
+    )
+    public
+    onlyChainportCongress
+    {
+        isNetworkActivated[networkId] = false;
+        emit NetworkDeactivated(networkNameById[networkId], networkId);
     }
 }

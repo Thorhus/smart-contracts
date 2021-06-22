@@ -11,31 +11,28 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
-    mapping(address => address) public erc20ToBep20Address;
+    mapping(address => address) public erc20ToBridgeTokenAddress;
     mapping(string => uint256) public functionNameToNonce;
     mapping(address => bool) public isCreatedByTheBridge;
 
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
-    struct Network {
-        string chainName;
-        uint8 chainId;
-        bool isSupported;
-    }
+    // Network mappings
+    mapping(uint8 => string) public networkNameById;
+    mapping(uint8 => bool) public isNetworkActivated;
 
-    // uint represents local id, starts from 1
-    mapping (uint => Network) networks;
-
-    uint8 public numberOfBlockchains;
+    // Number of networks used also for id
+    uint8 public numberOfNetworks;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
-    event TokensTransfer(address tokenAddress, address issuer, uint256 amount, uint8 chainId);
+    event TokensTransfer(address bridgeTokenAddress, address issuer, uint256 amount, uint8 networkId);
 
-    event BlockchainAdded(string blockchainName, uint8 chainId);
-    event BlockchainRemoved(string blockchainName, uint8 chianId);
+    event NetworkAdded(string networkName, uint8 networkId);
+    event NetworkActivated(string networkName, uint8 networkId);
+    event NetworkDeactivated(string networkName, uint8 networkId);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -83,11 +80,11 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     onlyMaintainer
     isNotFrozen
     {
-        require(erc20ToBep20Address[erc20_address] == address(0), "MintNewToken: Token already exists.");
+        require(erc20ToBridgeTokenAddress[erc20_address] == address(0), "MintNewToken: Token already exists.");
 
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
-        erc20ToBep20Address[erc20_address] = address(newToken);
+        erc20ToBridgeTokenAddress[erc20_address] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
         emit TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
@@ -129,50 +126,59 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     // Function to clear up the state and delete mistakenly minted tokens.
     function deleteMintedTokens(address [] memory erc20addresses) public onlyMaintainer {
         for(uint i = 0; i < erc20addresses.length; i++) {
-            isCreatedByTheBridge[erc20ToBep20Address[erc20addresses[i]]] = false;
-            delete erc20ToBep20Address[erc20addresses[i]];
+            isCreatedByTheBridge[erc20ToBridgeTokenAddress[erc20addresses[i]]] = false;
+            delete erc20ToBridgeTokenAddress[erc20addresses[i]];
         }
     }
 
     function crossChainTransfer(
-        address bep20Token,
+        address bridgeToken,
         uint256 amount,
-        uint8 chainId
+        uint8 networkId
     )
     public
     isAmountGreaterThanZero(amount)
     {
-        require(chainId < numberOfBlockchains && bytes(supportedBlockchains[chainId]).length != 0, "Invalid blockchain ID.");
+        require(isNetworkActivated[networkId] == true, "Invalid blockchain ID.");
 
-        require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
-        BridgeMintableToken token = BridgeMintableToken(bep20Token);
+        require(isCreatedByTheBridge[bridgeToken], "BurnTokens: Token is not created by the bridge.");
+        BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
 
-        emit TokensTransfer(bep20Token, msg.sender, amount, chainId);
+        emit TokensTransfer(bridgeToken, msg.sender, amount, networkId);
     }
 
-    function addSupportedBlockchain(
-        string memory blockchainName
+    function addNetwork(
+        string memory networkName
     )
     public
     onlyMaintainer
     {
-        require(bytes(blockchainName).length != 0, "Invalid blockchain name");
+        // Using numberOfNetworks as an id for new network
+        networkNameById[numberOfNetworks] = networkName;
+        isNetworkActivated[numberOfNetworks] = true;
 
-        supportedBlockchains.push(blockchainName);
-        numberOfBlockchains++;
-
-        emit BlockchainAdded(blockchainName, uint8(supportedBlockchains.length) - 1);
+        emit NetworkAdded(networkName, numberOfNetworks);
+        numberOfNetworks++;
     }
 
-    function removeSupportedBlockchain(
-        uint8 chainId
+    function activateSupportedNetwork(
+        uint8 networkId
+    )
+    public
+    onlyMaintainer
+    {
+        isNetworkActivated[networkId] = true;
+        emit NetworkActivated(networkNameById[networkId], networkId);
+    }
+
+    function deactivateSupportedNetwork(
+        uint8 networkId
     )
     public
     onlyChainportCongress
     {
-        string memory blockchainName = supportedBlockchains[chainId];
-        delete supportedBlockchains[chainId];
-        emit BlockchainRemoved(blockchainName, chainId);
+        isNetworkActivated[networkId] = false;
+        emit NetworkDeactivated(networkNameById[networkId], networkId);
     }
 }
