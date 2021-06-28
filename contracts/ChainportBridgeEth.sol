@@ -194,7 +194,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Already used signature.");
         isSignatureUsed[signature] = true;
 
-        require(nonce == functionNameToNonce["mintTokens"] + 1);
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
         functionNameToNonce["mintTokens"] = nonce;
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
@@ -217,6 +217,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     {
         require(isSignatureUsed[signature] == false, "Signature already used");
         isSignatureUsed[signature] = true;
+
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
+        functionNameToNonce["mintTokens"] = nonce;
 
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
@@ -255,6 +258,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
         require(isSignatureUsed[signature] == false, "Signature already used");
         isSignatureUsed[signature] = true;
+
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
+        functionNameToNonce["mintTokens"] = nonce;
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
