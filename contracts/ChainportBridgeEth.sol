@@ -190,6 +190,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        delete tokenToPendingWithdrawal[token];
 
         require(isSignatureUsed[signature] == false, "Already used signature.");
         isSignatureUsed[signature] = true;
