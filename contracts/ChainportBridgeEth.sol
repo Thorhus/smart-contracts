@@ -158,6 +158,8 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     {
         // This is representing % of every asset on the contract
         // Example: 32% is safety threshold
+        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
+
         safetyThreshold = _safetyThreshold;
         emit SafetyThresholdChanged(_safetyThreshold);
     }
