@@ -2,15 +2,15 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/proxy/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "./libraries/SafeMath.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
 contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     IValidator public signatureValidator;
 
@@ -170,10 +170,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        IERC20 ercToken = IERC20(token);
-
-        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -201,8 +198,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
 
-        bool result = IERC20(token).transfer(beneficiary, amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransfer(beneficiary, amount);
 
         emit TokensUnfreezed(token, beneficiary, amount);
     }
@@ -232,8 +228,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
                 delete tokenToPendingWithdrawal[token];
                 isTokenHavingPendingWithdrawal[token] = false;
 
-                bool result = IERC20(token).transfer(p.beneficiary, p.amount);
-                require(result, "Transfer did not go through.");
+                IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 emit WithdrawalApproved(token, p.beneficiary, p.amount);
@@ -281,8 +276,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
-            bool result = IERC20(token).transfer(beneficiary, amount);
-            require(result, "Transfer did not go through.");
+            IERC20(token).safeTransfer(beneficiary, amount);
 
             emit TokensUnfreezed(token, beneficiary, amount);
         }
@@ -304,8 +298,8 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         isTokenHavingPendingWithdrawal[token] = false;
 
         // Transfer funds to user
-        bool result = IERC20(token).transfer(p.beneficiary, p.amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransfer(p.beneficiary, p.amount);
+
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
