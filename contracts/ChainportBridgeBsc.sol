@@ -131,6 +131,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to burn tokens to selected network bridge
     function crossChainTransfer(
         address bridgeToken,
         uint256 amount,
@@ -139,15 +140,16 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     public
     isAmountGreaterThanZero(amount)
     {
-        require(isNetworkActivated[networkId] == true, "Invalid blockchain ID.");
+        require(isNetworkActivated[networkId] == true, "Invalid network ID.");
 
-        require(isCreatedByTheBridge[bridgeToken], "BurnTokens: Token is not created by the bridge.");
+        require(isCreatedByTheBridge[bridgeToken], "CrossChainTransfer: Token is not created by the bridge.");
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
 
         emit TokensTransfer(bridgeToken, msg.sender, amount, networkId);
     }
 
+    // Function to add new network
     function addNetwork(
         string memory networkName
     )
@@ -162,7 +164,8 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
         numberOfNetworks++;
     }
 
-    function activateSupportedNetwork(
+    // Function to activate selected network
+    function activateNetwork(
         uint8 networkId
     )
     public
@@ -172,7 +175,8 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
         emit NetworkActivated(networkNameById[networkId], networkId);
     }
 
-    function deactivateSupportedNetwork(
+    // Function to deactivate selected network
+    function deactivateNetwork(
         uint8 networkId
     )
     public
