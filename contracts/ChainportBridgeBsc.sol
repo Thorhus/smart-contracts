@@ -18,21 +18,16 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     // Mapping if bridge is Frozen
     bool public isFrozen;
 
-    // Network mappings
-    mapping(uint8 => string) public networkNameById;
-    mapping(uint8 => bool) public isNetworkActivated;
-
-    // Number of networks used also for id
-    uint8 public numberOfNetworks;
+    // Network activity state mapping
+    mapping(uint16 => bool) public isNetworkActive;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
-    event TokensTransfer(address bridgeTokenAddress, address issuer, uint256 amount, uint8 networkId);
+    event TokensTransfer(address bridgeTokenAddress, address issuer, uint256 amount, uint16 networkId);
 
-    event NetworkAdded(string networkName, uint8 networkId);
-    event NetworkActivated(string networkName, uint8 networkId);
-    event NetworkDeactivated(string networkName, uint8 networkId);
+    event NetworkActivated(uint16 networkId);
+    event NetworkDeactivated(uint16 networkId);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -135,12 +130,12 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     function crossChainTransfer(
         address bridgeToken,
         uint256 amount,
-        uint8 networkId
+        uint16 networkId
     )
     public
     isAmountGreaterThanZero(amount)
     {
-        require(isNetworkActivated[networkId] == true, "Invalid network ID.");
+        require(isNetworkActive[networkId], "Network with this id is not supported.");
 
         require(isCreatedByTheBridge[bridgeToken], "CrossChainTransfer: Token is not created by the bridge.");
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
@@ -149,40 +144,25 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
         emit TokensTransfer(bridgeToken, msg.sender, amount, networkId);
     }
 
-    // Function to add new network
-    function addNetwork(
-        string memory networkName
-    )
-    public
-    onlyMaintainer
-    {
-        // Using numberOfNetworks as an id for new network
-        networkNameById[numberOfNetworks] = networkName;
-        isNetworkActivated[numberOfNetworks] = true;
-
-        emit NetworkAdded(networkName, numberOfNetworks);
-        numberOfNetworks++;
-    }
-
     // Function to activate selected network
     function activateNetwork(
-        uint8 networkId
+        uint16 networkId
     )
     public
     onlyMaintainer
     {
-        isNetworkActivated[networkId] = true;
-        emit NetworkActivated(networkNameById[networkId], networkId);
+        isNetworkActive[networkId] = true;
+        emit NetworkActivated(networkId);
     }
 
     // Function to deactivate selected network
     function deactivateNetwork(
-        uint8 networkId
+        uint16 networkId
     )
     public
     onlyChainportCongress
     {
-        isNetworkActivated[networkId] = false;
-        emit NetworkDeactivated(networkNameById[networkId], networkId);
+        isNetworkActive[networkId] = false;
+        emit NetworkDeactivated(networkId);
     }
 }
