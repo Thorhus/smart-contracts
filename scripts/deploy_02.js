@@ -38,7 +38,7 @@ async function main() {
     ]);
     await chainportBridgeEth.deployed()
     saveContractProxies(hre.network.name, "ChainportBridgeEth", chainportBridgeEth.address);
-    console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
+    console.log("ChainportBridgeEth proxy deployed to:", chainportBridgeEth.address);
 
     let admin = await upgrades.admin.getInstance();
 
