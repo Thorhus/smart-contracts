@@ -385,7 +385,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     }
 
     // Function to activate already added supported network
-    function activateSupportedNetwork(
+    function activateNetwork(
         uint8 networkId
     )
     public
@@ -396,7 +396,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     }
 
     // Function to deactivate specified added network
-    function deactivateSupportedNetwork(
+    function deactivateNetwork(
         uint8 networkId
     )
     public
