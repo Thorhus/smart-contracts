@@ -351,6 +351,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         return IERC20(token).balanceOf(address(this));
     }
 
+    // Function to deposit tokens to specified network's bridge
     function depositTokens(
         address token,
         uint256 amount,
@@ -368,6 +369,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         emit TokensDeposited(token, msg.sender, amount, networkId);
     }
 
+    // Function to add new supported network
     function addNetwork(
         string memory networkName
     )
@@ -382,6 +384,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         numberOfNetworks++;
     }
 
+    // Function to activate already added supported network
     function activateSupportedNetwork(
         uint8 networkId
     )
@@ -392,6 +395,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         emit NetworkActivated(networkNameById[networkId], networkId);
     }
 
+    // Function to deactivate specified added network
     function deactivateSupportedNetwork(
         uint8 networkId
     )
