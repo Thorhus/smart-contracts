@@ -19,15 +19,15 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     bool public isFrozen;
 
     // Network activity state mapping
-    mapping(uint16 => bool) public isNetworkActive;
+    mapping(uint256 => bool) public isNetworkActive;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
-    event TokensTransfered(address bridgeTokenAddress, address issuer, uint256 amount, uint16 networkId);
+    event TokensTransfered(address bridgeTokenAddress, address issuer, uint256 amount, uint256 networkId);
 
-    event NetworkActivated(uint16 networkId);
-    event NetworkDeactivated(uint16 networkId);
+    event NetworkActivated(uint256 networkId);
+    event NetworkDeactivated(uint256 networkId);
 
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -130,7 +130,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     function crossChainTransfer(
         address bridgeToken,
         uint256 amount,
-        uint16 networkId
+        uint256 networkId
     )
     public
     isAmountGreaterThanZero(amount)
@@ -146,7 +146,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
     // Function to activate selected network
     function activateNetwork(
-        uint16 networkId
+        uint256 networkId
     )
     public
     onlyMaintainer
@@ -157,7 +157,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
 
     // Function to deactivate selected network
     function deactivateNetwork(
-        uint16 networkId
+        uint256 networkId
     )
     public
     onlyChainportCongress
