@@ -24,7 +24,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
-    event TokensTransfer(address bridgeTokenAddress, address issuer, uint256 amount, uint16 networkId);
+    event TokensTransfered(address bridgeTokenAddress, address issuer, uint256 amount, uint16 networkId);
 
     event NetworkActivated(uint16 networkId);
     event NetworkDeactivated(uint16 networkId);
@@ -141,7 +141,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
 
-        emit TokensTransfer(bridgeToken, msg.sender, amount, networkId);
+        emit TokensTransfered(bridgeToken, msg.sender, amount, networkId);
     }
 
     // Function to activate selected network
