@@ -14,6 +14,8 @@ contract Validator is Initializable, ChainportMiddleware {
 
     address public signatoryAddress;
 
+    bytes32 constant private recoverSignatureHash = keccak256(abi.encodePacked('bytes binding user withdrawal'));
+
     // Set initial signatory address and Chainport congress
     function initialize(
         address _signatoryAddress,
@@ -81,7 +83,7 @@ contract Validator is Initializable, ChainportMiddleware {
         // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
-                keccak256(abi.encodePacked('bytes binding user withdrawal')),
+                recoverSignatureHash,
                 keccak256(abi.encodePacked(beneficiary, token, amount, nonce))
             )
         );
