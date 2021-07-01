@@ -46,7 +46,7 @@ contract Validator is Initializable, ChainportMiddleware {
      * @param           amount is the amount of tokens user is attempting to withdraw
      */
     function verifyWithdraw(
-        bytes memory signedMessage,
+        bytes calldata signedMessage,
         address token,
         uint256 amount,
         address beneficiary,
