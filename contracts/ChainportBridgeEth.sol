@@ -198,9 +198,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
-        require(isSignatureUsed[signature] == false, "Already used signature.");
+        require(isSignatureUsed[signature] == false, "Error: Already used signature.");
         isSignatureUsed[signature] = true;
 
         require(nonce == functionNameToNonce["mintTokens"] + 1);
@@ -225,7 +225,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isSignatureUsed[signature] == false, "Signature already used");
+        require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
         // Check if freeze time has passed and same user is calling again
@@ -262,9 +262,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
-        require(isSignatureUsed[signature] == false, "Signature already used");
+        require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
         // msg.sender is beneficiary address
@@ -356,7 +356,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isNetworkActive[networkId], "Network with this id is not supported.");
+        require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
         IERC20 ercToken = IERC20(token);
 

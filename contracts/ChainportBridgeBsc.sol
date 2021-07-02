@@ -35,7 +35,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     }
 
     modifier isAmountGreaterThanZero(uint256 amount) {
-        require(amount > 0, "Amount is not greater than zero.");
+        require(amount > 0, "Error: Amount is not greater than zero.");
         _;
     }
 
@@ -75,7 +75,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     onlyMaintainer
     isNotFrozen
     {
-        require(erc20ToBridgeTokenAddress[erc20_address] == address(0), "MintNewToken: Token already exists.");
+        require(erc20ToBridgeTokenAddress[erc20_address] == address(0), "Error: Token already exists.");
 
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
@@ -95,7 +95,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     isNotFrozen
     isAmountGreaterThanZero(amount)
     {
-        require(nonce == functionNameToNonce["mintTokens"] + 1, "Nonce is not correct");
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Error: Nonce is not correct");
         functionNameToNonce["mintTokens"] = nonce;
 
         BridgeMintableToken ercToken = BridgeMintableToken(token);
@@ -111,7 +111,7 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     public
     isAmountGreaterThanZero(amount)
     {
-        require(isCreatedByTheBridge[bep20Token], "BurnTokens: Token is not created by the bridge.");
+        require(isCreatedByTheBridge[bep20Token], "Error: Token is not created by the bridge.");
 
         BridgeMintableToken token = BridgeMintableToken(bep20Token);
         token.burnFrom(msg.sender, amount);
@@ -135,9 +135,9 @@ contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
     public
     isAmountGreaterThanZero(amount)
     {
-        require(isNetworkActive[networkId], "Network with this id is not supported.");
+        require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
-        require(isCreatedByTheBridge[bridgeToken], "CrossChainTransfer: Token is not created by the bridge.");
+        require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
 
