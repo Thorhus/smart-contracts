@@ -190,7 +190,6 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     onlyIfAmountGreaterThanZero(amount)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
-        delete tokenToPendingWithdrawal[token];
 
         require(isSignatureUsed[signature] == false, "Already used signature.");
         isSignatureUsed[signature] = true;
@@ -232,7 +231,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
                 // Clear up the state and remove pending flag
                 delete tokenToPendingWithdrawal[token];
-                isTokenHavingPendingWithdrawal[token] = false;
+                delete isTokenHavingPendingWithdrawal[token];
 
                 IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
@@ -304,7 +303,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Clear up the state and remove pending flag
         delete tokenToPendingWithdrawal[token];
-        isTokenHavingPendingWithdrawal[token] = false;
+        delete isTokenHavingPendingWithdrawal[token];
 
         // Transfer funds to user
         IERC20(token).safeTransfer(p.beneficiary, p.amount);
@@ -328,7 +327,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
         emit WithdrawalRejected(token, p.beneficiary, p.amount);
         // Clear up the state and remove pending flag
         delete tokenToPendingWithdrawal[token];
-        isTokenHavingPendingWithdrawal[token] = false;
+        delete isTokenHavingPendingWithdrawal[token];
     }
 
     // Function to check if amount is above threshold
