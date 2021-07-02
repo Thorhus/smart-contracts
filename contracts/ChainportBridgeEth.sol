@@ -67,7 +67,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     }
 
     modifier onlyIfAmountGreaterThanZero(uint256 amount) {
-        require(amount > 0, "Amount is not greater than zero.");
+        require(amount > 0, "Error: Amount is not greater than zero.");
         _;
     }
 
