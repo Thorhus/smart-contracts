@@ -1,5 +1,4 @@
 const hre = require("hardhat");
-const { hexify, toChainportDenomination } = require('../test/setup');
 const { getSavedContractAddresses, saveContractAddress, saveContractProxies, getSavedContractProxies} = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
 
@@ -8,12 +7,17 @@ async function main() {
     const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
 
-    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
+    const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry');
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts.ChainportCongress]);
-    await maintainersRegistry.deployed()
+    await maintainersRegistry.deployed();
     saveContractProxies(hre.network.name, "MaintainersRegistry", maintainersRegistry.address);
     console.log('MaintainersRegistry Proxy deployed to:', maintainersRegistry.address);
 
+
+    // Deploy call library
+    const Call = await hre.ethers.getContractFactory('Call');
+    const call = await Call.deploy();
+    await call.deployed();
 
     const Validator = await ethers.getContractFactory('Validator');
     const validator = await upgrades.deployProxy(
@@ -23,22 +27,19 @@ async function main() {
             contracts.ChainportCongress
         ]
     );
-    await validator.deployed()
+    await validator.deployed();
     saveContractProxies(hre.network.name, "Validator", validator.address);
     console.log('Validator Proxy deployed to:', validator.address);
 
 
-    const ChainportBridgeEth = await ethers.getContractFactory('ChainportBridgeEth')
-    const chainportBridgeEth = await upgrades.deployProxy(ChainportBridgeEth,[
-        maintainersRegistry.address,
+    const ChainportSideBridge = await ethers.getContractFactory('ChainportSideBridge');
+    const chainportSideBridge = await upgrades.deployProxy(ChainportSideBridge,[
         contracts.ChainportCongress,
-        validator.address,
-        config.timeLockLength, // 3600 secs timelock
-        config.safetyThreshold // safety threshold 20%
+        maintainersRegistry.address
     ]);
-    await chainportBridgeEth.deployed()
-    saveContractProxies(hre.network.name, "ChainportBridgeEth", chainportBridgeEth.address);
-    console.log("ChainportBridgeEth contract deployed to:", chainportBridgeEth.address);
+    await chainportSideBridge.deployed();
+    saveContractProxies(hre.network.name, "ChainportSideBridge", chainportSideBridge.address);
+    console.log("ChainportSideBridge contract deployed to:", chainportSideBridge.address);
 
     let admin = await upgrades.admin.getInstance();
 
@@ -46,13 +47,13 @@ async function main() {
     console.log('Maintainers Implementation: ', maintainersImplementation);
     saveContractAddress(hre.network.name, 'MaintainersRegistry', maintainersImplementation);
 
-    let validatorImplementation = await admin.getProxyImplementation(validator.address)
+    let validatorImplementation = await admin.getProxyImplementation(validator.address);
     console.log('Validator Implementation: ', validatorImplementation);
-    saveContractAddress(hre.network.name, 'Validator', validatorImplementation)
+    saveContractAddress(hre.network.name, 'Validator', validatorImplementation);
 
-    let bridgeImplementation = await admin.getProxyImplementation(chainportBridgeEth.address);
+    let bridgeImplementation = await admin.getProxyImplementation(chainportSideBridge.address);
     console.log('Bridge Implementation: ', bridgeImplementation);
-    saveContractAddress(hre.network.name, 'ChainportBridgeEth', bridgeImplementation);
+    saveContractAddress(hre.network.name, 'ChainportSideBridge', bridgeImplementation);
 
     saveContractProxies(hre.network.name, 'ProxyAdmin', admin.address);
 }
