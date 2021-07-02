@@ -8,7 +8,7 @@ import "./libraries/SafeMath.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
-contract ChainportBridgeEth is Initializable, ChainportMiddleware {
+contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
 

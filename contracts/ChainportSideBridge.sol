@@ -7,7 +7,7 @@ import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
 
-contract ChainportBridgeBsc is Initializable, ChainportMiddleware {
+contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
