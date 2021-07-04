@@ -1,5 +1,5 @@
 const hre = require("hardhat")
-const { getSavedContractAddresses, getSavedContractProxies, getSavedContractProxyAbis } = require('./utils')
+const { getSavedContractAddresses, getSavedContractProxies, getSavedContractProxyAbis, saveContractAddress } = require('./utils')
 const { encodeParameters } = require('../test/ethereum');
 
 function sleep(ms) {
@@ -9,15 +9,36 @@ function sleep(ms) {
 async function main() {
 
     await hre.run('compile')
-    const contractToUpgradeName = "ChainportBridgeEth"
+
+    const contracts = getSavedContractAddresses()[hre.network.name]
+    const mainBridgeContractName = 'ChainportMainBridge'
+    const sideBridgeContractName = 'ChainportSideBridge'
+    let contractToUpgradeName
+
+    try {
+        await hre.ethers.getContractAt(mainBridgeContractName, contracts[mainBridgeContractName])
+        contractToUpgradeName = mainBridgeContractName
+        console.log('Network is using main bridge.\n')
+    } catch (err) {
+        try {
+            await hre.ethers.getContractAt(sideBridgeContractName, contracts[sideBridgeContractName])
+            contractToUpgradeName = sideBridgeContractName
+            console.log('Network is using side bridge.\n')
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
     const contractToUpgradeProxy = getSavedContractProxies()[hre.network.name][contractToUpgradeName]
     const oldImplementationAddress = getSavedContractAddresses()[hre.network.name][contractToUpgradeName]
     const congressContractAddress = getSavedContractAddresses()[hre.network.name]["ChainportCongress"]
     const proxyAdminAddress = getSavedContractProxies()[hre.network.name]["ProxyAdmin"]
 
-    const contractToUpgrade = await ethers.getContractFactory(contractToUpgradeName)
+    const contractToUpgrade = await hre.ethers.getContractFactory(contractToUpgradeName)
     const newImplementation = await contractToUpgrade.deploy()
     await newImplementation.deployed()
+
+    console.log(newImplementation.address)
 
     const congressContract = await hre.ethers.getContractAt("ChainportCongress", congressContractAddress)
 
@@ -35,11 +56,12 @@ async function main() {
         description
     )
 
+    console.log("Proposal Made Successfully.")
+
+    const proxyAdmin = await hre.ethers.getContractAt(getSavedContractProxyAbis()["ProxyAdmin"], proxyAdminAddress)
     let newImplementationAddress = oldImplementationAddress
 
-    const proxyAdmin = await ethers.getContractAt(getSavedContractProxyAbis()["ProxyAdmin"], proxyAdminAddress)
     console.log("Waiting for voting and new block...")
-
     while(newImplementationAddress === oldImplementationAddress){
         await sleep(5000);
         newImplementationAddress = await proxyAdmin.getProxyImplementation(contractToUpgradeProxy)
