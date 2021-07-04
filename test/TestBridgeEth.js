@@ -65,23 +65,18 @@ describe("Bridge Ethereum Side", function () {
         });
 
         describe("Check if values are set properly", function () {
-
             it("Maintainers registry is set properly", async function () {
                 expect(await bridgeEthInstance.maintainersRegistry()).to.equal(maintainersRegistryInstance.address);
             });
-
             it("Chainport congress address is set properly", async function () {
                 expect(await bridgeEthInstance.chainportCongress()).to.equal(chainportCongress.address);
             });
-
             it("Validator address is set properly", async function () {
                 expect(await bridgeEthInstance.signatureValidator()).to.equal(validatorInstance.address);
             });
-
             it("Freeze length is set properly", async function () {
                 expect(await bridgeEthInstance.freezeLength()).to.equal(freezeLength);
             });
-
             it("Safety threshold is set properly", async function () {
                 expect(await bridgeEthInstance.safetyThreshold()).to.equal(safetyThreshold);
             });
@@ -91,11 +86,6 @@ describe("Bridge Ethereum Side", function () {
 
             it("Should protect the asset (by congress)", async function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
-                expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
-            });
-
-            it("Should protect the asset (by maintainer)", async function () {
-                await bridgeEthInstance.connect(maintainer).protectAssetByMaintainer(token.address);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
             });
 
@@ -115,45 +105,6 @@ describe("Bridge Ethereum Side", function () {
                 await bridgeEthInstance.connect(chainportCongress).setAssetProtection(token.address, true);
                 expect(await bridgeEthInstance.isAssetProtected(token.address)).to.equal(true);
                 await expect(bridgeEthInstance.connect(user1).setAssetProtection(token.address, false))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-        });
-
-        describe("Asset freezing", function () {
-
-            it("Should freeze the asset (by congress)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
-            });
-
-            it("Should freeze the asset (by maintainer)", async function () {
-                await bridgeEthInstance.connect(maintainer).freezeAssetByMaintainer(token.address);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
-            });
-
-            it("Should unfreeze the asset (by congress)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
-                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, false);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(false);
-            });
-
-            it("Should not freeze the asset (by user)", async function () {
-                await expect(bridgeEthInstance.connect(user1).freezeAsset(token.address, true))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should not unfreeze the asset (by user)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
-                await expect(bridgeEthInstance.connect(user1).freezeAsset(token.address, false))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should not unfreeze the asset (by maintainer)", async function () {
-                await bridgeEthInstance.connect(chainportCongress).freezeAsset(token.address, true);
-                expect(await bridgeEthInstance.isAssetFrozen(token.address)).to.equal(true);
-                await expect(bridgeEthInstance.connect(maintainer).freezeAsset(token.address, false))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
@@ -251,6 +202,11 @@ describe("Bridge Ethereum Side", function () {
                     .withArgs(token.address, user1.address , tokenAmount - 1);
             });
 
+            it("Should not freeze the token if the amount to freeze is more than the account balance", async function () {
+                await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
+                    .to.be.revertedWith("ERC20: transfer amount exceeds balance");
+            });
+
             it("Should not freeze if amount is below or equal to zero", async function () {
                 await expect(bridgeEthInstance.connect(user1).freezeToken(token.address, 0))
                     .to.be.revertedWith("Amount is not greater than zero.");
@@ -300,17 +256,6 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Release Tokens By Maintainer", function (){
-
-                xit("Should withdraw tokens using signature (by maintainer)", async function () {
-                    await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
-                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
-                        token.address,
-                        releaseAmount,
-                        maintainer.address,
-                        await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
-                    );
-                });
-
                 it("Should not withdraw when singature length is not right (by maintainer)", async function () {
                     await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
                         "0x00",
@@ -319,6 +264,26 @@ describe("Bridge Ethereum Side", function () {
                         maintainer.address,
                         await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     )).to.be.revertedWith("bad signature length");
+                });
+
+                xit("Should not withdraw tokens when sig v is not right (by maintainer)", async function () {
+                    await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        maintainer.address,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                    );
+                });
+
+                xit("Should not withdraw tokens when sig s is not right (by maintainer)", async function () {
+                    await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        maintainer.address,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                    );
                 });
 
                 it("Should not withdraw when bridge is frozen (by maintainer)", async function () {
@@ -343,13 +308,41 @@ describe("Bridge Ethereum Side", function () {
                         await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     )).to.be.revertedWith("Amount is not greater than zero.");
                 });
+
+                xit("Should withdraw tokens using signature (by maintainer)", async function () {
+                    await bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        maintainer.address,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                    );
+                });
+
+                xit("Should not withdraw tokens using signature used (by maintainer)", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokensByMaintainer(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        maintainer.address,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
+                    )).to.be.revertedWith("Already used signature.");
+                });
             });
 
             describe("Release Tokens Time Lock Passed", function () {
+                it("Should release tokens if time lock passed", async function () {
+                    await expect(bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
+                        token.address,
+                        releaseAmount,
+                        await bridgeEthInstance.functionNameToNonce("releaseTokensTimeLockPassed") + 1
+                    )).to.be.revertedWith("Invalid function call");
+                });
 
                 xit("Should release tokens if time lock passed", async function () {
                     await bridgeEthInstance.connect(maintainer).releaseTokensTimelockPassed(
-                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
                         token.address,
                         releaseAmount,
                         await bridgeEthInstance.functionNameToNonce("releaseTokensTimeLockPassed") + 1
@@ -388,10 +381,9 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Release Tokens", function () {
-
                 xit("Should release tokens", async function () {
                     await bridgeEthInstance.connect(maintainer).releaseTokens(
-                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cde", // Needs proper signature
+                        "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
                         token.address,
                         releaseAmount,
                         await bridgeEthInstance.functionNameToNonce("releaseTokens") + 1
@@ -430,6 +422,9 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Approve Withdrawal And Transfer Funds", function () {
+                it("Should approve withdrawal and transfer funds (by congress)", async function () {
+                    await expect(bridgeEthInstance.connect(chainportCongress).approveWithdrawalAndTransferFunds(token.address)).to.be.reverted;
+                });
 
                 xit("Should approve withdrawal and transfer funds (by congress)", async function () {
                     await bridgeEthInstance.connect(chainportCongress).approveWithdrawalAndTransferFunds(token.address);
@@ -455,6 +450,10 @@ describe("Bridge Ethereum Side", function () {
             });
 
             describe("Reject Withdrawal", function () {
+
+                it("Should reject withdrawal (by congress)", async function () {
+                    await expect(bridgeEthInstance.connect(chainportCongress).rejectWithdrawal(token.address)).to.be.reverted;
+                });
 
                 xit("Should reject withdrawal (by congress)", async function () {
                     await bridgeEthInstance.connect(chainportCongress).rejectWithdrawal(token.address);
@@ -502,5 +501,7 @@ describe("Bridge Ethereum Side", function () {
                 expect(await bridgeEthInstance.isAboveThreshold(token.address, tokenAmount*55)).to.be.true;
             });
         });
+
+
     });
 });

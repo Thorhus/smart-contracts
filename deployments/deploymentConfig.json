@@ -1,7 +1,7 @@
 {
   "local": {
-    "tokenName" : "Bridge Token",
-    "tokenSymbol" : "BRD",
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
     "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
     "timeLockLength" : 3600,
