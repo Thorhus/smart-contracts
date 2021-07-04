@@ -5,8 +5,8 @@ async function main () {
     const networks = 4
     const contracts = getSavedContractProxies()[hre.network.name]
 
-    const mainBridgeContractName = "ChainportBridgeEth"
-    const sideBridgeContractName = "ChainportBridgeBsc"
+    const mainBridgeContractName = "ChainportSideBridge"
+    const sideBridgeContractName = "ChainportMainBridge"
     let bridge
 
     // Checking which bridge is in use
