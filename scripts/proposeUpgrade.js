@@ -42,11 +42,11 @@ async function main() {
 
     const congressContract = await hre.ethers.getContractAt("ChainportCongress", congressContractAddress)
 
-    const callDatas = [encodeParameters(["address", "address"], [contractToUpgradeProxy, newImplementation.address])]
-    const signatures = ["upgrade(address,address)"]
-    const description = "Upgrade " + contractToUpgradeName + " contract."
-    const values = [0]
     const targets = [proxyAdminAddress]
+    const values = [0]
+    const signatures = ["upgrade(address,address)"]
+    const callDatas = [encodeParameters(["address", "address"], [contractToUpgradeProxy, newImplementation.address])]
+    const description = "Upgrade " + contractToUpgradeName + " contract."
 
     await congressContract.propose(
         targets,
