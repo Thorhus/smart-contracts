@@ -87,7 +87,7 @@ contract MaintainersRegistry is Initializable {
         require(_isMaintainer[_maintainer] == true, 'MaintainersRegistry :: Address is not a maintainer');
 
         uint length = allMaintainers.length;
-        require(length > 1, "Cannot remove last maintainer.")
+        require(length > 1, "Cannot remove last maintainer.");
 
         uint i = 0;
 
