@@ -82,7 +82,7 @@ describe("Side Bridge Test", function () {
             it("Should not mint same token second time", async function () {
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
                 await expect(sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals))
-                    .to.be.revertedWith("MintNewToken: Token already exists.");
+                    .to.be.revertedWith("Error: Token already exists.");
             });
 
             it("Should not mint a new token (by user)", async function () {
@@ -155,7 +155,7 @@ describe("Side Bridge Test", function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepTokenAddress = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
 
                 let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
 
@@ -174,7 +174,7 @@ describe("Side Bridge Test", function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepToken = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepToken = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
 
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer).mintTokens(
@@ -188,7 +188,7 @@ describe("Side Bridge Test", function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepToken = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepToken = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
 
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer).mintTokens(
@@ -200,19 +200,19 @@ describe("Side Bridge Test", function () {
 
             it("Should not burn a token which was not created by the bridge", async function () {
                 await expect(sideBridgeInstance.connect(maintainer).burnTokens(
-                    await sideBridgeInstance.erc20ToBep20Address(token.address), 1))
-                    .to.be.revertedWith("BurnTokens: Token is not created by the bridge.");
+                    await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address), 1))
+                    .to.be.revertedWith("Error: Token is not created by the bridge.");
             });
         });
 
         describe("Delete Minted Tokens", function () {
 
             it("Should not delete minted tokens (by user))", async function () {
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
                 expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
 
@@ -221,30 +221,30 @@ describe("Side Bridge Test", function () {
             });
 
             it("Should delete minted tokens (by maintainer))", async function () {
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
                 expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
 
                 newToken = await ethers.getContractFactory("BridgeMintableToken");
                 newToken = await newToken.deploy("Fake Token", "FKT", decimals);
 
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(newToken.address, "", "", decimals);
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.true;
 
                 await sideBridgeInstance.connect(maintainer).deleteMintedTokens([token.address, newToken.address]);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.erc20ToBridgeTokenAddress(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
             });
