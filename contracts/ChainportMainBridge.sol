@@ -44,6 +44,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
+
+    //TODO remember to delete this/converge to TokensDeposited once clear
     event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
     event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
 
@@ -104,6 +106,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isFrozen = false;
     }
 
+    //TODO: rename to setAssetFreezeState
     function freezeAsset(
         address tokenAddress,
         bool _isFrozen
@@ -133,7 +136,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
-        emit AssetProtectionChanged(tokenAddress, _isProtected);
+        emit AssetProtectionChanged(tokenAddress, _isProtected); //TODO rename to AssetProtected
     }
 
     function protectAssetByMaintainer(
@@ -172,6 +175,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit SafetyThresholdChanged(_safetyThreshold);
     }
 
+    //TODO remove this and converge to using depositTokens
     function freezeToken(
         address token,
         uint256 amount
@@ -201,9 +205,13 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         require(isSignatureUsed[signature] == false, "Error: Already used signature.");
         isSignatureUsed[signature] = true;
+        //TODO consider adding a mapping from FUNC_NAME_<NONCE> -> is_used
+        //i.e. isNonceExecuted[FUNC_NAME_<NONCE>] = true/false and require it is not true when going to execute per funcname
+        //required for all 3 places where we have a nonce
 
-        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
-        functionNameToNonce["mintTokens"] = nonce;
+        //TODO: replace with mapping to funcname_nonce --> is_executed
+        require(nonce == functionNameToNonce["releaseTokensByMaintainer"] + 1, "Invalid nonce"); //TODO: Delete
+        functionNameToNonce["releaseTokensByMaintainer"] = nonce;//TODO: Delete
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
@@ -226,8 +234,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
-        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
-        functionNameToNonce["mintTokens"] = nonce;
+        //TODO: double check that all nonces relate to their correct function
+        functionNameToNonce["releaseTokensTimelockPassed"] = nonce;
 
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
@@ -243,7 +251,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
                 IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
-                emit TokensUnfreezed(token, p.beneficiary, p.amount);
+                emit TokensUnfreezed(token, p.beneficiary, p.amount); #TODO rename to deposit/claim nomenclature
                 emit WithdrawalApproved(token, p.beneficiary, p.amount);
             }
         } else {
@@ -267,8 +275,10 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
-        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
-        functionNameToNonce["mintTokens"] = nonce;
+        //TODO: double check that all nonces relate to their correct function
+        //TOOD: if nonce is zero (this is first time update) ,then do not require the following
+        //TODO: replace with mapping to funcname_nonce --> is_executed
+        functionNameToNonce["releaseTokens"] = nonce;//TODO delete
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
@@ -362,6 +372,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         IERC20 ercToken = IERC20(token);
 
+        //TODO: is there a safeTransferFrom?
         bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
         require(result, "Transfer did not go through.");
 

@@ -136,7 +136,8 @@ contract ChainportCongressMembersRegistry {
     onlyChainportCongress
     {
         require(isMemberInCongress[targetMember] == true);
-
+        //TODO add requirement so that it's not possible to remove last member (there should always be at least 1 member in congress)
+        //TODO push this fix to other congresses as well
         uint length = allMembers.length;
 
         uint i=0;
