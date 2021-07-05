@@ -25,6 +25,64 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   defaultNetwork: 'local',
   networks: {
+    hecotest: {
+      url: 'https://http-testnet.hecochain.com/',
+      accounts: [process.env.PK],
+      chainId: 256,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    hecotestStaging: {
+      url: 'https://http-testnet.hecochain.com/',
+      accounts: [process.env.PK],
+      chainId: 256,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    hecoMainnet: {
+      url: 'https://http-mainnet.hecochain.com/',
+      accounts: [process.env.PK],
+      chainId: 128,
+      gasPrice: 41000000000,
+      timeout: 500000000
+    },
+    polygonMumbai: {
+      url: 'https://matic-testnet-archive-rpc.bwarelabs.com',
+      accounts: [process.env.PK],
+      chainId: 80001,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    polygonMumbaiStaging: {
+      url: 'https://matic-testnet-archive-rpc.bwarelabs.com',
+      accounts: [process.env.PK],
+      chainId: 80001,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    polygonMainnet: {
+      url: 'https://matic-mainnet-archive-rpc.bwarelabs.com',
+      accounts: [process.env.PK],
+      chainId: 137,
+      gasPrice: 41000000000,
+      timeout: 500000000
+    },
+    kovan: {
+      // Infura public nodes
+      url: 'https://kovan.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8',
+      accounts: [process.env.PK],
+      chainId: 42,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
+    kovanStaging: {
+      // Infura public nodes
+      url: 'https://kovan.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8',
+      accounts: [process.env.PK],
+      chainId: 42,
+      gasPrice: 40000000000,
+      timeout: 50000
+    },
     ropsten: {
       // Infura public nodes
       url: 'https://ropsten.infura.io/v3/34ee2e319e7945caa976d4d1e24db07f',
@@ -67,9 +125,10 @@ module.exports = {
     },
     binanceMainnet: {
       url: "https://bsc-dataseed.binance.org/",
+      accounts: [process.env.PK],
       chainId: 56,
       gasPrice: 20000000000,
-      accounts: [process.env.PK]
+      timeout: 500000000
     },
 
     local: {

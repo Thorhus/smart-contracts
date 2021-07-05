@@ -34,7 +34,28 @@ $ npx hardhat run --network ropsten scripts/upgradeChainportBridgeEth.js
 ```
 
 ---
-
+### How to use network related scripts
+`activateNetworks.js` & `readNetworkStates.js`
+- We use `activateNetworks.js` to automatically and conventionally activate networks that we want to support.
+- We use `readNetworkStates.js` to check requested network states.
+* Both of the scripts are being executed using hardhat and they autodetect type of bridge contracts on specified
+network. Only step left to do is run script using this command template in your terminal.
+  ```angular2html
+  $ npx hardhat run --network {desired_network_name} scripts/{desired_network_related_script}
+  ```
+Example: 
+- _**Step 1:**_ To activate specified networks on ropsten bridge contract we use next command:
+  ```angular2html
+  $ npx hardhat run --network ropsten scripts/activateNetworks.js
+  ```
+  Running this command will let the script perform necessary work on bridge contract to make specific networks active.
+<br><br>
+- _**Step 2:**_ Now we can run `readNetworkStates.js` to see if the networks we need are active:
+  ```angular2html
+  $ npx hardhat run --network ropsten scripts/readNetworkStates.js
+  ```
+  After running this command you should get information from console output about requested networks and their current activity states.
+---
 ### Congress submit proposal and vote
 
 - _**Step 1:**_ Select method to execute and destination contract
