@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
-contract ChainportBridgeEth is Initializable, ChainportMiddleware {
+contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -39,6 +39,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
 
+    // Network activity state mapping
+    mapping(uint256 => bool) public isNetworkActive;
+
     // Events
     event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
     event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
@@ -53,13 +56,18 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
 
     event AssetFrozen(address asset, bool isAssetFrozen);
 
+    event NetworkActivated(uint256 networkId);
+    event NetworkDeactivated(uint256 networkId);
+
+    event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
+
     modifier isNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
     }
 
     modifier onlyIfAmountGreaterThanZero(uint256 amount) {
-        require(amount > 0, "Amount is not greater than zero.");
+        require(amount > 0, "Error: Amount is not greater than zero.");
         _;
     }
 
@@ -189,9 +197,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
-        require(isSignatureUsed[signature] == false, "Already used signature.");
+        require(isSignatureUsed[signature] == false, "Error: Already used signature.");
         isSignatureUsed[signature] = true;
 
         require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
@@ -215,7 +223,7 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isSignatureUsed[signature] == false, "Signature already used");
+        require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
         require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
@@ -254,9 +262,9 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Token is currently having pending withdrawal.");
+        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
-        require(isSignatureUsed[signature] == false, "Signature already used");
+        require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
         require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
@@ -338,5 +346,47 @@ contract ChainportBridgeEth is Initializable, ChainportMiddleware {
     // Get contract balance of specific token
     function getTokenBalance(address token) internal view returns (uint256) {
         return IERC20(token).balanceOf(address(this));
+    }
+
+    // Function to deposit tokens to specified network's bridge
+    function depositTokens(
+        address token,
+        uint256 amount,
+        uint256 networkId
+    )
+    public
+    isNotFrozen
+    onlyIfAmountGreaterThanZero(amount)
+    {
+        require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
+
+        IERC20 ercToken = IERC20(token);
+
+        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
+        require(result, "Transfer did not go through.");
+
+        emit TokensDeposited(token, msg.sender, amount, networkId);
+    }
+
+    // Function to activate already added supported network
+    function activateNetwork(
+        uint256 networkId
+    )
+    public
+    onlyMaintainer
+    {
+        isNetworkActive[networkId] = true;
+        emit NetworkActivated(networkId);
+    }
+
+    // Function to deactivate specified added network
+    function deactivateNetwork(
+        uint256 networkId
+    )
+    public
+    onlyChainportCongress
+    {
+        isNetworkActive[networkId] = false;
+        emit NetworkDeactivated(networkId);
     }
 }
