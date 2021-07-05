@@ -44,6 +44,7 @@ contract BridgeMintableToken is ERC20Burnable {
     public
     {
         require(msg.sender == binanceBridgeContract);
+        require(_binanceBridgeContract != address(0));
         binanceBridgeContract = _binanceBridgeContract;
     }
 }

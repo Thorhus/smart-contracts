@@ -2,15 +2,15 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/proxy/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import "./libraries/SafeMath.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
 contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     IValidator public signatureValidator;
 
@@ -166,6 +166,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         // This is representing % of every asset on the contract
         // Example: 32% is safety threshold
+        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
+
         safetyThreshold = _safetyThreshold;
         emit SafetyThresholdChanged(_safetyThreshold);
     }
@@ -178,10 +180,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isNotFrozen
     onlyIfAmountGreaterThanZero(amount)
     {
-        IERC20 ercToken = IERC20(token);
-
-        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
 
         emit TokensFreezed(token, msg.sender, amount);
     }
@@ -203,14 +202,13 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Already used signature.");
         isSignatureUsed[signature] = true;
 
-        require(nonce == functionNameToNonce["mintTokens"] + 1);
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
         functionNameToNonce["mintTokens"] = nonce;
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
 
-        bool result = IERC20(token).transfer(beneficiary, amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransfer(beneficiary, amount);
 
         emit TokensUnfreezed(token, beneficiary, amount);
     }
@@ -228,6 +226,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
+        functionNameToNonce["mintTokens"] = nonce;
+
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
             PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
@@ -238,10 +239,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
                 // Clear up the state and remove pending flag
                 delete tokenToPendingWithdrawal[token];
-                isTokenHavingPendingWithdrawal[token] = false;
+                delete isTokenHavingPendingWithdrawal[token];
 
-                bool result = IERC20(token).transfer(p.beneficiary, p.amount);
-                require(result, "Transfer did not go through.");
+                IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
                 emit TokensUnfreezed(token, p.beneficiary, p.amount);
                 emit WithdrawalApproved(token, p.beneficiary, p.amount);
@@ -267,6 +267,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
+        require(nonce == functionNameToNonce["mintTokens"] + 1, "Invalid nonce");
+        functionNameToNonce["mintTokens"] = nonce;
+
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
@@ -289,8 +292,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
-            bool result = IERC20(token).transfer(beneficiary, amount);
-            require(result, "Transfer did not go through.");
+            IERC20(token).safeTransfer(beneficiary, amount);
 
             emit TokensUnfreezed(token, beneficiary, amount);
         }
@@ -309,11 +311,11 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
         // Clear up the state and remove pending flag
         delete tokenToPendingWithdrawal[token];
-        isTokenHavingPendingWithdrawal[token] = false;
+        delete isTokenHavingPendingWithdrawal[token];
 
         // Transfer funds to user
-        bool result = IERC20(token).transfer(p.beneficiary, p.amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransfer(p.beneficiary, p.amount);
+
         // Emit events
         emit TokensUnfreezed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
@@ -333,7 +335,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit WithdrawalRejected(token, p.beneficiary, p.amount);
         // Clear up the state and remove pending flag
         delete tokenToPendingWithdrawal[token];
-        isTokenHavingPendingWithdrawal[token] = false;
+        delete isTokenHavingPendingWithdrawal[token];
     }
 
     // Function to check if amount is above threshold

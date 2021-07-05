@@ -9,7 +9,7 @@ contract MaintainersRegistry is Initializable {
     using SafeMath for uint;
 
     // Mappings
-    mapping(address => bool) _isMaintainer;
+    mapping(address => bool) private _isMaintainer;
 
     // Singular types
 
