@@ -48,8 +48,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
 
-    //TODO remember to delete this/converge to TokensDeposited once clear
-    event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
     event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
 
     event WithdrawalApproved(address token, address beneficiary, uint256 amount);
@@ -175,20 +173,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         safetyThreshold = _safetyThreshold;
         emit SafetyThresholdChanged(_safetyThreshold);
-    }
-
-    //TODO remove this and converge to using depositTokens
-    function freezeToken(
-        address token,
-        uint256 amount
-    )
-    public
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
-    {
-        IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
-
-        emit TokensFreezed(token, msg.sender, amount);
     }
 
     function releaseTokensByMaintainer(
