@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
  */
 contract BridgeMintableToken is ERC20Burnable {
 
-    address public binanceBridgeContract; //TODO rename to the general name of the clone chain bridge contract (everythere here below as well)
+    address public binanceBridgeContract; // State variable names cannot be changed
 
     constructor(
         string memory tokenName_,
