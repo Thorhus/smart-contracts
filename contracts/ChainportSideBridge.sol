@@ -11,7 +11,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
-    mapping(address => address) public erc20ToBridgeTokenAddress;
+    mapping(address => address) public erc20ToBridgeTokenAddress;//TODO rename to BEP20 as was before
     mapping(string => uint256) public functionNameToNonce;
     mapping(address => bool) public isCreatedByTheBridge;
 
