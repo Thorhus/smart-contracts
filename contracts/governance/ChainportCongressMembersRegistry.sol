@@ -111,11 +111,8 @@ contract ChainportCongressMembersRegistry {
         // Add member to list of all members
         allMembers.push(targetMember);
         // Update minimum quorum
-        if(allMembers.length > 1) {
-            minimalQuorum = allMembers.length.sub(1);
-        } else {
-            minimalQuorum = 1;
-        }
+        minimalQuorum = allMembers.length.sub(1);
+
         // Mark that user is member in congress
         isMemberInCongress[targetMember] = true;
         // Fire an event

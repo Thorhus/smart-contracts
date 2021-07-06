@@ -38,6 +38,7 @@ contract BridgeMintableToken is ERC20Burnable {
         emit Mint(_to, _amount);
     }
 
+    //TODO understand in which scenarios we would call this function, if at all
     function setSideBridgeContract(
         address _sideBridgeContract
     )

@@ -136,7 +136,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
-        emit AssetProtectionChanged(tokenAddress, _isProtected);
+        emit AssetProtectionChanged(tokenAddress, _isProtected); //TODO rename to AssetProtected
     }
 
     function protectAssetByMaintainer(
@@ -217,7 +217,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
-        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensTimelockPassed", nonce));
+        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
         require(!isNonceUsed[nonceHash], "Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
@@ -261,7 +261,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
         require(!isNonceUsed[nonceHash], "Nonce already used.");
-        isNonceUsed[nonceHash] = true;
+
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
@@ -285,6 +285,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
+            isNonceUsed[nonceHash] = true;
+
             IERC20(token).safeTransfer(beneficiary, amount);
 
             emit TokensClaimed(token, beneficiary, amount);
