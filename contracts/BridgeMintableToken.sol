@@ -38,6 +38,7 @@ contract BridgeMintableToken is ERC20Burnable {
         emit Mint(_to, _amount);
     }
 
+    // Function for setting new bridge proxy contract address
     function setSideBridgeContract(
         address _sideBridgeContract
     )
