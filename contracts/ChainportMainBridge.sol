@@ -42,18 +42,19 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
 
-    // Events
-    event TokensUnfreezed(address tokenAddress, address issuer, uint256 amount);
+    // Nonce mapping
+    mapping(bytes32 => bool) public isNonceUsed;
 
-    //TODO remember to delete this/converge to TokensDeposited once clear
-    event TokensFreezed(address tokenAddress, address issuer, uint256 amount);
+    // Events
+    event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
+
     event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
 
     event WithdrawalApproved(address token, address beneficiary, uint256 amount);
     event WithdrawalRejected(address token, address beneficiary, uint256 amount);
 
     event TimeLockLengthChanged(uint256 newTimeLockLength);
-    event AssetProtectionChanged(address asset, bool isProtected);
+    event AssetProtected(address asset, bool isProtected);
     event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
     event AssetFrozen(address asset, bool isAssetFrozen);
@@ -106,8 +107,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isFrozen = false;
     }
 
-    //TODO: rename to setAssetFreezeState
-    function freezeAsset(
+    function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
     )
@@ -136,7 +136,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
-        emit AssetProtectionChanged(tokenAddress, _isProtected); //TODO rename to AssetProtected
+        emit AssetProtected(tokenAddress, _isProtected);
     }
 
     function protectAssetByMaintainer(
@@ -146,7 +146,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isAssetProtected[tokenAddress] = true;
-        emit AssetProtectionChanged(tokenAddress, true);
+        emit AssetProtected(tokenAddress, true);
     }
 
     // Function to set timelock
@@ -175,20 +175,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit SafetyThresholdChanged(_safetyThreshold);
     }
 
-    //TODO remove this and converge to using depositTokens
-    function freezeToken(
-        address token,
-        uint256 amount
-    )
-    public
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
-    {
-        IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
-
-        emit TokensFreezed(token, msg.sender, amount);
-    }
-
     function releaseTokensByMaintainer(
         bytes memory signature,
         address token,
@@ -205,20 +191,17 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         require(isSignatureUsed[signature] == false, "Error: Already used signature.");
         isSignatureUsed[signature] = true;
-        //TODO consider adding a mapping from FUNC_NAME_<NONCE> -> is_used
-        //i.e. isNonceExecuted[FUNC_NAME_<NONCE>] = true/false and require it is not true when going to execute per funcname
-        //required for all 3 places where we have a nonce
 
-        //TODO: replace with mapping to funcname_nonce --> is_executed
-        require(nonce == functionNameToNonce["releaseTokensByMaintainer"] + 1, "Invalid nonce"); //TODO: Delete
-        functionNameToNonce["releaseTokensByMaintainer"] = nonce;//TODO: Delete
+        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));
+        require(!isNonceUsed[nonceHash], "Nonce already used.");
+        isNonceUsed[nonceHash] = true;
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
         require(isMessageValid == true, "Error: Signature is not valid.");
 
         IERC20(token).safeTransfer(beneficiary, amount);
 
-        emit TokensUnfreezed(token, beneficiary, amount);
+        emit TokensClaimed(token, beneficiary, amount);
     }
 
     function releaseTokensTimelockPassed(
@@ -234,8 +217,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
-        //TODO: double check that all nonces relate to their correct function
-        functionNameToNonce["releaseTokensTimelockPassed"] = nonce;
+        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
+        require(!isNonceUsed[nonceHash], "Nonce already used.");
+        isNonceUsed[nonceHash] = true;
 
         // Check if freeze time has passed and same user is calling again
         if(isTokenHavingPendingWithdrawal[token] == true) {
@@ -251,7 +235,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
                 IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
-                emit TokensUnfreezed(token, p.beneficiary, p.amount); #TODO rename to deposit/claim nomenclature
+                emit TokensClaimed(token, p.beneficiary, p.amount);
                 emit WithdrawalApproved(token, p.beneficiary, p.amount);
             }
         } else {
@@ -275,10 +259,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
-        //TODO: double check that all nonces relate to their correct function
-        //TOOD: if nonce is zero (this is first time update) ,then do not require the following
-        //TODO: replace with mapping to funcname_nonce --> is_executed
-        functionNameToNonce["releaseTokens"] = nonce;//TODO delete
+        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
+        require(!isNonceUsed[nonceHash], "Nonce already used.");
+
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
@@ -302,9 +285,11 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             // Fire an event
             emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
         } else {
+            isNonceUsed[nonceHash] = true;
+
             IERC20(token).safeTransfer(beneficiary, amount);
 
-            emit TokensUnfreezed(token, beneficiary, amount);
+            emit TokensClaimed(token, beneficiary, amount);
         }
     }
 
@@ -327,7 +312,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         IERC20(token).safeTransfer(p.beneficiary, p.amount);
 
         // Emit events
-        emit TokensUnfreezed(token, p.beneficiary, p.amount);
+        emit TokensClaimed(token, p.beneficiary, p.amount);
         emit WithdrawalApproved(token, p.beneficiary, p.amount);
     }
 
@@ -370,11 +355,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
-        IERC20 ercToken = IERC20(token);
-
-        //TODO: is there a safeTransferFrom?
-        bool result = ercToken.transferFrom(address(msg.sender), address(this), amount);
-        require(result, "Transfer did not go through.");
+        IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
 
         emit TokensDeposited(token, msg.sender, amount, networkId);
     }

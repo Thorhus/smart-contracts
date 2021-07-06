@@ -185,7 +185,7 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Token Freezing", function () {
+        describe("Token Depositing", function () {
 
             beforeEach(async function () {
                 let sideBridgeInstance = await ethers.getContractFactory("ChainportSideBridge");
@@ -199,33 +199,36 @@ describe("Main Bridge Test", function () {
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
 
                 await token.connect(user1).approve(mainBridgeInstance.address, tokenAmount);
+
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+                await mainBridgeInstance.connect(maintainer).activateNetwork(1);
             });
 
             it("Should freeze the token", async function () {
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
-                    .to.emit(mainBridgeInstance, 'TokensFreezed')
-                    .withArgs(token.address, user1.address , tokenAmount - 1);
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount - 1, 1))
+                    .to.emit(mainBridgeInstance, 'TokensDeposited')
+                    .withArgs(token.address, user1.address , tokenAmount - 1, 1);
             });
 
             it("Should not freeze the token if the amount to freeze is more than the account balance", async function () {
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount + 1, 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
             });
 
             it("Should not freeze if amount is below or equal to zero", async function () {
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, 0))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, 0, 1))
                     .to.be.revertedWith("Amount is not greater than zero.");
             });
 
             it("Should not freeze the token if exceeds balance", async function () {
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, tokenAmount + 1))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount + 1, 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
             });
 
             it("Should not freeze the token if exceeds allowance", async function () {
                 await token.connect(user1).approve(mainBridgeInstance.address, 0);
 
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, tokenAmount - 1))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount - 1, 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds allowance");
             });
 
@@ -233,7 +236,7 @@ describe("Main Bridge Test", function () {
                 await mainBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(true);
 
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, 10))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, 10, 1))
                     .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
@@ -255,9 +258,11 @@ describe("Main Bridge Test", function () {
 
                 await token.connect(user1).approve(mainBridgeInstance.address, tokenAmount);
 
-                await expect(mainBridgeInstance.connect(user1).freezeToken(token.address, tokenAmount))
-                    .to.emit(mainBridgeInstance, 'TokensFreezed')
-                    .withArgs(token.address, user1.address , tokenAmount);
+                await mainBridgeInstance.connect(maintainer).activateNetwork(1);
+
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount, 1))
+                    .to.emit(mainBridgeInstance, 'TokensDeposited')
+                    .withArgs(token.address, user1.address , tokenAmount, 1);
             });
 
             describe("Release Tokens By Maintainer", function (){

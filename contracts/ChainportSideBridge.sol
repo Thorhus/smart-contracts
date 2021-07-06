@@ -11,7 +11,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
-    mapping(address => address) public erc20ToBridgeTokenAddress;
+    mapping(address => address) public erc20ToBep20Address; // Name shouldn't be changed because of upgrading conventions
     mapping(string => uint256) public functionNameToNonce;
     mapping(address => bool) public isCreatedByTheBridge;
 
@@ -75,11 +75,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     isNotFrozen
     {
-        require(erc20ToBridgeTokenAddress[erc20_address] == address(0), "Error: Token already exists.");
+        require(erc20ToBep20Address[erc20_address] == address(0), "Error: Token already exists.");
 
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
-        erc20ToBridgeTokenAddress[erc20_address] = address(newToken);
+        erc20ToBep20Address[erc20_address] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
         emit TokenCreated(address(newToken), erc20_address, tokenName, tokenSymbol, decimals);
     }
@@ -121,8 +121,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Function to clear up the state and delete mistakenly minted tokens.
     function deleteMintedTokens(address [] memory erc20addresses) public onlyMaintainer {
         for(uint i = 0; i < erc20addresses.length; i++) {
-            isCreatedByTheBridge[erc20ToBridgeTokenAddress[erc20addresses[i]]] = false;
-            delete erc20ToBridgeTokenAddress[erc20addresses[i]];
+            isCreatedByTheBridge[erc20ToBep20Address[erc20addresses[i]]] = false;
+            delete erc20ToBep20Address[erc20addresses[i]];
         }
     }
 

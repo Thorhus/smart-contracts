@@ -111,11 +111,8 @@ contract ChainportCongressMembersRegistry {
         // Add member to list of all members
         allMembers.push(targetMember);
         // Update minimum quorum
-        if(allMembers.length > 1) {
-            minimalQuorum = allMembers.length.sub(1);
-        } else {
-            minimalQuorum = 1;
-        }
+        minimalQuorum = allMembers.length.sub(1);
+
         // Mark that user is member in congress
         isMemberInCongress[targetMember] = true;
         // Fire an event
@@ -135,9 +132,9 @@ contract ChainportCongressMembersRegistry {
     external
     onlyChainportCongress
     {
-        require(isMemberInCongress[targetMember] == true);
-        //TODO add requirement so that it's not possible to remove last member (there should always be at least 1 member in congress)
-        //TODO push this fix to other congresses as well
+        require(isMemberInCongress[targetMember] == true, "Address is not a member of congress.");
+        require(allMembers.length > 1, "Cannot remove last congress member.");
+
         uint length = allMembers.length;
 
         uint i=0;
