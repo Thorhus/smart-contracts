@@ -54,7 +54,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event WithdrawalRejected(address token, address beneficiary, uint256 amount);
 
     event TimeLockLengthChanged(uint256 newTimeLockLength);
-    event AssetProtectionChanged(address asset, bool isProtected);
+    event AssetProtected(address asset, bool isProtected);
     event SafetyThresholdChanged(uint256 newSafetyThreshold);
 
     event AssetFrozen(address asset, bool isAssetFrozen);
@@ -136,7 +136,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isAssetProtected[tokenAddress] = _isProtected;
-        emit AssetProtectionChanged(tokenAddress, _isProtected); //TODO rename to AssetProtected
+        emit AssetProtected(tokenAddress, _isProtected);
     }
 
     function protectAssetByMaintainer(
@@ -146,7 +146,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isAssetProtected[tokenAddress] = true;
-        emit AssetProtectionChanged(tokenAddress, true);
+        emit AssetProtected(tokenAddress, true);
     }
 
     // Function to set timelock
