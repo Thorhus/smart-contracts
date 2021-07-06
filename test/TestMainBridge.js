@@ -193,7 +193,7 @@ describe("Main Bridge Test", function () {
 
                 await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
-                await token.connect(chainportCongress).setBinanceBridgeContract(sideBridgeInstance.address);
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer)
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
@@ -251,7 +251,7 @@ describe("Main Bridge Test", function () {
 
                 await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
-                await token.connect(chainportCongress).setBinanceBridgeContract(sideBridgeInstance.address);
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer)
                     .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
@@ -500,7 +500,7 @@ describe("Main Bridge Test", function () {
 
                 await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
 
-                await token.connect(chainportCongress).setBinanceBridgeContract(sideBridgeInstance.address);
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer)
                     .mintTokens(token.address, mainBridgeInstance.address, tokenAmount*100, lastNonce + nonceIncrease);
