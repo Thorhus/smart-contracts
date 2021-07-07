@@ -2,37 +2,43 @@
     "ropstenStaging": {
         "MaintainersRegistry": "0x03d333c1b401BF9fA150543050f0CBdB307c0209",
         "Validator": "0x52C6B38b1340Af8B27813fCeCC1bCe0b47717fC1",
-        "ChainportBridgeEth": "0x55be293F2d7A244DCf170aDa216e93B8D5AaF8A9",
+        "ChainportMainBridge": "0x55be293F2d7A244DCf170aDa216e93B8D5AaF8A9",
         "ProxyAdmin": "0x7FDAbB8008F5f54EED4EDFb73EA6f2A4CB5a1A34"
     },
     "binancetestStaging": {
         "MaintainersRegistry": "0x351BB8E7c7243202F58a75D9e640B7282A0EF6ee",
         "Validator": "0xE317bF1cf456875f37F1d1c5A63848d0Ab25653C",
-        "ChainportBridgeBsc": "0xb1D20acaa7bfDF30cb4acf7A500ab6938A5FF7cb",
+        "ChainportSideBridge": "0xb1D20acaa7bfDF30cb4acf7A500ab6938A5FF7cb",
         "ProxyAdmin": "0x62b0ec34aFa04F8dBc64d1D8C28B744002c83b85"
     },
     "mainnet": {
         "MaintainersRegistry": "0x1F13AF55ed6062895bf25DAcFCfb2d0B008d0CFf",
         "Validator": "0x7a90b52DD8C7729d7AE7eA65C79CE4ba5e2C2768",
-        "ChainportBridgeEth": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
+        "ChainportMainBridge": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
         "ProxyAdmin": "0x5bAE376BC4923a78C185CD93dD80eb42f30228EB"
     },
     "binanceMainnet": {
         "MaintainersRegistry": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
         "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
-        "ChainportBridgeBsc": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
+        "ChainportSideBridge": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
         "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
     },
     "ropsten": {
         "MaintainersRegistry": "0x451211796f8d6478B03473e0D0F4Ee6Aa9634d8e",
         "Validator": "0xb879ABc69916fed8dF0A567600Fe304a469b11eb",
-        "ChainportBridgeEth": "0xf94198e75288f80ad9510C0A53B305BFED2DB1cf",
+        "ChainportMainBridge": "0xf94198e75288f80ad9510C0A53B305BFED2DB1cf",
         "ProxyAdmin": "0xFf1dE2e95875777478876fca6D4A89B645fCbC03"
     },
     "binancetest": {
         "MaintainersRegistry": "0x920bf40A31586a2336c5f88F194F3b7F46ADB12F",
         "Validator": "0x8890e4322848B6913AfC4B6086596D7b7d9a3e11",
-        "ChainportBridgeBsc": "0xe655454870c4a28383d81DA9B547EEa129cFB318",
+        "ChainportSideBridge": "0xe655454870c4a28383d81DA9B547EEa129cFB318",
         "ProxyAdmin": "0xc2ad06eF56C8c79a209314d98D0B878533025009"
+    },
+    "polygonMumbai": {
+        "MaintainersRegistry": "0x614ea08AADf323e237B8d62B1553C9b342B3D1F1",
+        "Validator": "0x237A7A59Fa21Cecb277B685c12c65bAd1525DfaE",
+        "ChainportSideBridge": "0x5CB62f043D58927C1b8488DE48B104109edA09eA",
+        "ProxyAdmin": "0x964A9e2B2f2Da04A32c2280B40AF380944051003"
     }
 }
