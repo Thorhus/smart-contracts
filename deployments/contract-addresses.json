@@ -11,7 +11,7 @@
         "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
         "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
         "Validator": "0x570BbC3cfD1846fb160D751F41ADaB1188d560C8",
-        "ChainportMainBridge": "0x7653C0f448A39EcF842d61E2Fca8ae83C555442d"
+        "ChainportMainBridge": "0x7BB1e04299cFDC12758C35D281bCfDDED652c240"
     },
     "binancetest": {
         "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
@@ -19,7 +19,7 @@
         "ChainportToken": "0xb965b288fb7d225c185Ac0e288ed291d2F923eEb",
         "MaintainersRegistry": "0x4e89b05487f89c3f2c03e8e3215284A7f4c59ae9",
         "Validator": "0x7303CD0e18B657dF967E039AA9E5a9034A5d9F40",
-        "ChainportSideBridge": "0x3ECB89118766C00c0f99cD834c75504735E636F7"
+        "ChainportSideBridge": "0x7A6D7b8Cd23d342cD0515351369996CF7f955506"
     },
     "ropstenStaging": {
         "ChainportCongress": "0x131dB3b4393619a4064D6540732524C77239d1bb",
@@ -58,6 +58,6 @@
         "ChainportToken": "0x3a17E4dB7BA26d3D326A780732AF7Ade73E43374",
         "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
         "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
-        "ChainportSideBridge": "0x733349aAd94150dbD33596Bd72D3313c3389eda7"
+        "ChainportSideBridge": "0xFd519D0aBabA75A6079615414FE915c9dBDBaaE1"
     }
 }
