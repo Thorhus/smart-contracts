@@ -3,12 +3,12 @@ const { expect } = require("chai");
 describe("Side Bridge Test", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance,
-    validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
+    validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token, contract,
     tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000";
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
-        [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
+        [chainportCongress, user1, user2, maintainer, contract, ...maintainers] = await ethers.getSigners();
 
         token = await ethers.getContractFactory("BridgeMintableToken");
         token = await token.deploy("", "", decimals);
@@ -37,6 +37,15 @@ describe("Side Bridge Test", function () {
 
         beforeEach(async function () {
             await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
+        });
+
+        describe("Setting maintainers registry", function () {
+            it("Should set maintainers registry (by congress)", async function () {
+                await sideBridgeInstance.connect(chainportCongress).setMaintainersRegistry(contract.address);
+            });
+            it("Should not set maintainers registry (by user)", async function () {
+                await expect(sideBridgeInstance.connect(user1).setMaintainersRegistry(contract.address)).to.be.reverted;
+            });
         });
 
         describe("Bridge Freezing Operations", function () {
@@ -70,6 +79,39 @@ describe("Side Bridge Test", function () {
                 expect(await sideBridgeInstance.isFrozen()).to.equal(true);
                 await expect(sideBridgeInstance.connect(maintainer).unfreezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
+        describe("Network activation", function () {
+
+            it("Should activate network (as maintainer)", async function () {
+                await expect(sideBridgeInstance.connect(maintainer).activateNetwork(1))
+                    .to.emit(sideBridgeInstance, 'NetworkActivated')
+                    .withArgs(1);
+                expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
+            });
+
+            it("Should not activate network (as user)", async function () {
+                await expect(sideBridgeInstance.connect(user1).activateNetwork(1))
+                    .to.be.revertedWith('ChainportUpgradables: Restricted only to Maintainer');
+            });
+
+            it("Should deactivate network (as congress)", async function () {
+                await expect(sideBridgeInstance.connect(maintainer).activateNetwork(1))
+                    .to.emit(sideBridgeInstance, 'NetworkActivated')
+                    .withArgs(1);
+                expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
+                await expect(sideBridgeInstance.connect(chainportCongress).deactivateNetwork(1))
+                    .to.emit(sideBridgeInstance, 'NetworkDeactivated')
+                    .withArgs(1);
+                expect(await sideBridgeInstance.isNetworkActive(1)).to.be.false;
+            });
+
+            it("Should not deactivate network (as user)", async function () {
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+                expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
+                await expect(sideBridgeInstance.connect(user1).deactivateNetwork(1))
+                    .to.be.revertedWith('ChainportUpgradables: Restricted only to ChainportCongress');
             });
         });
 
@@ -247,6 +289,65 @@ describe("Side Bridge Test", function () {
                 bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
+            });
+        });
+
+        describe("Cross chain transfer", function () {
+            it("Should perform cross chain transfer", async function () {
+
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+
+                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+
+                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
+
+                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
+
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintTokens(
+                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount-1, 1))
+                    .to.emit(sideBridgeInstance, 'TokensTransferred')
+                    .withArgs(bepToken.address, maintainer.address, tokenAmount-1, 1);
+            });
+
+            it("Should not perform cross chain transfer (network not activated)", async function () {
+                await expect(sideBridgeInstance.connect(user1).crossChainTransfer(token.address, tokenAmount-1, 1))
+                    .to.be.revertedWith("Error: Network with this id is not supported.");
+            });
+
+            it("Should not perform cross chain transfer (Token not created by the bridge)", async function () {
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+                await expect(sideBridgeInstance.connect(user1).crossChainTransfer(token.address, tokenAmount-1, 1))
+                    .to.be.revertedWith("Error: Token is not created by the bridge.");
+
+            });
+
+            it("Should not perform cross chain transfer (Token amount 0)", async function () {
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+                await expect(sideBridgeInstance.connect(user1).crossChainTransfer(token.address, 0, 1))
+                    .to.be.revertedWith('Error: Amount is not greater than zero.');
+            });
+
+            it("Should not perform cross chain transfer (Token amount exceeds allowance)", async function () {
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+
+                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+
+                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
+
+                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
+
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintTokens(
+                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount+1, 1))
+                    .to.be.revertedWith('ERC20: burn amount exceeds allowance');
             });
         });
     });
