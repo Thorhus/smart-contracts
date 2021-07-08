@@ -64,13 +64,18 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
 
-    modifier isNotFrozen {
+    modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
     }
 
-    modifier onlyIfAmountGreaterThanZero(uint256 amount) {
+    modifier isAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Error: Amount is not greater than zero.");
+        _;
+    }
+
+    modifier isAssetNotFrozen(address asset) {
+        require(!isAssetFrozen[asset], "Error: Asset is frozen.");
         _;
     }
 
@@ -184,8 +189,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     )
     public
     onlyMaintainer
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
+    isBridgeNotFrozen
+    isAmountGreaterThanZero(amount)
+    isAssetNotFrozen(token)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
@@ -211,8 +217,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         uint256 nonce
     )
     public
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
+    isBridgeNotFrozen
+    isAmountGreaterThanZero(amount)
+    isAssetNotFrozen(token)
     {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
@@ -251,8 +258,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         uint256 nonce
     )
     public
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
+    isBridgeNotFrozen
+    isAmountGreaterThanZero(amount)
+    isAssetNotFrozen(token)
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
@@ -299,7 +307,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     )
     public
     onlyChainportCongress
-    isNotFrozen
+    isBridgeNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == true);
         // Get current pending withdrawal attempt
@@ -322,7 +330,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     )
     public
     onlyChainportCongress
-    isNotFrozen
+    isBridgeNotFrozen
     {
         require(isTokenHavingPendingWithdrawal[token] == true);
         // Get current pending withdrawal attempt
@@ -350,8 +358,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         uint256 networkId
     )
     public
-    isNotFrozen
-    onlyIfAmountGreaterThanZero(amount)
+    isBridgeNotFrozen
+    isAmountGreaterThanZero(amount)
+    isAssetNotFrozen(token)
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 

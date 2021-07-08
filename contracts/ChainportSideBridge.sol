@@ -29,7 +29,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
 
-    modifier isNotFrozen {
+    modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
     }
@@ -73,7 +73,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     )
     public
     onlyMaintainer
-    isNotFrozen
+    isBridgeNotFrozen
     {
         require(erc20ToBep20Address[erc20_address] == address(0), "Error: Token already exists.");
 
@@ -92,7 +92,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     )
     public
     onlyMaintainer
-    isNotFrozen
+    isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     {
         require(nonce == functionNameToNonce["mintTokens"] + 1, "Error: Nonce is not correct");
@@ -133,7 +133,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         uint256 networkId
     )
     public
-    isNotFrozen
+    isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
