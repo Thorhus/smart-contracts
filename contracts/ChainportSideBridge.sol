@@ -133,6 +133,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         uint256 networkId
     )
     public
+    isNotFrozen
     isAmountGreaterThanZero(amount)
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
