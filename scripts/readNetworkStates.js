@@ -25,7 +25,7 @@ async function main () {
     // Activating networks
     console.log("Network Id -> Activity State")
     console.log("----------------------------")
-    for(let i = 0; i < networks; i++){
+    for(let i = 0; i <= networks; i++){
         let state = await bridge.isNetworkActive(i)
         state = state === true?"active":"inactive"
         console.log("Network " + i + " -> " + state)

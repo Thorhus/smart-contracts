@@ -2,8 +2,8 @@ const hre = require("hardhat")
 const { getSavedContractProxies } = require("./utils")
 
 async function main () {
-    const networks = 4
-    const contracts = getSavedContractProxies()[hre.network.name]
+    const networks = 2
+    const proxies = getSavedContractProxies()[hre.network.name]
 
     const mainBridgeContractName = "ChainportSideBridge"
     const sideBridgeContractName = "ChainportMainBridge"
@@ -11,11 +11,11 @@ async function main () {
 
     // Checking which bridge is in use
     try {
-        bridge = await hre.ethers.getContractAt(mainBridgeContractName, contracts[mainBridgeContractName])
+        bridge = await hre.ethers.getContractAt(mainBridgeContractName, proxies[mainBridgeContractName])
         console.log("Network is using main bridge.")
     } catch (err) {
         try {
-            bridge = await hre.ethers.getContractAt(sideBridgeContractName, contracts[sideBridgeContractName])
+            bridge = await hre.ethers.getContractAt(sideBridgeContractName, proxies[sideBridgeContractName])
             console.log("Network is using side bridge.")
         } catch (err) {
             console.log(err.message)
@@ -24,7 +24,7 @@ async function main () {
 
     // Activating networks
     console.log("Activating networks...")
-    for(let i = 0; i < networks; i++){
+    for(let i = 1; i <= networks; i++){
         await bridge.activateNetwork(i)
         console.log("Network " + i + " activated.")
     }
