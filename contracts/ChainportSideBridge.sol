@@ -12,7 +12,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     IValidator public signatureValidator;
 
     mapping(address => address) public erc20ToBep20Address; // Name shouldn't be changed because of upgrading conventions
-    mapping(string => uint256) public functionNameToNonce;
+    mapping(string => uint256) public functionNameToNonce;  // Cannot be removed because of upgrading conventions
     mapping(address => bool) public isCreatedByTheBridge;
 
     // Mapping if bridge is Frozen
@@ -20,6 +20,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
+    // Nonce check mapping
+    mapping(bytes32 => bool) public isNonceUsed;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -95,8 +97,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     {
-        require(nonce == functionNameToNonce["mintTokens"] + 1, "Error: Nonce is not correct");
-        functionNameToNonce["mintTokens"] = nonce;
+        bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
+        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
+        isNonceUsed[nonceHash] = true;
 
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
