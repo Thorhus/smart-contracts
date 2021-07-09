@@ -199,7 +199,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isSignatureUsed[signature] = true;
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));
-        require(!isNonceUsed[nonceHash], "Nonce already used.");
+        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
         bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
@@ -225,7 +225,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isSignatureUsed[signature] = true;
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
-        require(!isNonceUsed[nonceHash], "Nonce already used.");
+        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
         // Check if freeze time has passed and same user is calling again
@@ -268,7 +268,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isSignatureUsed[signature] = true;
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
-        require(!isNonceUsed[nonceHash], "Nonce already used.");
+        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
 
 
         // msg.sender is beneficiary address
