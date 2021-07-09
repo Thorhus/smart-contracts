@@ -169,10 +169,11 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            it("Should not mint tokens with invalid nonce", async function () {
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+            it("Should not mint tokens with already used nonce", async function () {
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
+                sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, 435);
                 await expect(sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, 435))
-                    .to.be.revertedWith("Nonce is not correct");
+                    .to.be.revertedWith('Error: Nonce already used.');
             });
 
             it("Should not mint tokens when amount is below or equal to zero", async function () {
