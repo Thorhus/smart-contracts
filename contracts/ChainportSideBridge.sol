@@ -87,6 +87,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
+    maintainerWorkNotInProgress
     {
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
 
@@ -117,27 +118,20 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
-
+    //TODO work towards unifying burnTokens into xchaintransfer function
     function burnTokens(
         address bridgeToken,
         uint256 amount
     )
     public
     isAmountGreaterThanZero(amount)
+    isBridgeNotFrozen
     {
         require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
 
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
         emit TokensBurned(address(token), msg.sender, amount);
-    }
-
-    // Function to clear up the state and delete mistakenly minted tokens.
-    function deleteMintedTokens(address [] memory originalTokenAddresses) public onlyMaintainer {
-        for(uint i = 0; i < originalTokenAddresses.length; i++) {
-            isCreatedByTheBridge[originalAssetToBridgeToken[originalTokenAddresses[i]]] = false;
-            delete originalAssetToBridgeToken[originalTokenAddresses[i]];
-        }
     }
 
     // Function to burn tokens to selected network bridge
