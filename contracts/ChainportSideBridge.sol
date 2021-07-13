@@ -195,6 +195,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to change maintainerWorkInProgress variable/flag
+    // Affects modifier
     function setMaintainerWorkInProgress(
         bool isMaintainerWorkInProgress
     )
