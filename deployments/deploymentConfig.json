@@ -108,11 +108,13 @@
     "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembers": [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
     ],
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
@@ -131,11 +133,13 @@
     "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembers": [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
     ],
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
@@ -151,11 +155,13 @@
     "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembers": [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
     ],
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
