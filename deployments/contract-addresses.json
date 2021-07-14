@@ -11,7 +11,7 @@
         "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
         "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
         "Validator": "0x570BbC3cfD1846fb160D751F41ADaB1188d560C8",
-        "ChainportMainBridge": "0x7BB1e04299cFDC12758C35D281bCfDDED652c240"
+        "ChainportMainBridge": "0x0Ae87eDfd6fb9F931C8572420dEd0Df4E76a6A66"
     },
     "binancetest": {
         "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
@@ -19,7 +19,7 @@
         "ChainportToken": "0xb965b288fb7d225c185Ac0e288ed291d2F923eEb",
         "MaintainersRegistry": "0x4e89b05487f89c3f2c03e8e3215284A7f4c59ae9",
         "Validator": "0x7303CD0e18B657dF967E039AA9E5a9034A5d9F40",
-        "ChainportSideBridge": "0x7466c66Cd709e0B551715eF30501ef477B19Bce2"
+        "ChainportSideBridge": "0x359E9B5f106fA68612cDd90F8D16693F2F5c02Bd"
     },
     "ropstenStaging": {
         "ChainportCongress": "0x131dB3b4393619a4064D6540732524C77239d1bb",
@@ -53,11 +53,11 @@
         "ChainportSideBridge": "0x71B4EA7aF852bbbDCe96348974C7EA1f34C48aA0"
     },
     "polygonMumbai": {
-        "ChainportCongress": "0xE99FE7DbAC84578C7B65a90a354608e658220B78",
-        "ChainportCongressMembersRegistry": "0xF8091853D4c5b68f00749E6a6A928dAB4F06025a",
+        "ChainportCongress": "0x5bA1426905912913E5aA8F896cA5Df0f8af7DAEB",
+        "ChainportCongressMembersRegistry": "0x6d681aAc3f66EaDB99BCC396ad6397c7d4072Fc9",
         "ChainportToken": "0x3a17E4dB7BA26d3D326A780732AF7Ade73E43374",
         "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
         "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
-        "ChainportSideBridge": "0xFe459Ae8bAaB4A8AE6bD4495F9Ad98859056E84b"
+        "ChainportSideBridge": "0x2111d444BD080c10D02B2e2bd756E2578E939844"
     }
 }
