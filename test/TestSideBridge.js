@@ -194,11 +194,11 @@ describe("Side Bridge Test", function () {
 
         describe("Token Burning", function () {
 
-            xit("Should burn a token made by the bridge (by maintainer)", async function () {
+            it("Should burn a token made by the bridge (by maintainer)", async function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
 
                 let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
 
@@ -213,11 +213,11 @@ describe("Side Bridge Test", function () {
                 expect(await bepToken.balanceOf(maintainer.address)).to.equal(tokenAmount - 1);
             });
 
-            xit("Should not burn a token if amount exceeds allowance", async function () {
+            it("Should not burn a token if amount exceeds allowance", async function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepToken = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
 
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer).mintTokens(
@@ -227,11 +227,11 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith("ERC20: burn amount exceeds allowance");
             });
 
-            xit("Should not burn a token if amount is below or equal to zero", async function () {
+            it("Should not burn a token if amount is below or equal to zero", async function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepToken = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
 
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
                 await sideBridgeInstance.connect(maintainer).mintTokens(
@@ -243,19 +243,20 @@ describe("Side Bridge Test", function () {
 
             it("Should not burn a token which was not created by the bridge", async function () {
                 await expect(sideBridgeInstance.connect(maintainer).burnTokens(
-                    await sideBridgeInstance.erc20ToBep20Address(token.address), 1))
+                    await sideBridgeInstance.originalAssetToBridgeToken(token.address), 1))
                     .to.be.revertedWith("Error: Token is not created by the bridge.");
             });
         });
 
-        describe("Delete Minted Tokens", function () {
+        // Function removed
+        xdescribe("Delete Minted Tokens", function () {
 
-            xit("Should not delete minted tokens (by user))", async function () {
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+            it("Should not delete minted tokens (by user))", async function () {
+                bscTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
                 expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
 
@@ -263,42 +264,42 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            xit("Should delete minted tokens (by maintainer))", async function () {
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+            it("Should delete minted tokens (by maintainer))", async function () {
+                bscTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
                 expect(bscTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.true;
 
                 newToken = await ethers.getContractFactory("BridgeMintableToken");
                 newToken = await newToken.deploy("Fake Token", "FKT", decimals);
 
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
                 await sideBridgeInstance.connect(maintainer).mintNewToken(newToken.address, "", "", decimals);
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.not.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.true;
 
                 await sideBridgeInstance.connect(maintainer).deleteMintedTokens([token.address, newToken.address]);
-                bscTokenAddr = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                bscTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
-                bscNewTokenAddr = await sideBridgeInstance.erc20ToBep20Address(newToken.address);
+                bscNewTokenAddr = await sideBridgeInstance.originalAssetToBridgeToken(newToken.address);
                 expect(bscNewTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await sideBridgeInstance.isCreatedByTheBridge(bscNewTokenAddr)).to.be.false;
             });
         });
 
         describe("Cross chain transfer", function () {
-            xit("Should perform cross chain transfer", async function () {
+            it("Should perform cross chain transfer", async function () {
 
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
 
                 let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
 
@@ -333,10 +334,10 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith('Error: Amount is not greater than zero.');
             });
 
-            xit("Should not perform cross chain transfer (Token amount exceeds allowance)", async function () {
+            it("Should not perform cross chain transfer (Token amount exceeds allowance)", async function () {
                 await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
 
-                let bepTokenAddress = await sideBridgeInstance.erc20ToBep20Address(token.address);
+                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
 
                 let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
 
