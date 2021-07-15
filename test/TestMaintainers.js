@@ -33,6 +33,11 @@ describe("MaintainersRegistry", function () {
             expect(await maintainersRegistryInstance.chainportCongress()).to.equal(chainportCongress.address);
         });
 
+        it("Should not initialize twice", async function () {
+            await expect(maintainersRegistryInstance.initialize(maintainers, chainportCongress.address))
+                .to.be.revertedWith("Initializable: contract is already initialized");
+        });
+
         describe("Adding a maintainer", function () {
 
             it("Should add a maintainer (by congress)", async function () {
