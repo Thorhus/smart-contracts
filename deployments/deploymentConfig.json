@@ -118,10 +118,7 @@
     ],
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
-    ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    ]
   },
 
   "binancetestStaging": {
