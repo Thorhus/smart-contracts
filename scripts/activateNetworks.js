@@ -2,6 +2,8 @@ const hre = require("hardhat")
 const { getSavedContractProxies } = require("./utils")
 
 async function main () {
+    // Script for automated activation of supported networks
+    // Number of networks needs to be set properly
     const networks = 2
     const proxies = getSavedContractProxies()[hre.network.name]
 

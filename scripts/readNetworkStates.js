@@ -2,6 +2,8 @@ const hre = require("hardhat")
 const { getSavedContractProxies } = require("./utils")
 
 async function main () {
+    // Script for checking all network states of supported networks on selected blockchain
+    // Number of networks needs to be updated
     const networks = 5
     const contracts = getSavedContractProxies()[hre.network.name]
 
