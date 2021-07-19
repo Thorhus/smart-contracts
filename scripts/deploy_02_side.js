@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const { getSavedContractAddresses, saveContractAddress, saveContractProxies, getSavedContractProxies} = require('./utils')
+const { getSavedContractAddresses, saveContractAddress, saveContractProxies } = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
 
 async function main() {

@@ -1,11 +1,9 @@
 const hre = require("hardhat");
-const { hexify, toChainportDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress, saveContractProxies, getSavedContractProxies, getSavedContractProxyAbis} = require('./utils')
+const { getSavedContractAddresses, getSavedContractProxies, getSavedContractProxyAbis } = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
     await hre.run('compile');
-    const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
     const proxies = getSavedContractProxies()[hre.network.name];
     const abi = getSavedContractProxyAbis()["ProxyAdmin"];

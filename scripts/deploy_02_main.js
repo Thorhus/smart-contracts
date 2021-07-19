@@ -1,6 +1,5 @@
 const hre = require("hardhat");
-const { hexify, toChainportDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress, saveContractProxies, getSavedContractProxies} = require('./utils')
+const { getSavedContractAddresses, saveContractAddress, saveContractProxies } = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
 
 async function main() {
