@@ -40,5 +40,11 @@
         "Validator": "0x237A7A59Fa21Cecb277B685c12c65bAd1525DfaE",
         "ChainportSideBridge": "0x5CB62f043D58927C1b8488DE48B104109edA09eA",
         "ProxyAdmin": "0x964A9e2B2f2Da04A32c2280B40AF380944051003"
+    },
+    "polygonMumbaiStaging": {
+        "MaintainersRegistry": "0x6F5d7Ad88428Bd03F7d879DA7AE50D68CC4A9CBf",
+        "Validator": "0x34e06bf484A39457AdAaa20afE2fb6407F4Dcbc4",
+        "ChainportSideBridge": "0x980C8ed8FfC43BfA7bCd63B7C0a90e2a6285c600",
+        "ProxyAdmin": "0xB4f640A89f5655D1Da762657228F2B54F98832Ce"
     }
 }

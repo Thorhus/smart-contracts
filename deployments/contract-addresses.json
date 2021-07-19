@@ -59,5 +59,13 @@
         "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
         "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
         "ChainportSideBridge": "0x2111d444BD080c10D02B2e2bd756E2578E939844"
+    },
+    "polygonMumbaiStaging": {
+        "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
+        "ChainportCongressMembersRegistry": "0xC8A76aE2572272ecd603225AE3a70da2C2D42127",
+        "ChainportToken": "0xE6874Ef951Ff95761c7969261B07e8fbd9b00F94",
+        "MaintainersRegistry": "0x878FDF5412D59C3aB3Dc74CcA86eA7CAC6C052d2",
+        "Validator": "0x478FE74a6b733f6C407E4A94123FD9E56841BBD0",
+        "ChainportSideBridge": "0x14F4290F86769522E7d6ED843dd8d861Aa77C942"
     }
 }
