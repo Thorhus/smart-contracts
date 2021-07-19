@@ -105,14 +105,13 @@ contract ChainportCongressMembersRegistry {
         require(isMemberInCongress[targetMember] == false);
         // Update basic member information
         address2Member[targetMember] = Member({
-            memberSince: block.timestamp,
-            name: memberName
+        memberSince: block.timestamp,
+        name: memberName
         });
         // Add member to list of all members
         allMembers.push(targetMember);
         // Update minimum quorum
         minimalQuorum = allMembers.length.sub(1);
-
         // Mark that user is member in congress
         isMemberInCongress[targetMember] = true;
         // Fire an event
@@ -132,8 +131,7 @@ contract ChainportCongressMembersRegistry {
     external
     onlyChainportCongress
     {
-        require(isMemberInCongress[targetMember] == true, "Address is not a member of congress.");
-        require(allMembers.length > 1, "Cannot remove last congress member.");
+        require(isMemberInCongress[targetMember] == true);
 
         uint length = allMembers.length;
 
@@ -158,8 +156,8 @@ contract ChainportCongressMembersRegistry {
 
         //Remove his state to empty member
         address2Member[targetMember] = Member({
-            memberSince: block.timestamp,
-            name: "0x0"
+        memberSince: block.timestamp,
+        name: "0x0"
         });
 
         //Reduce 1 member from quorum
@@ -214,9 +212,9 @@ contract ChainportCongressMembersRegistry {
     {
         Member memory member = address2Member[_member];
         return (
-            _member,
-            member.name,
-            member.memberSince
+        _member,
+        member.name,
+        member.memberSince
         );
     }
 
