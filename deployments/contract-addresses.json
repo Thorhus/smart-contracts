@@ -21,6 +21,14 @@
         "Validator": "0x7303CD0e18B657dF967E039AA9E5a9034A5d9F40",
         "ChainportSideBridge": "0x359E9B5f106fA68612cDd90F8D16693F2F5c02Bd"
     },
+    "polygonMumbai": {
+        "ChainportCongress": "0x5bA1426905912913E5aA8F896cA5Df0f8af7DAEB",
+        "ChainportCongressMembersRegistry": "0x6d681aAc3f66EaDB99BCC396ad6397c7d4072Fc9",
+        "ChainportToken": "0x3a17E4dB7BA26d3D326A780732AF7Ade73E43374",
+        "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
+        "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
+        "ChainportSideBridge": "0x2111d444BD080c10D02B2e2bd756E2578E939844"
+    },
     "ropstenStaging": {
         "ChainportCongress": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
         "ChainportCongressMembersRegistry": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
@@ -37,6 +45,14 @@
         "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
         "ChainportSideBridge": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A"
     },
+    "polygonMumbaiStaging": {
+        "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
+        "ChainportCongressMembersRegistry": "0xC8A76aE2572272ecd603225AE3a70da2C2D42127",
+        "ChainportToken": "0xE6874Ef951Ff95761c7969261B07e8fbd9b00F94",
+        "MaintainersRegistry": "0x878FDF5412D59C3aB3Dc74CcA86eA7CAC6C052d2",
+        "Validator": "0x478FE74a6b733f6C407E4A94123FD9E56841BBD0",
+        "ChainportSideBridge": "0x14F4290F86769522E7d6ED843dd8d861Aa77C942"
+    },
     "mainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
         "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
@@ -51,21 +67,5 @@
         "MaintainersRegistry": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
         "Validator": "0xfa09cc64dc2C3C59AF926c028AB3214103e3C78a",
         "ChainportSideBridge": "0x71B4EA7aF852bbbDCe96348974C7EA1f34C48aA0"
-    },
-    "polygonMumbai": {
-        "ChainportCongress": "0x5bA1426905912913E5aA8F896cA5Df0f8af7DAEB",
-        "ChainportCongressMembersRegistry": "0x6d681aAc3f66EaDB99BCC396ad6397c7d4072Fc9",
-        "ChainportToken": "0x3a17E4dB7BA26d3D326A780732AF7Ade73E43374",
-        "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
-        "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
-        "ChainportSideBridge": "0x2111d444BD080c10D02B2e2bd756E2578E939844"
-    },
-    "polygonMumbaiStaging": {
-        "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
-        "ChainportCongressMembersRegistry": "0xC8A76aE2572272ecd603225AE3a70da2C2D42127",
-        "ChainportToken": "0xE6874Ef951Ff95761c7969261B07e8fbd9b00F94",
-        "MaintainersRegistry": "0x878FDF5412D59C3aB3Dc74CcA86eA7CAC6C052d2",
-        "Validator": "0x478FE74a6b733f6C407E4A94123FD9E56841BBD0",
-        "ChainportSideBridge": "0x14F4290F86769522E7d6ED843dd8d861Aa77C942"
     }
 }

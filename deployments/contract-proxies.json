@@ -1,28 +1,4 @@
 {
-    "ropstenStaging": {
-        "MaintainersRegistry": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A",
-        "Validator": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
-        "ChainportMainBridge": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
-        "ProxyAdmin": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9"
-    },
-    "binancetestStaging": {
-        "MaintainersRegistry": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9",
-        "Validator": "0xca9DC171AB63cC726830ac70670210f332E27Cef",
-        "ChainportSideBridge": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
-        "ProxyAdmin": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4"
-    },
-    "mainnet": {
-        "MaintainersRegistry": "0x1F13AF55ed6062895bf25DAcFCfb2d0B008d0CFf",
-        "Validator": "0x7a90b52DD8C7729d7AE7eA65C79CE4ba5e2C2768",
-        "ChainportMainBridge": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
-        "ProxyAdmin": "0x5bAE376BC4923a78C185CD93dD80eb42f30228EB"
-    },
-    "binanceMainnet": {
-        "MaintainersRegistry": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
-        "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
-        "ChainportSideBridge": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
-        "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
-    },
     "ropsten": {
         "MaintainersRegistry": "0x451211796f8d6478B03473e0D0F4Ee6Aa9634d8e",
         "Validator": "0xb879ABc69916fed8dF0A567600Fe304a469b11eb",
@@ -41,10 +17,34 @@
         "ChainportSideBridge": "0x5CB62f043D58927C1b8488DE48B104109edA09eA",
         "ProxyAdmin": "0x964A9e2B2f2Da04A32c2280B40AF380944051003"
     },
+    "ropstenStaging": {
+        "MaintainersRegistry": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A",
+        "Validator": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
+        "ChainportMainBridge": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
+        "ProxyAdmin": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9"
+    },
+    "binancetestStaging": {
+        "MaintainersRegistry": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9",
+        "Validator": "0xca9DC171AB63cC726830ac70670210f332E27Cef",
+        "ChainportSideBridge": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
+        "ProxyAdmin": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4"
+    },
     "polygonMumbaiStaging": {
         "MaintainersRegistry": "0x6F5d7Ad88428Bd03F7d879DA7AE50D68CC4A9CBf",
         "Validator": "0x34e06bf484A39457AdAaa20afE2fb6407F4Dcbc4",
         "ChainportSideBridge": "0x980C8ed8FfC43BfA7bCd63B7C0a90e2a6285c600",
         "ProxyAdmin": "0xB4f640A89f5655D1Da762657228F2B54F98832Ce"
+    },
+    "mainnet": {
+        "MaintainersRegistry": "0x1F13AF55ed6062895bf25DAcFCfb2d0B008d0CFf",
+        "Validator": "0x7a90b52DD8C7729d7AE7eA65C79CE4ba5e2C2768",
+        "ChainportMainBridge": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
+        "ProxyAdmin": "0x5bAE376BC4923a78C185CD93dD80eb42f30228EB"
+    },
+    "binanceMainnet": {
+        "MaintainersRegistry": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
+        "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
+        "ChainportSideBridge": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
+        "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
     }
 }
