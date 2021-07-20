@@ -147,7 +147,7 @@ minimal quorum has been done, you will be able to execute proposal as congress m
 
 ---
 
-###Links
+### Links
 
 * **_Contract Addresses_** -> [here](../deployments/contract-addresses.json)
 * **_Proxy Addresses_** -> [here](../deployments/contract-proxies.json)
