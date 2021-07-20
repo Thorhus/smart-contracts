@@ -146,3 +146,9 @@ main currency (_ETH, BNB, MATIC..._) in case that proposal includes _payable_ fu
 minimal quorum has been done, you will be able to execute proposal as congress member.
 
 ---
+
+###Links
+
+* **_Contract Addresses_** -> [here](../deployments/contract-addresses.json)
+* **_Proxy Addresses_** -> [here](../deployments/contract-proxies.json)
+* **_Deployment Config_** -> [here](../deployments/deploymentConfig.json)
