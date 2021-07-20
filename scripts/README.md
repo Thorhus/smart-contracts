@@ -1,6 +1,6 @@
 # Chainport Scripts
 
-Chainport scripts usage guide.
+Chainport scripts and contracts usage guide.
 
 ## Developer Instructions
 
@@ -16,22 +16,19 @@ $ node encodeParams.js 'address,uint256' '0xf3B39c28bF4c5c13346eEFa8F90e88B78A61
 
 ---
 
-### How to use contract upgrading scripts (ex. upgradeChainportContract.js)
+### How To Use Bridge Upgrade Script For Test Environment (`upgradeChainportBridge.js`)
 
-- __*Step 1:*__ Start node in the project directory using terminal:
+- Upgrade contract with hardhat using this template:
 ```angular2html
-$ npx hardhat node
+$ npx hardhat run --network {desired_network_name} scripts/upgradeChainportBridge.js
 ```
+After execution of this command script will do the following:
 
+- Detect the bridge that selected network is using
+- Upgrade to new implementation
+- Wait for block to change and save new implementation address to `.json` file
 
-- __*Step 2:*__ Upgrade contract with hardhat using this template:
-```angular2html
-$ npx hardhat run --network {desired_network_name} scripts/{desired_upgrading_script}
-```
-- __Ex:__ Upgrade ChainportBridgeEth on ropsten network:
-```angular2html
-$ npx hardhat run --network ropsten scripts/upgradeChainportBridgeEth.js
-```
+By the output you will know when the upgrade is finished correctly.
 
 ---
 ### How to use network related scripts
@@ -56,14 +53,46 @@ Example:
   ```
   After running this command you should get information from console output about requested networks and their current activity states.
 ---
-### Congress submit proposal and vote
 
-- _**Step 1:**_ Select method to execute and destination contract
-- _**Step 2:**_ Generate calldata (explained in `encodeParams.js` section)
-- _**Step 3:**_ Congress can execute multiple methods in the same transaction, but highly
-  recommended is to stick with the one. (That is the reason why always array is accepted)
-- _**Step 4:**_ Call the function:
-```
+## How To Call `onlyMaintainer` Functions
+Functions with the `onlyMaintainer` modifier can be called only if your wallet has been given a privilege 
+of being a maintainer. You will know this either by checking `deploymentConfig.json` or by searching for it 
+in the `MaintainersRegistry` contract on wanted network.
+After confirming that you have maintainer privilege you will be able to call methods present on contracts from
+mentioned wallet address. You can do so via script or via explorer api of wanted network and contract.
+### Methods To Be Called By Maintainer
+ **_MainBridge:_**
+* _freezeBridge()_
+* _freezeAssetByMaintainer(address asset)_
+* _protectAssetByMaintainer(address asset)_
+* _releaseTokensByMaintainer(bytes memory signature, address token, uint256 amount, address beneficiary, uint256 nonce)_
+* _activateNetwork(uint256 networkId)_
+
+**_SideBridge_**
+* _freezeBridge()_
+* _mintNewToken(address token, string memory tokenName, string memory tokenSymbol)_
+* _mintTokens(address token, address receiver, uint256 amount, uint256 nonce)_
+* _activateNetwork(uint256 networkId)_
+* _setMaintainerWorkInProgress(bool value)_
+
+---
+
+## Calling Methods And Making Proposals As Chainport Congress
+Methods that require special authority level with `onlyChainportCongress` modifier can be executed only by the 
+_ChainportCongress_ contract. Firstly since congress has more than one single member, we have to make a proposal
+in order for other congress members to see it. Then they will be able to vote and execute the proposal after the 
+minimum quorum has voted 'for' the proposal and not against it.
+All of the mentioned actions must be performed by congress members including proposing, voting and executing.
+Before calling _ChainportCongress_ contract methods please confirm that the wallet you are using is given the
+congress member privilege. Such can be confirmed by checking `deploymentConfig.json` or by searching it
+in the `ChainportCongressMembersRegistry` contract on wanted network.
+
+### How To Make A Proposal
+Proposal must be made by one of the congress members by executing `propose` function on the contract networks api.
+
+*__Propose Function Arguments:__*
+
+```angular2html
 function propose(
         address[] memory targets,
         uint[] memory values,
@@ -72,137 +101,48 @@ function propose(
         string memory description
     )
 ```
-<br/>
+Attention: It is recommended to use arrays with only one argument/proposal at the time.
 
-- _Step 4.1:_ targets is array of destination targets (where transaction should go)
-- _Step 4.2:_ values are ETH values for the corresponding targets if there's any payable method called
-- _Step 4.3:_ signatures are signatures of methods being called (Ex: "transfer(address,uint256)")
-- _Step 4.4:_ calldatas is the array of calldatas got from Step 2.
-- _Step 4.5:_ description is array of descriptions what is done in the actions
+*__Arguments explanation:__*
 
-<br/>
+`targets: ["contract_address_1", "contract_address_2" ...]` <->
+`targets: ["0x1f...3aBd", "0x5b...3c"]`
 
-- _**Step 5:**_ After method propose is called (best through etherscan) members can vote
-- _**Step 6:**_ During propose method event is emitted with proposalId which is used for voting
-- _**Step 7:**_ Members can vote
-- _**Step 8:**_ Once quorum is reached any member can execute proposal
+Targets is an array of contract addresses that our proposal is targeting.
 
----
+`values: [0, 0.1, 0.25]`
 
-### Maintainer bridge freezing
+Values is an array of token values (_like ETH, BNB, MATIC - depending on blockchian_)
+for payable functions only (_will be zero in most cases_).
 
-- _**Step 1:**_ Select proper method to execute (freezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
-- _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
-- _**Step 3:**_ Call the following function through etherscan:
-``` 
-function freezeBridge() 
-```
+`signatures: ["function_name(argType1,argType2)"]` <->
+`signatures: ["upgradeProxy(address,address)"]`
 
-Function takes no arguments
+Signatures is an array of functions that we want to call with their argument types (_without indents_).
 
----
+`calldatas: [encoded_data_1, encoded_data_2]` <-> `calldatas: [0x00...5f7, 0x00...de3]`
 
-### Congress bridge unfreezing
+Calldatas is an array of encoded data arguments for the function that we want to execute. It is generated
+using `encodeParams.js` script. Details on how to use it can be found [here](#developer-instructions).
 
-- _**Step 1:**_ Select proper method to execute (unfreezeBridge) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef) or [ChainportBridgeBsc](https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
-- _Step 1.1:_ Keep in mind that given function should be called only when the bridge is already frozen
-- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
-- _Step 2.1:_ First take a look at the function
-``` 
-function unfreezeBridge() 
-```
-Function takes no arguments
+`description: "Perform the wanted method."` <-> `description: "Upgrade main bridge."`
 
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
-- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
-- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'unfreezeBridge()')
-- _Step 2.5:_ Since the function has no arguments we do not need to generate calldata (In the place for calldata argument just put 0x)
-- _Step 2.6:_ Description should be action that we want to perform (Unfreeze the bridge) 
+Description is a string that should describe the function that we want to perform. Entirely depends on your
+free will as a congress member.
 
-- _**Step 3:**_ Put everything together like bellow:
-```
-targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
-values: [0]
-signatures: ["unfreezeBridge()"]
-calldatas: [0x]
-description: ["Unfreeze the bridge."]
-```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
-- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
-- _**Step 6:**_ Members can vote
-- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
+### How To Vote
+
+Voting is being performed exclusively on selected networks _ChainportCongress_ contract. The `castVote()` function
+has only two arguments, `uint256 proposalId`(_id of proposal you want to vote for_) 
+and `bool support`(_you can vote for it or against it <-> true or false_). 
+
+### How To Execute Proposal
+
+Attention: proposal can be executed only after the _minimalQuorum_ of congress has voted 'for' the proposal itself.
+
+To execute proposal as a congress member on _ChainportCongress_ contract you will only need two arguments of
+`execute()` function. Those two arguments are `proposalId` of proposal you want to execute and amount of blockchain's
+main currency (_ETH, BNB, MATIC..._) in case that proposal includes _payable_ functions (most of the time it will be zero). If voting of 
+minimal quorum has been done, you will be able to execute proposal as congress member.
 
 ---
-
-### Congress approve locked withdraw
-- _**Step 1:**_ Select proper method to execute (approveWithdrawalAndTransferFunds) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
-- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
-- _Step 2.1:_ First take a look at the function
-```
-function approveWithdrawalAndTransferFunds(
-        address token
-    )
-```
-
-_Args:_ token is address of the token we want to withdraw
-
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
-- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
-- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'approveWithdrawalAndTransferFunds(address)')
-- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to withdraw):
-``` $ node encodedParams.js 'address' 'TOKEN_ADDRESS'  ``` 
-- _Step 2.6:_ Description should be action that we want to perform (Approve withdrawal and transfer funds.) 
-
-- _**Step 3:**_ Put everything together like bellow:
-```
-targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
-values: [0]
-signatures: ["approveWithdrawalAndTransferFunds(address)"]
-calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
-description: ["Approve withdrawal and transfer funds."]
-```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
-- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
-- _**Step 6:**_ Members can vote
-- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
-
----
-
-### Congress reject locked withdraw
-- _**Step 1:**_ Select proper method to execute (rejectWithdrawal) in destination contract ([ChainportBridgeEth](https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef))
-- _**Step 2:**_ Since the function requires congress members proposal and voting we will call it the next way:
-- _Step 2.1:_ First take a look at the function
-```
-function rejectWithdrawal(
-        address token
-    )
-```
-
-_Args:_ token is address of the token we want to withdraw
-
-- _Step 2.2:_ Targets are destinations where transfer should go (blockchain address of the target or targets since its an array)
-- _Step 2.3:_ Values are corresponding values for payable functions (we don't have any therefore its 0)
-- _Step 2.4:_ Signatures are signatures for given functions, for every function they are example of a function call with argument types (in our case 'rejectWithdrawal(address)')
-- _Step 2.5:_ Since this function has argument it is necessary to generate a calldata using encodeParams.js like this (replace TOKEN_ADDRESS with address of token you want to reject withdraw of):
-``` $ node encodedParams.js 'address' 'TOKEN_ADDRESS'  ``` 
-- _Step 2.6:_ Description should be action that we want to perform (Reject token withdrawal.) 
-
-- _**Step 3:**_ Put everything together like bellow:
-```
-targets: ["TARGET ADDRESS"]                   // Put the target address/addresses here (with quotes)
-values: [0]
-signatures: ["rejectWithdrawal(address)"]
-calldatas: [CALLDATA]                         // Put here calldata we just generated (without the quotes)
-description: ["Reject token withdrawal."]
-```
-- _**Step 4:**_ Call the propose method with given arguments (through etherscan, [ChainportCongress](https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1) contract)
-- _**Step 5:**_ During propose method event is emitted with proposalId which is used for voting
-- _**Step 6:**_ Members can vote
-- _**Step 7:**_ Once quorum is reached any member can execute proposal and therefore function will be executed
-
----
-
-### Find contracts on etherscan
-- _**ChainportBridgeEth ->**_ https://etherscan.io/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
-- _**ChainportBridgeBsc ->**_ https://bscscan.com/address/0xca9DC171AB63cC726830ac70670210f332E27Cef
-- _**ChainportCongress ->**_ https://etherscan.io/address/0xB6b4C7aC240b1f176c5589d064733066a83884a1
