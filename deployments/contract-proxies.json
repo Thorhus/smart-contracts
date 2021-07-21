@@ -46,5 +46,11 @@
         "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
         "ChainportSideBridge": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
         "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
+    },
+    "polygonMainnet": {
+        "MaintainersRegistry": "0x451b0d1022eDEcFfcE8A4c6b97c0dE3a46F36769",
+        "Validator": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A",
+        "ChainportSideBridge": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900",
+        "ProxyAdmin": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9"
     }
 }
