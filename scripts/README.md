@@ -1,16 +1,8 @@
 # Chainport Scripts
 
-Usage of chainport scripts
+Chainport scripts and contracts usage guide.
 
 ## Developer Instructions
-
-### How to use upgradability scripts
-1. Rename a new version of contract to contractNameV2 (ex. bridgeEth.sol -> bridgeEthV2.sol)
-2. Run upgrade script for specific contract
-3. Rename contract back to its original name (ex. bridgeEthV2.sol -> bridgeEth.sol)
-
---- 
-
 
 ### encodeParams.js
 
@@ -24,14 +16,83 @@ $ node encodeParams.js 'address,uint256' '0xf3B39c28bF4c5c13346eEFa8F90e88B78A61
 
 ---
 
-### Congress submit proposal and vote
+### How To Use Bridge Upgrade Script For Test Environment (`upgradeChainportBridge.js`)
 
-- _**Step 1:**_ Select method to execute and destination contract
-- _**Step 2:**_ Generate calldata (explained in `encodeParams.js` section)
-- _**Step 3:**_ Congress can execute multiple methods in the same transaction, but highly
-  recommended is to stick with the one. (That is the reason why always array is accepted)
-- _**Step 4:**_ Call the function:
+- Upgrade contract with hardhat using this template:
+```angular2html
+$ npx hardhat run --network {desired_network_name} scripts/upgradeChainportBridge.js
 ```
+After execution of this command script will do the following:
+
+- Detect the bridge that selected network is using
+- Upgrade to new implementation
+- Wait for block to change and save new implementation address to `.json` file
+
+By the output you will know when the upgrade is finished correctly.
+
+---
+### How to use network related scripts
+`activateNetworks.js` & `readNetworkStates.js`
+- We use `activateNetworks.js` to automatically and conventionally activate networks that we want to support.
+- We use `readNetworkStates.js` to check requested network states.
+* Both of the scripts are being executed using hardhat and they autodetect type of bridge contracts on specified
+network. Only step left to do is run script using this command template in your terminal.
+  ```angular2html
+  $ npx hardhat run --network {desired_network_name} scripts/{desired_network_related_script}
+  ```
+Example: 
+- _**Step 1:**_ To activate specified networks on ropsten bridge contract we use next command:
+  ```angular2html
+  $ npx hardhat run --network ropsten scripts/activateNetworks.js
+  ```
+  Running this command will let the script perform necessary work on bridge contract to make specific networks active.
+<br><br>
+- _**Step 2:**_ Now we can run `readNetworkStates.js` to see if the networks we need are active:
+  ```angular2html
+  $ npx hardhat run --network ropsten scripts/readNetworkStates.js
+  ```
+  After running this command you should get information from console output about requested networks and their current activity states.
+---
+
+## How To Call `onlyMaintainer` Functions
+Functions with the `onlyMaintainer` modifier can be called only if your wallet has been given a privilege 
+of being a maintainer. You will know this either by checking `deploymentConfig.json` or by searching for it 
+in the `MaintainersRegistry` contract on wanted network.
+After confirming that you have maintainer privilege you will be able to call methods present on contracts from
+mentioned wallet address. You can do so via script or via explorer api of wanted network and contract.
+### Methods To Be Called By Maintainer
+ **_MainBridge:_**
+* _freezeBridge()_
+* _freezeAssetByMaintainer(address asset)_
+* _protectAssetByMaintainer(address asset)_
+* _releaseTokensByMaintainer(bytes memory signature, address token, uint256 amount, address beneficiary, uint256 nonce)_
+* _activateNetwork(uint256 networkId)_
+
+**_SideBridge_**
+* _freezeBridge()_
+* _mintNewToken(address token, string memory tokenName, string memory tokenSymbol)_
+* _mintTokens(address token, address receiver, uint256 amount, uint256 nonce)_
+* _activateNetwork(uint256 networkId)_
+* _setMaintainerWorkInProgress(bool value)_
+
+---
+
+## Calling Methods And Making Proposals As Chainport Congress
+Methods that require special authority level with `onlyChainportCongress` modifier can be executed only by the 
+_ChainportCongress_ contract. Firstly since congress has more than one single member, we have to make a proposal
+in order for other congress members to see it. Then they will be able to vote and execute the proposal after the 
+minimum quorum has voted 'for' the proposal and not against it.
+All of the mentioned actions must be performed by congress members including proposing, voting and executing.
+Before calling _ChainportCongress_ contract methods please confirm that the wallet you are using is given the
+congress member privilege. Such can be confirmed by checking `deploymentConfig.json` or by searching it
+in the `ChainportCongressMembersRegistry` contract on wanted network.
+
+### How To Make A Proposal
+Proposal must be made by one of the congress members by executing `propose` function on the contract networks api.
+
+*__Propose Function Arguments:__*
+
+```angular2html
 function propose(
         address[] memory targets,
         uint[] memory values,
@@ -40,74 +101,54 @@ function propose(
         string memory description
     )
 ```
-<br/>
+Attention: It is recommended to use arrays with only one argument/proposal at the time.
 
-- _Step 4.1:_ targets is array of destination targets (where transaction should go)
-- _Step 4.2:_ values are ETH values for the corresponding targets if there's any payable method called
-- _Step 4.3:_ signatures are signatures of methods being called (Ex: "transfer(address,uint256)")
-- _Step 4.4:_ calldatas is the array of calldatas got from Step 2.
-- _Step 4.5:_ description is array of descriptions what is done in the actions
+*__Arguments explanation:__*
 
-<br/>
+`targets: ["contract_address_1", "contract_address_2" ...]` <->
+`targets: ["0x1f...3aBd", "0x5b...3c"]`
 
-- _**Step 5:**_ After method propose is called (best through etherscan) members can vote
-- _**Step 6:**_ During propose method event is emitted with proposalId which is used for voting
-- _**Step 7:**_ Members can vote
-- _**Step 8:**_ Once quorum is reached any member can execute proposal
+Targets is an array of contract addresses that our proposal is targeting.
+
+`values: [0, 0.1, 0.25]`
+
+Values is an array of token values (_like ETH, BNB, MATIC - depending on blockchian_)
+for payable functions only (_will be zero in most cases_).
+
+`signatures: ["function_name(argType1,argType2)"]` <->
+`signatures: ["upgradeProxy(address,address)"]`
+
+Signatures is an array of functions that we want to call with their argument types (_without indents_).
+
+`calldatas: [encoded_data_1, encoded_data_2]` <-> `calldatas: [0x00...5f7, 0x00...de3]`
+
+Calldatas is an array of encoded data arguments for the function that we want to execute. It is generated
+using `encodeParams.js` script. Details on how to use it can be found [here](#developer-instructions).
+
+`description: "Perform the wanted method."` <-> `description: "Upgrade main bridge."`
+
+Description is a string that should describe the function that we want to perform. Entirely depends on your
+free will as a congress member.
+
+### How To Vote
+
+Voting is being performed exclusively on selected networks _ChainportCongress_ contract. The `castVote()` function
+has only two arguments, `uint256 proposalId`(_id of proposal you want to vote for_) 
+and `bool support`(_you can vote for it or against it <-> true or false_). 
+
+### How To Execute Proposal
+
+Attention: proposal can be executed only after the _minimalQuorum_ of congress has voted 'for' the proposal itself.
+
+To execute proposal as a congress member on _ChainportCongress_ contract you will only need two arguments of
+`execute()` function. Those two arguments are `proposalId` of proposal you want to execute and amount of blockchain's
+main currency (_ETH, BNB, MATIC..._) in case that proposal includes _payable_ functions (most of the time it will be zero). If voting of 
+minimal quorum has been done, you will be able to execute proposal as congress member.
 
 ---
 
-### Maintainer bridge freezing
+### Links
 
-- _**Step 1:**_ Select proper method to execute in destination contract
-- _**Step 2:**_ Make sure that you are connected as maintainer (function can only be performed by maintainer)
-- _**Step 3:**_ Call function:
-``` 
-function freezeBridge() 
-```
-<br/>
-- No arguments
-
----
-
-### Congress bridge unfreezing
-
-- _**Step 1:**_ Select proper method to execute in destination contract
-- _**Step 2:**_ Call function:
-``` 
-function unfreezeBridge() 
-```
-
-- No arguments
-
-- _**Step 3:**_ Congress members can now vote (preferably through etherscan) in order to execute the function
-
----
-
-### Congress approve locked withdraw
-- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
-- _**Step 2:**_ Call function:
-```
-function approveWithdrawalAndTransferFunds(
-        address token
-    )
-```
-
-- _Step 2.1:_ token is address of the token we want to withdraw
-
-- _**Step 3:**_ Same as on 'Congress bridge unfreezing' paragraph congress members should perform voting in order to execute function
----
-
-### Congress reject locked withdraw
-- _**Step 1:**_ Select proper method to execute in destination contract (ChainportBridgeEth.sol)
-- _**Step 2:**_ Call function:
-```
-function rejectWithdrawal(
-        address token
-    )
-```
-
-- _Step 2.1:_ token is address of the token we want to reject withdrawal of
-
-- _**Step 3:**_ Same as on 'Congress bridge unfreezing' and 'Approve locked withdraw' paragraph congress members should perform voting in order to execute function
----
+* **_Contract Addresses_** -> [here](../deployments/contract-addresses.json)
+* **_Proxy Addresses_** -> [here](../deployments/contract-proxies.json)
+* **_Deployment Config_** -> [here](../deployments/deploymentConfig.json)

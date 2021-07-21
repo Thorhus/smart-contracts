@@ -9,7 +9,7 @@ contract MaintainersRegistry is Initializable {
     using SafeMath for uint;
 
     // Mappings
-    mapping(address => bool) _isMaintainer;
+    mapping(address => bool) private _isMaintainer;
 
     // Singular types
 
@@ -87,6 +87,7 @@ contract MaintainersRegistry is Initializable {
         require(_isMaintainer[_maintainer] == true, 'MaintainersRegistry :: Address is not a maintainer');
 
         uint length = allMaintainers.length;
+        require(length > 1, "Cannot remove last maintainer.");
 
         uint i = 0;
 

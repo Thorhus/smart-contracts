@@ -14,6 +14,8 @@ contract Validator is Initializable, ChainportMiddleware {
 
     address public signatoryAddress;
 
+    bytes32 constant private recoverSignatureHash = keccak256(abi.encodePacked('bytes binding user withdrawal'));
+
     // Set initial signatory address and Chainport congress
     function initialize(
         address _signatoryAddress,
@@ -46,7 +48,7 @@ contract Validator is Initializable, ChainportMiddleware {
      * @param           amount is the amount of tokens user is attempting to withdraw
      */
     function verifyWithdraw(
-        bytes memory signedMessage,
+        bytes calldata signedMessage,
         address token,
         uint256 amount,
         address beneficiary,
@@ -81,7 +83,7 @@ contract Validator is Initializable, ChainportMiddleware {
         // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
-                keccak256(abi.encodePacked('bytes binding user withdrawal')),
+                recoverSignatureHash,
                 keccak256(abi.encodePacked(beneficiary, token, amount, nonce))
             )
         );
@@ -150,7 +152,11 @@ contract Validator is Initializable, ChainportMiddleware {
         require(v==27 || v==28,'bad sig v');
         //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/cryptography/ECDSA.sol#L57
         require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, 'bad sig s');
-        return ecrecover(hash, v, r, s);
+
+        address signer = ecrecover(hash, v, r, s);
+        require(signer != address(0), 'bad signature');
+
+        return signer;
 
     }
 

@@ -19,19 +19,23 @@ describe("MaintainersRegistry", function () {
         maintainers[maintainers.length] = maintainer.address;
     });
 
-    it("Should initialize and make given addresses maintainers", async function () {
-        await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
-        let res;
-        for(let i = 0; i < maintainers.length; i++) {
-            res = await maintainersRegistryInstance.isMaintainer(maintainers[i]);
-            expect(res).to.equal(true);
-        }
-        expect(await maintainersRegistryInstance.chainportCongress()).to.equal(chainportCongress.address);
-    });
-
     describe("Maintainers Functions", function () {
         beforeEach(async function () {
             await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
+        });
+
+        it("Should initialize and make given addresses maintainers", async function () {
+            let res;
+            for(let i = 0; i < maintainers.length; i++) {
+                res = await maintainersRegistryInstance.isMaintainer(maintainers[i]);
+                expect(res).to.equal(true);
+            }
+            expect(await maintainersRegistryInstance.chainportCongress()).to.equal(chainportCongress.address);
+        });
+
+        it("Should not initialize twice", async function () {
+            await expect(maintainersRegistryInstance.initialize(maintainers, chainportCongress.address))
+                .to.be.revertedWith("Initializable: contract is already initialized");
         });
 
         describe("Adding a maintainer", function () {

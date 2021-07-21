@@ -2,6 +2,8 @@
 
 Implementation of Chainport protocol
 
+[![codecov](https://codecov.io/gh/chainport/smart-contracts/branch/master/graph/badge.svg?token=EDOX8YQHGI)](https://codecov.io/gh/chainport/smart-contracts)
+
 ### Developer instructions
 
 #### Instal dependencies

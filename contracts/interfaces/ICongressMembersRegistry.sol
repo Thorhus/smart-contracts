@@ -1,7 +1,7 @@
 pragma solidity ^0.6.12;
 
 /**
- * IHordCongressMembersRegistry contract.
+ * ICongressMembersRegistry contract.
  * @author Nikola Madjarevic
  * Date created: 21.3.21.
  * Github: madjarevicn

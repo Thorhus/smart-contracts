@@ -91,6 +91,15 @@ function saveContractBytecode(network, contract, bytecode, env) {
     fs.writeFileSync(path.join(__dirname, `../deployments/contract-bytecodes.json`), JSON.stringify(bytecodes, null, '    '))
 }
 
+function getSavedContractProxyAbis() {
+    let json
+    try {
+        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-proxy-abis.json`))
+    } catch (err) {
+        json = '{}'
+    }
+    return JSON.parse(json)
+}
 
 module.exports = {
     getSavedContractAddresses,
@@ -100,5 +109,6 @@ module.exports = {
     getDeploymentBlockchain,
     saveDeploymentBlockchain,
     getSavedContractABI,
-    saveContractAbi
+    saveContractAbi,
+    getSavedContractProxyAbis
 }
