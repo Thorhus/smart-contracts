@@ -1,8 +1,11 @@
 {
   "local": {
-    "tokenName" : "Bridge Token",
-    "tokenSymbol" : "BRD",
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
+    "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
       "0xf3B39c28bF4c5c13346eEFa8F90e88B78A610381"
@@ -12,17 +15,17 @@
       "Nikola"
     ],
     "maintainers": [
-      "0x83453d40198982beA848d982CE4d056D3ddFb41D"
-    ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
+    ]
   },
 
   "ropsten": {
-    "tokenName" : "Bridge Token",
-    "tokenSymbol" : "BRD",
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
+    "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
       "0xf3B39c28bF4c5c13346eEFa8F90e88B78A610381"
@@ -33,16 +36,16 @@
     ],
     "maintainers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D"
-    ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    ]
   },
 
   "binancetest": {
-    "tokenName" : "Bridge Token",
-    "tokenSymbol" : "wBRD",
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
     "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
+    "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
     "initialCongressMembers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D",
       "0xf3B39c28bF4c5c13346eEFa8F90e88B78A610381"
@@ -53,10 +56,47 @@
     ],
     "maintainers": [
       "0x83453d40198982beA848d982CE4d056D3ddFb41D"
+    ]
+  },
+
+  "polygonMumbai": {
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
+    "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
+    "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
+    "initialCongressMembers": [
+      "0x83453d40198982beA848d982CE4d056D3ddFb41D",
+      "0xf3B39c28bF4c5c13346eEFa8F90e88B78A610381"
     ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    "initialCongressMembersNames": [
+      "Idan",
+      "Nikola"
+    ],
+    "maintainers": [
+      "0x83453d40198982beA848d982CE4d056D3ddFb41D"
+    ]
+  },
+
+  "hecotest": {
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
+    "totalSupply" : 320000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
+    "signatoryAddress" : "0xa040a4e812306d66746508bcfbe84b3e73de67fa",
+    "initialCongressMembers": [
+      "0x83453d40198982beA848d982CE4d056D3ddFb41D",
+      "0xf3B39c28bF4c5c13346eEFa8F90e88B78A610381"
+    ],
+    "initialCongressMembersNames": [
+      "Idan",
+      "Nikola"
+    ],
+    "maintainers": [
+      "0x83453d40198982beA848d982CE4d056D3ddFb41D"
+    ]
   },
 
   "ropstenStaging": {
@@ -65,21 +105,20 @@
     "totalSupply" : 180000000,
     "timeLockLength" : 3600,
     "safetyThreshold" : 20,
+    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembers": [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
     ],
-    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
-    ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    ]
   },
 
   "binancetestStaging": {
@@ -88,21 +127,42 @@
     "totalSupply" : 180000000,
     "timeLockLength" : 3600,
     "safetyThreshold" : 20,
+    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembers": [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
-    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Deployer"
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
     ],
     "maintainers": [
       "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
+    ]
+  },
+
+  "polygonMumbaiStaging": {
+    "tokenName" : "Chainport",
+    "tokenSymbol" : "PORT",
+    "totalSupply" : 180000000,
+    "timeLockLength" : 3600,
+    "safetyThreshold" : 20,
+    "signatoryAddress": "0xd86fc51cabe595162f1398ffdcdb7e4f69c54078",
+    "initialCongressMembers": [
+      "0x894107B7b5051409f279E8300774B2f62Febe057",
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6",
+      "0xb0b599daE2afF825543cfeb061eb206365dA921f"
     ],
-    "ethErc20tokenName": "TestEthToken",
-    "ethErc20tokenSymbol": "TET",
-    "ethErc20tokenSupply": 320000000
+    "initialCongressMembersNames": [
+      "Chainport Foundation 1",
+      "Chainport Foundation 2",
+      "Chainport Foundation 3"
+    ],
+    "maintainers": [
+      "0x4a102dCFe11Ba9b7ABD169CC993Bfc5c1910700E"
+    ]
   },
 
   "mainnet": {
@@ -114,11 +174,13 @@
     "signatoryAddress": "0x75187213Ef5B4DdE3feBdf779B12504E078069B0",
     "initialCongressMembers" : [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2",
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Nikola"
+      "Chainport Nikola",
+      "Chainport Foundation 2"
     ],
     "maintainers" : [
       "0xfE83475880d3592833249BAAacfEC5eD51E29D82"
@@ -134,11 +196,35 @@
     "signatoryAddress": "0x75187213Ef5B4DdE3feBdf779B12504E078069B0",
     "initialCongressMembers" : [
       "0x894107B7b5051409f279E8300774B2f62Febe057",
-      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2"
+      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2",
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6"
     ],
     "initialCongressMembersNames": [
       "Chainport Foundation 1",
-      "Chainport Nikola"
+      "Chainport Nikola",
+      "Chainport Foundation 2"
+    ],
+    "maintainers" : [
+      "0xfE83475880d3592833249BAAacfEC5eD51E29D82"
+    ]
+  },
+
+  "polygonMainnet": {
+    "tokenName" : "Chainport Token",
+    "tokenSymbol" : "PORT",
+    "totalSupply" : 180000000,
+    "timeLockLength" : 129600,
+    "safetyThreshold" : 40,
+    "signatoryAddress": "0x75187213Ef5B4DdE3feBdf779B12504E078069B0",
+    "initialCongressMembers" : [
+      "0x894107B7b5051409f279E8300774B2f62Febe057",
+      "0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2",
+      "0xd2238e8c085e5059f8dfc52256530210bc7250f6"
+    ],
+    "initialCongressMembersNames": [
+      "Chainport Foundation 1",
+      "Chainport Nikola",
+      "Chainport Foundation 2"
     ],
     "maintainers" : [
       "0xfE83475880d3592833249BAAacfEC5eD51E29D82"
