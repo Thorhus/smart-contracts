@@ -2,7 +2,7 @@ const { expect } = require("chai");
 
 describe("Validator", function () {
 
-    let maintainersRegistry, maintainersRegistryInstance, bridgeBsc, bridgeBscInstance,
+    let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
     tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -25,10 +25,10 @@ describe("Validator", function () {
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
 
-        bridgeBsc = await ethers.getContractFactory("ChainportBridgeBsc");
-        bridgeBscInstance = await bridgeBsc.deploy();
+        sideBridge = await ethers.getContractFactory("ChainportSideBridge");
+        sideBridgeInstance = await sideBridge.deploy();
     });
-    
+
     describe("Main functions", function () {
 
         beforeEach(async function () {
@@ -39,12 +39,12 @@ describe("Validator", function () {
             it("Should not set zero address (by congress)", async function () {
                 await expect(validatorInstance.setSignatoryAddress(zeroAddress)).to.be.reverted;
             });
-    
+
             it("Should set signatory address (by congress)", async function() {
                 await validatorInstance.setSignatoryAddress(validatorInstance.address);
                 expect(await(validatorInstance.signatoryAddress())).to.equal(validatorInstance.address);
             });
-    
+
             it("Should not set signatory address (by non congress)", async function () {
                 await expect(validatorInstance.connect(user1).setSignatoryAddress(user1.address))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");

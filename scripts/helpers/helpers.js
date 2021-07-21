@@ -14,7 +14,10 @@ const networkToBlockchain = {
     'binancetest' : 'bsc',
     'binancetestStaging' : 'bsc',
     'mainnet': 'eth',
-    'binanceMainnet': 'bsc'
+    'binanceMainnet': 'bsc',
+    'polygonMumbai' : 'polygon',
+    'polygonMumbaiStaging' : 'polygon',
+    'polygonMainnet' : 'polygon'
 };
 
 /**

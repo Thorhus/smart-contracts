@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
  */
 contract BridgeMintableToken is ERC20Burnable {
 
-    address public binanceBridgeContract;
+    address public sideBridgeContract;
 
     constructor(
         string memory tokenName_,
@@ -22,7 +22,7 @@ contract BridgeMintableToken is ERC20Burnable {
     ERC20(tokenName_, tokenSymbol_)
     {
         _setupDecimals(decimals_);
-        binanceBridgeContract = msg.sender;
+        sideBridgeContract = msg.sender;
     }
 
     event Mint(address indexed to, uint256 amount);
@@ -33,17 +33,19 @@ contract BridgeMintableToken is ERC20Burnable {
     )
     public
     {
-        require(msg.sender == binanceBridgeContract, "Only Bridge contract can mint new tokens.");
+        require(msg.sender == sideBridgeContract, "Only Bridge contract can mint new tokens.");
         _mint(_to, _amount);
         emit Mint(_to, _amount);
     }
 
-    function setBinanceBridgeContract(
-        address _binanceBridgeContract
+    // Function for setting new bridge proxy contract address
+    function setSideBridgeContract(
+        address _sideBridgeContract
     )
     public
     {
-        require(msg.sender == binanceBridgeContract);
-        binanceBridgeContract = _binanceBridgeContract;
+        require(msg.sender == sideBridgeContract);
+        require(_sideBridgeContract != address(0));
+        sideBridgeContract = _sideBridgeContract;
     }
 }

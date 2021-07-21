@@ -105,8 +105,8 @@ contract ChainportCongressMembersRegistry {
         require(isMemberInCongress[targetMember] == false);
         // Update basic member information
         address2Member[targetMember] = Member({
-            memberSince: block.timestamp,
-            name: memberName
+        memberSince: block.timestamp,
+        name: memberName
         });
         // Add member to list of all members
         allMembers.push(targetMember);
@@ -156,8 +156,8 @@ contract ChainportCongressMembersRegistry {
 
         //Remove his state to empty member
         address2Member[targetMember] = Member({
-            memberSince: block.timestamp,
-            name: "0x0"
+        memberSince: block.timestamp,
+        name: "0x0"
         });
 
         //Reduce 1 member from quorum
@@ -212,9 +212,9 @@ contract ChainportCongressMembersRegistry {
     {
         Member memory member = address2Member[_member];
         return (
-            _member,
-            member.name,
-            member.memberSince
+        _member,
+        member.name,
+        member.memberSince
         );
     }
 

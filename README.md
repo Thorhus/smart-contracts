@@ -2,6 +2,8 @@
 
 Implementation of Chainport protocol
 
+[![codecov](https://codecov.io/gh/chainport/smart-contracts/branch/master/graph/badge.svg?token=EDOX8YQHGI)](https://codecov.io/gh/chainport/smart-contracts)
+
 ### Developer instructions
 
 #### Instal dependencies
@@ -30,12 +32,12 @@ USERNAME=2key
 - `rm -r .openzeppelin`
 - `rm -r cache`
 - `rm -r artifacts`
-- `npx hardhat run --network ropsten scripts/deploy_01.js`
-- `npx hardhat run --network ropsten scripts/deploy_02.js`
-- `npx hardhat run --network binancetest scripts/deploy_01.js`
-- `npx hardhat run --network binancetest scripts/deploy_02_binance.js`
-- `npx hardhat run --network ropsten tenderly/tenderly_push.js`
-- `npx hardhat run --network binancetest tenderly/tenderly_push.js`
+- `npx hardhat run --network ropstenStaging scripts/deploy_01.js`
+- `npx hardhat run --network ropstenStaging scripts/deploy_02.js`
+- `npx hardhat run --network binancetestStaging scripts/deploy_01.js`
+- `npx hardhat run --network binancetestStaging scripts/deploy_02_binance.js`
+- `npx hardhat run --network ropstenStaging tenderly/tenderly_push.js`
+- `npx hardhat run --network binancetestStaging tenderly/tenderly_push.js`
 
 #### Tenderly push
 - Generate tenderly access key on the https://dashboard.tenderly.co
