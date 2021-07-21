@@ -207,7 +207,7 @@ describe("Bridge Binance Side", function () {
 
         describe("Delete Minted Tokens", function () {
 
-            it("Should not delete minted tokens (by user))", async function () {
+            it("Should not delete minted tokens (by user)", async function () {
                 bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
@@ -220,7 +220,7 @@ describe("Bridge Binance Side", function () {
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            it("Should delete minted tokens (by maintainer))", async function () {
+            it("Should delete minted tokens (by maintainer)", async function () {
                 bscTokenAddr = await bridgeBscInstance.erc20ToBep20Address(token.address);
                 expect(bscTokenAddr.toString()).to.be.equal(zeroAddress);
                 expect(await bridgeBscInstance.isCreatedByTheBridge(bscTokenAddr)).to.be.false;
