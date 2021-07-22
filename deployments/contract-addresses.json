@@ -57,9 +57,9 @@
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
         "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
         "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
-        "MaintainersRegistry": "0x83B3d4B7651aC4E4aaA8B9ccbfccD66C76D94402",
-        "Validator": "0xfE96f0902Ce65C644bF607d3eCC800790a8240a4",
-        "ChainportMainBridge": "0x931a22bB1267b2890D4630b59d92daa42EBF1912"
+        "MaintainersRegistry": "0x71D57ee5471B720642A129621eA694da8F949621",
+        "Validator": "0x578d73B9C8310997893118bd17F6C0b4c92EF61E",
+        "ChainportMainBridge": "0x93307C7dE0f1B54814135f06321639A9f5c7dDFF"
     },
     "binanceMainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
