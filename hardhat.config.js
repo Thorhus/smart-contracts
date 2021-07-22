@@ -120,7 +120,7 @@ module.exports = {
       url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
       accounts: [process.env.PK],
       chainId: 1,
-      gasPrice: 41000000000,
+      gasPrice: 25000000000,
       timeout: 500000000
     },
     binanceMainnet: {
