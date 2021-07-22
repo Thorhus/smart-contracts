@@ -3,11 +3,18 @@ require('@nomiclabs/hardhat-ethers');
 require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
-require('dotenv').config();
 require("solidity-coverage");
+require("requirejs");
+
+let PK
+
+require('dotenv'.config(), function(content){
+  PK = process.env.PK;
+}, function(err) {
+  PK = 0xA9664FDf800930e5E5E879bCf8CE290943F1E30D
+});
 
 const { generateTenderlySlug } = require('./scripts/helpers/helpers');
-
 
 task('accounts', 'Prints the list of accounts', async () => {
   const accounts = await ethers.getSigners();
