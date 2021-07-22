@@ -4,15 +4,13 @@ require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
 require("solidity-coverage");
-require("requirejs");
+require('dotenv').config()
 
-let PK
+let PK = process.env.PK
 
-require('dotenv'.config(), function(content){
-  PK = process.env.PK;
-}, function(err) {
-  PK = 0xA9664FDf800930e5E5E879bCf8CE290943F1E30D
-});
+if(typeof PK === 'undefined'){
+  PK = `0x${"32c069bf3d38a060eacdc072eecd4ef63f0fc48895afbacbe185c97037789875"}`
+}
 
 const { generateTenderlySlug } = require('./scripts/helpers/helpers');
 
@@ -34,42 +32,42 @@ module.exports = {
   networks: {
     hecotest: {
       url: 'https://http-testnet.hecochain.com/',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 256,
       gasPrice: 40000000000,
       timeout: 50000
     },
     hecotestStaging: {
       url: 'https://http-testnet.hecochain.com/',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 256,
       gasPrice: 40000000000,
       timeout: 50000
     },
     hecoMainnet: {
       url: 'https://http-mainnet.hecochain.com/',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 128,
       gasPrice: 41000000000,
       timeout: 500000000
     },
     polygonMumbai: {
       url: 'https://matic-testnet-archive-rpc.bwarelabs.com',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 80001,
       gasPrice: 40000000000,
       timeout: 50000
     },
     polygonMumbaiStaging: {
       url: 'https://matic-testnet-archive-rpc.bwarelabs.com',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 80001,
       gasPrice: 40000000000,
       timeout: 50000
     },
     polygonMainnet: {
       url: 'https://matic-mainnet-archive-rpc.bwarelabs.com',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 137,
       gasPrice: 41000000000,
       timeout: 500000000
@@ -77,7 +75,7 @@ module.exports = {
     kovan: {
       // Infura public nodes
       url: 'https://kovan.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 42,
       gasPrice: 40000000000,
       timeout: 50000
@@ -85,7 +83,7 @@ module.exports = {
     kovanStaging: {
       // Infura public nodes
       url: 'https://kovan.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 42,
       gasPrice: 40000000000,
       timeout: 50000
@@ -93,7 +91,7 @@ module.exports = {
     ropsten: {
       // Infura public nodes
       url: 'https://ropsten.infura.io/v3/34ee2e319e7945caa976d4d1e24db07f',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 3,
       gasPrice: 40000000000,
       timeout: 50000
@@ -101,7 +99,7 @@ module.exports = {
     ropstenStaging: {
       // Infura public nodes
       url: 'https://ropsten.infura.io/v3/34ee2e319e7945caa976d4d1e24db07f',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 3,
       gasPrice: 80000000000,
       timeout: 100000
@@ -109,7 +107,7 @@ module.exports = {
     binancetest: {
       // Infura public nodes
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 97,
       gasPrice: 40000000000,
       timeout: 50000
@@ -117,7 +115,7 @@ module.exports = {
     binancetestStaging: {
       // Infura public nodes
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 97,
       gasPrice: 40000000000,
       timeout: 50000
@@ -125,14 +123,14 @@ module.exports = {
     mainnet: {
       // Infura public nodes
       url: 'https://mainnet.infura.io/v3/1692a3b8ad92406189c2c7d2b01660bc',
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 1,
       gasPrice: 41000000000,
       timeout: 500000000
     },
     binanceMainnet: {
       url: "https://bsc-dataseed.binance.org/",
-      accounts: [process.env.PK],
+      accounts: [PK],
       chainId: 56,
       gasPrice: 20000000000,
       timeout: 500000000
