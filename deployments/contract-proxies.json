@@ -48,9 +48,9 @@
         "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
     },
     "polygonMainnet": {
-        "MaintainersRegistry": "0x451b0d1022eDEcFfcE8A4c6b97c0dE3a46F36769",
-        "Validator": "0xF8F86d0d44736B25BC638a59F2F3A98D6b3Cd59A",
-        "ChainportSideBridge": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900",
-        "ProxyAdmin": "0xA3590DFe373eB8f5F8261aa6675a320b48924FD9"
+        "MaintainersRegistry": "0x93307C7dE0f1B54814135f06321639A9f5c7dDFF",
+        "Validator": "0x33b43965A288c3ab24740ac092D8A214B8DDD0EA",
+        "ChainportSideBridge": "0xF9ac9365A23D837F97078DaD50638a12c9E256C8",
+        "ProxyAdmin": "0x8637D273285fAa6794e3D4d1Ca180aD52575Dce6"
     }
 }

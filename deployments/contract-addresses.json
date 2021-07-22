@@ -69,10 +69,10 @@
         "ChainportSideBridge": "0x71B4EA7aF852bbbDCe96348974C7EA1f34C48aA0"
     },
     "polygonMainnet": {
-        "ChainportCongress": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
-        "ChainportCongressMembersRegistry": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
-        "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
-        "Validator": "0xca9DC171AB63cC726830ac70670210f332E27Cef",
-        "ChainportSideBridge": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553"
+        "ChainportCongress": "0x71D57ee5471B720642A129621eA694da8F949621",
+        "ChainportCongressMembersRegistry": "0x63D572d781eD8D18d823462aa2a4D51d7Ac4F29F",
+        "MaintainersRegistry": "0x578d73B9C8310997893118bd17F6C0b4c92EF61E",
+        "Validator": "0x2970a51ff52986675B3A384c2E22c2E2e466681c",
+        "ChainportSideBridge": "0xF7362aF99Cc1f48a1e50D304ed23BAf8f9Fd16f2"
     }
 }
