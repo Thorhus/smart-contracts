@@ -9,6 +9,7 @@ require('dotenv').config()
 let PK = process.env.PK
 
 if(typeof PK === 'undefined'){
+  // *** PK STATED BELOW IS DUMMY PK EXCLUSIVELY FOR TESTING PURPOSES ***
   PK = `0x${"32c069bf3d38a060eacdc072eecd4ef63f0fc48895afbacbe185c97037789875"}`
 }
 
