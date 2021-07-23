@@ -4,14 +4,20 @@ describe("Side Bridge Test", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token, contract,
-    tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000";
+    tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000",
+    tokenAddresses = [], revertedAddresses = [];
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
-        [chainportCongress, user1, user2, maintainer, contract, ...maintainers] = await ethers.getSigners();
+        [chainportCongress, user1, user2, maintainer, contract, tokenAddresses[0], tokenAddresses[1], tokenAddresses[2],
+            tokenAddresses[3], ...maintainers] = await ethers.getSigners();
 
         token = await ethers.getContractFactory("BridgeMintableToken");
         token = await token.deploy("", "", decimals);
+
+        for(let i = 0; i < tokenAddresses.length; i++) {
+            tokenAddresses[i] = tokenAddresses[i].address;
+        }
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -79,6 +85,78 @@ describe("Side Bridge Test", function () {
                 expect(await sideBridgeInstance.isFrozen()).to.equal(true);
                 await expect(sideBridgeInstance.connect(maintainer).unfreezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
+            });
+        });
+
+        describe("Assets freezing operations", function () {
+            it("Freeze assets by maintainer", async function () {
+                await expect(sideBridgeInstance.connect(maintainer).freezeAssetsByMaintainer(tokenAddresses));
+                for(let i; i < tokenAddresses.length; i++){
+                    expect(await sideBridgeInstance.isAssetFrozen(tokenAddresses[i])).to.be.true;
+                }
+            });
+
+            it("Should not freeze asset by user", async function () {
+                await expect(sideBridgeInstance.connect(user1).freezeAssetsByMaintainer(tokenAddresses))
+                    .to.be.reverted;
+            });
+
+            it("Should freeze asset by congress", async function () {
+                await expect(sideBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, true))
+                    .to.emit(sideBridgeInstance, 'AssetFrozen')
+                    .withArgs(token.address, true);
+            });
+
+            it("Should not unfreeze asset by user or maintainer", async function () {
+                await sideBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, true);
+                await expect(sideBridgeInstance.connect(user1).setAssetFreezeState(token.address, false))
+                    .to.be.reverted;
+            });
+
+            it("Should unfreeze asset by congress", async function () {
+                await expect(sideBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, false))
+                    .to.emit(sideBridgeInstance, 'AssetFrozen')
+                    .withArgs(token.address, false);
+            });
+        });
+
+        describe("Maintainer work in progress", function () {
+
+            it("Should set maintainer workInProgress by maintainer", async function () {
+                await sideBridgeInstance.connect(maintainer).setMaintainerWorkInProgress(true);
+                expect(await sideBridgeInstance.maintainerWorkInProgress()).to.be.true;
+            });
+
+            it("Should not set maintainer workInProgress by user", async function () {
+                await expect(sideBridgeInstance.connect(user1).setMaintainerWorkInProgress(true))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+            });
+        });
+
+        describe("Load original asset to bridge token mapping", function () {
+            beforeEach(async function () {
+                //Revert addresses to make a new array
+                let j = tokenAddresses.length - 1;
+                for(let i = 0; i < tokenAddresses.length; i++){
+                    revertedAddresses[i] = tokenAddresses[j];
+                    j--;
+                }
+            });
+            it("Should load mapping by maintainer", async function () {
+                await sideBridgeInstance.connect(maintainer).setOriginalAssetToBridgeToken(
+                    tokenAddresses,
+                    revertedAddresses
+                );
+                for(let i = 0; i < tokenAddresses.length; i++){
+                    expect(await sideBridgeInstance.originalAssetToBridgeToken(tokenAddresses[i]))
+                        .to.be.equal(revertedAddresses[i]);
+                }
+            });
+            it("Should not laod mapping by user", async function () {
+                await expect(sideBridgeInstance.connect(user1).setOriginalAssetToBridgeToken(
+                    tokenAddresses,
+                    revertedAddresses
+                )).to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
         });
 
