@@ -224,13 +224,15 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
-    function freezeAssetByMaintainer(
-        address tokenAddress
+    function freezeAssetsByMaintainer(
+        address [] memory tokenAddresses
     )
     public
     onlyMaintainer
     {
-        isAssetFrozen[tokenAddress] = true;
-        emit AssetFrozen(tokenAddress, true);
+        for(uint i = 0; i < tokenAddresses.length; i++){
+            isAssetFrozen[tokenAddresses[i]] = true;
+            emit AssetFrozen(tokenAddresses[i], true);
+        }
     }
 }
