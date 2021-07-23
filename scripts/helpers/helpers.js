@@ -41,13 +41,13 @@ const generateTenderlySlug = () => {
 
 const checksumNetworkAndBranch = (network) => {
     const gitBranch = branch.sync();
-    if(network === 'ropsten' || network === 'binancetest') {
+    if(network === 'ropsten' || network === 'binancetest' || network === 'polygonMumbai') {
         assert.strictEqual(gitBranch ,'develop','Wrong branch');
     }
-    else if(network === 'ropstenStaging' || network === 'binancetestStaging') {
+    else if(network === 'ropstenStaging' || network === 'binancetestStaging' || network === 'polygonMumbaiStaging') {
         assert.strictEqual(gitBranch ,'staging','Wrong branch');
     }
-    else if(network === 'mainnet' || network === 'binanceMainnet') {
+    else if(network === 'mainnet' || network === 'binanceMainnet' || network === 'polygonMainnet') {
         assert.strictEqual(gitBranch ,'master','Wrong branch');
     } else {
         new Error('Wrong network configuration')
