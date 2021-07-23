@@ -49,16 +49,16 @@ contract Validator is Initializable, ChainportMiddleware {
      */
     function verifyWithdraw(
         bytes calldata signedMessage,
-        address token,
-        uint256 amount,
+        uint256 nonce,
         address beneficiary,
-        uint256 nonce
-    )
+        uint256 amount,
+        address token
+)
     external
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signedMessage, beneficiary, token, amount, nonce);
+        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token);
         return messageSigner == signatoryAddress;
     }
 
@@ -71,10 +71,10 @@ contract Validator is Initializable, ChainportMiddleware {
      */
     function recoverSignature(
         bytes memory signedMessage,
+        uint256 nonce,
         address beneficiary,
-        address token,
         uint256 amount,
-        uint256 nonce
+        address token
     )
     public
     pure
@@ -84,7 +84,7 @@ contract Validator is Initializable, ChainportMiddleware {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 recoverSignatureHash,
-                keccak256(abi.encodePacked(beneficiary, token, amount, nonce))
+                keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
             )
         );
 

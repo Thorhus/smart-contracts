@@ -202,7 +202,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token);
         require(isMessageValid == true, "Error: Signature is not valid.");
 
         IERC20(token).safeTransfer(beneficiary, amount);
@@ -233,7 +233,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
             if(p.amount == amount && p.beneficiary == msg.sender && p.unlockingTime <= block.timestamp) {
                 // Verify the signature user is submitting
-                bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, p.beneficiary, nonce);
+                bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, p.beneficiary, amount, token);
                 require(isMessageValid == true, "Error: Signature is not valid.");
 
                 // Clear up the state and remove pending flag
@@ -274,7 +274,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, token, amount, beneficiary, nonce);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token);
         // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 

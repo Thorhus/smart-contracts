@@ -36,15 +36,21 @@
         "ProxyAdmin": "0xB4f640A89f5655D1Da762657228F2B54F98832Ce"
     },
     "mainnet": {
-        "MaintainersRegistry": "0x1F13AF55ed6062895bf25DAcFCfb2d0B008d0CFf",
-        "Validator": "0x7a90b52DD8C7729d7AE7eA65C79CE4ba5e2C2768",
-        "ChainportMainBridge": "0xC6A32aD7D94A879701D9a5080F002277a6873378",
-        "ProxyAdmin": "0x5bAE376BC4923a78C185CD93dD80eb42f30228EB"
+        "MaintainersRegistry": "0xb28906A38795B7A221C64Ebc8A87898CAF4132a6",
+        "Validator": "0x8637D273285fAa6794e3D4d1Ca180aD52575Dce6",
+        "ChainportMainBridge": "0x763A0CA93AF05adE98A52dc1E5B936b89bF8b89a",
+        "ProxyAdmin": "0x63D572d781eD8D18d823462aa2a4D51d7Ac4F29F"
     },
     "binanceMainnet": {
         "MaintainersRegistry": "0xA72Fd60723D1687171D98f72Bb9359962151cE58",
         "Validator": "0xfE445f302943F37C6FBCa65c36FFfa949d378062",
         "ChainportSideBridge": "0x5C80AE9c3396CA4394F9D8E6786Ed9aa74489afE",
         "ProxyAdmin": "0xfFcf87445D23B4357ddb3D6Cc0BC66f6d480d900"
+    },
+    "polygonMainnet": {
+        "MaintainersRegistry": "0x93307C7dE0f1B54814135f06321639A9f5c7dDFF",
+        "Validator": "0x33b43965A288c3ab24740ac092D8A214B8DDD0EA",
+        "ChainportSideBridge": "0xF9ac9365A23D837F97078DaD50638a12c9E256C8",
+        "ProxyAdmin": "0x8637D273285fAa6794e3D4d1Ca180aD52575Dce6"
     }
 }
