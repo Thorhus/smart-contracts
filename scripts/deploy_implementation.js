@@ -8,7 +8,7 @@ async function main() {
     const ChainportSideBridge = await hre.ethers.getContractFactory('ChainportSideBridge');
     const chainportSideBridge = await ChainportSideBridge.deploy();
     await chainportSideBridge.deployed();
-    console.log('New ChainportBSCBridge implementation: ', chainportSideBridge.address);
+    console.log('New ChainportSideBridge implementation: ', chainportSideBridge.address);
     saveContractAddress(hre.network.name, 'ChainportSideBridge', chainportSideBridge.address);
 }
 
