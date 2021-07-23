@@ -26,6 +26,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => address) public originalAssetToBridgeToken;
     // Security variable used for maintainer one time actions check used for upgrading
     bool public maintainerWorkInProgress;
+    // Mapping for freezing the assets
+    mapping(address => bool) public isAssetFrozen;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -36,6 +38,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event NetworkDeactivated(uint256 networkId);
 
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
+
+    event AssetFrozen(address asset, bool isAssetFrozen);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -49,6 +53,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     modifier maintainerWorkNotInProgress {
         require(!maintainerWorkInProgress, "Maintainer actions are being performed at the moment.");
+        _;
+    }
+
+    modifier isAssetNotFrozen(address asset) {
+        require(!isAssetFrozen[asset], "Error: Asset is frozen.");
         _;
     }
 
@@ -87,6 +96,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
+    isAssetNotFrozen(originalTokenAddress)
     maintainerWorkNotInProgress
     {
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
@@ -107,6 +117,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
+    isAssetNotFrozen(token)
     isAmountGreaterThanZero(amount)
     maintainerWorkNotInProgress
     {
@@ -126,6 +137,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     isAmountGreaterThanZero(amount)
     isBridgeNotFrozen
+    isAssetNotFrozen(bridgeToken)
     {
         require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
 
@@ -142,6 +154,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     )
     public
     isBridgeNotFrozen
+    isAssetNotFrozen(bridgeToken)
     isAmountGreaterThanZero(amount)
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
@@ -199,5 +212,26 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         maintainerWorkInProgress = isMaintainerWorkInProgress;
         emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
+    }
+
+    function setAssetFreezeState(
+        address tokenAddress,
+        bool _isFrozen
+    )
+    public
+    onlyChainportCongress
+    {
+        isAssetFrozen[tokenAddress] = _isFrozen;
+        emit AssetFrozen(tokenAddress, _isFrozen);
+    }
+
+    function freezeAssetByMaintainer(
+        address tokenAddress
+    )
+    public
+    onlyMaintainer
+    {
+        isAssetFrozen[tokenAddress] = true;
+        emit AssetFrozen(tokenAddress, true);
     }
 }
