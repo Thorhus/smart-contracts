@@ -66,7 +66,7 @@
         "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
         "MaintainersRegistry": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
         "Validator": "0xfa09cc64dc2C3C59AF926c028AB3214103e3C78a",
-        "ChainportSideBridge": "0x71D57ee5471B720642A129621eA694da8F949621"
+        "ChainportSideBridge": "0xb28906A38795B7A221C64Ebc8A87898CAF4132a6"
     },
     "polygonMainnet": {
         "ChainportCongress": "0x71D57ee5471B720642A129621eA694da8F949621",
