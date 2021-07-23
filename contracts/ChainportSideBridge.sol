@@ -96,7 +96,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
-    isAssetNotFrozen(originalTokenAddress)
     maintainerWorkNotInProgress
     {
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
