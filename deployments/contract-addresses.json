@@ -43,7 +43,7 @@
         "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
         "MaintainersRegistry": "0x326eB9271F0427c31bD646381a59E04713Ab6FB2",
         "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportSideBridge": "0x342A0144876EfD15c6E9D9c6B436e8D11176B3E3"
+        "ChainportSideBridge": "0x508BA755F9cC73c4C8C94068f10bA55659217A4c"
     },
     "polygonMumbaiStaging": {
         "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
