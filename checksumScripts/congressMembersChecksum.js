@@ -29,10 +29,12 @@ async function main() {
     const connectedMembers = await congressMembersRegistryInstance.getAllMemberAddresses()
     const members = config.initialCongressMembers
 
-    assert.strictEqual(connectedMembers.length, members.length, 'Members do not match')
+    console.log("\nMembers from contract: ")
+    console.log(connectedMembers + '\n')
+    console.log("Members from json: ")
+    console.log(members + '\n')
 
-    //console.log(connectedMembers)
-    //console.log(members)
+    assert.strictEqual(connectedMembers.length, members.length, 'Members do not match')
 
     // Compare members
     let counter = 0;
@@ -47,7 +49,7 @@ async function main() {
     }
 
     assert.strictEqual(connectedMembers.length, counter, 'Members do not match')
-    console.log("Checksum complete - All members are in the registry!")
+    console.log("\nChecksum complete - All members are in the registry!")
 
 }
 
