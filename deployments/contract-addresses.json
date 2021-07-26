@@ -66,13 +66,13 @@
         "ChainportCongressMembersRegistry": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
         "MaintainersRegistry": "0x9A1649bB726894548371adF4c9e8A5F6993Cf553",
         "Validator": "0xfa09cc64dc2C3C59AF926c028AB3214103e3C78a",
-        "ChainportSideBridge": "0x71D57ee5471B720642A129621eA694da8F949621"
+        "ChainportSideBridge": "0xb28906A38795B7A221C64Ebc8A87898CAF4132a6"
     },
     "polygonMainnet": {
         "ChainportCongress": "0x71D57ee5471B720642A129621eA694da8F949621",
         "ChainportCongressMembersRegistry": "0x63D572d781eD8D18d823462aa2a4D51d7Ac4F29F",
         "MaintainersRegistry": "0x578d73B9C8310997893118bd17F6C0b4c92EF61E",
         "Validator": "0x2970a51ff52986675B3A384c2E22c2E2e466681c",
-        "ChainportSideBridge": "0xF7362aF99Cc1f48a1e50D304ed23BAf8f9Fd16f2"
+        "ChainportSideBridge": "0xa6cB9A1d36580A9cD45c08B3F2da55696C364379"
     }
 }
