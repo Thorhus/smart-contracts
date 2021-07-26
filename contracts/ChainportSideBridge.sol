@@ -28,6 +28,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     bool public maintainerWorkInProgress;
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
+    // Mapping for freezing specific path: token -> functionName -> isFrozenOrNot
+    mapping(address => mapping(string => bool)) public isPathPaused;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -40,6 +42,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
 
     event AssetFrozen(address asset, bool isAssetFrozen);
+
+    event pathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -58,6 +62,15 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     modifier isAssetNotFrozen(address asset) {
         require(!isAssetFrozen[asset], "Error: Asset is frozen.");
+        _;
+    }
+
+    modifier isPathNotPaused(
+        address token,
+        string memory functionName
+    )
+    {
+        require(!isPathPaused[token][functionName], "Path is paused.");
         _;
     }
 
@@ -119,6 +132,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAssetNotFrozen(token)
     isAmountGreaterThanZero(amount)
     maintainerWorkNotInProgress
+    isPathNotPaused(token, "mintTokens")
     {
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
@@ -137,6 +151,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     isBridgeNotFrozen
     isAssetNotFrozen(bridgeToken)
+    isPathNotPaused(bridgeToken, "burnTokens")
     {
         require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
 
@@ -155,6 +170,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAssetNotFrozen(bridgeToken)
     isAmountGreaterThanZero(amount)
+    isPathNotPaused(bridgeToken, "crossChainTransfer")
     {
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
@@ -234,5 +250,28 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
             isAssetFrozen[tokenAddresses[i]] = true;
             emit AssetFrozen(tokenAddresses[i], true);
         }
+    }
+
+    function pausePathByMaintainer(
+        address token,
+        string memory functionName
+    )
+    public
+    onlyMaintainer
+    {
+        isPathPaused[token][functionName] = true;
+        emit pathPauseStateChanged(token, functionName, true);
+    }
+
+    function setPathPauseState(
+        address token,
+        string memory functionName,
+        bool isPaused
+    )
+    public
+    onlyChainportCongress
+    {
+        isPathPaused[token][functionName] = isFrozen;
+        emit pathPauseStateChanged(token, functionName, isPaused);
     }
 }

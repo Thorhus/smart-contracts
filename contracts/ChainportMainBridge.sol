@@ -45,6 +45,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Nonce mapping
     mapping(bytes32 => bool) public isNonceUsed;
 
+    // Mapping for freezing specific path: token -> functionName -> isFrozenOrNot
+    mapping(address => mapping(string => bool)) public isPathPaused;
+
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
 
@@ -64,6 +67,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
 
+    event pathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
+
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -76,6 +81,15 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     modifier isAssetNotFrozen(address asset) {
         require(!isAssetFrozen[asset], "Error: Asset is frozen.");
+        _;
+    }
+
+    modifier isPathNotPaused(
+        address token,
+        string memory functionName
+    )
+    {
+        require(!isPathPaused[token][functionName], "Path is paused.");
         _;
     }
 
@@ -192,6 +206,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     isAssetNotFrozen(token)
+    isPathNotPaused(token, "releaseTokensByMaintainer")
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
@@ -220,6 +235,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     isAssetNotFrozen(token)
+    isPathNotPaused(token, "releaseTokens")
     {
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
@@ -261,6 +277,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     isAssetNotFrozen(token)
+    isPathNotPaused(token, "releaseTokens")
     {
         require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
@@ -351,7 +368,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         return IERC20(token).balanceOf(address(this));
     }
 
-    // Function to deposit tokens to specified network's bridge
+    // Function to deposit tokens to bridge on specified network
     function depositTokens(
         address token,
         uint256 amount,
@@ -361,11 +378,15 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
     isAssetNotFrozen(token)
+    isPathNotPaused(token, "depositTokens")
     {
+        // Require that network is supported/activated
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
+        // Transfer funds from user to bridge
         IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
 
+        // Emit event
         emit TokensDeposited(token, msg.sender, amount, networkId);
     }
 
@@ -389,5 +410,28 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         isNetworkActive[networkId] = false;
         emit NetworkDeactivated(networkId);
+    }
+
+    function pausePathByMaintainer(
+        address token,
+        string memory functionName
+    )
+    public
+    onlyMaintainer
+    {
+        isPathPaused[token][functionName] = true;
+        emit pathPauseStateChanged(token, functionName, true);
+    }
+
+    function setPathPauseState(
+        address token,
+        string memory functionName,
+        bool isPaused
+    )
+    public
+    onlyChainportCongress
+    {
+        isPathPaused[token][functionName] = isFrozen;
+        emit pathPauseStateChanged(token, functionName, isPaused);
     }
 }
