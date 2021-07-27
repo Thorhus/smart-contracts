@@ -11,22 +11,23 @@ async function main() {
     const abi = getSavedContractProxyAbis()["ProxyAdmin"]
     const admin = await hre.ethers.getContractAt(abi, proxies["ProxyAdmin"])
     const standard = 42
+    const border = (standard+4)*4
 
-    console.log("-".repeat(46*4));
+    console.log("-".repeat(border));
     console.log(
         "|Proxy Name:"," ".repeat(standard - "Proxy Name:".length),"|",
-        "Local Address:"," ".repeat(standard - "Local Address:".length),"|",
-        "Proxy Address:"," ".repeat(standard - "Proxy Address:".length),"|",
+        "Local Implementation:"," ".repeat(standard - "Local Implementation:".length),"|",
+        "Proxy Implementation:"," ".repeat(standard - "Proxy Implementation:".length),"|",
         "Is Synced"," ".repeat(standard - "Is Synced".length),"|"
     )
     console.log("-".repeat(46*4));
 
-    for(var proxy in proxies){
+    for(const proxy in proxies) {
         if(proxy !== "ProxyAdmin"){
             let localImplementation = contracts[proxy];
             let proxyImplementation = await admin.getProxyImplementation(proxies[proxy]);
             let isSynced = false
-            if(localImplementation === proxyImplementation) isSynced = true
+            if(localImplementation.toLowerCase() === proxyImplementation.toLowerCase()) isSynced = true
             console.log(
                 "|"+proxy," ".repeat(standard - proxy.length),"|",
                 localImplementation," ".repeat(standard - localImplementation.length),"|",
@@ -36,7 +37,7 @@ async function main() {
         }
     }
 
-    console.log("-".repeat(46*4));
+    console.log("-".repeat(border));
 }
 
 main()
