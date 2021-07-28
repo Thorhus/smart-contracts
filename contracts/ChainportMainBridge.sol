@@ -47,8 +47,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
-    // Mapping for pausing network for specific asset: token -> networkId -> isPausedOrNot
-    mapping(address => mapping(uint256 => bool)) public isNetworkPaused;
 
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
@@ -70,7 +68,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
 
     event pathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-    event networkPauseStateChanged(address tokenAddress, uint256 networkId, bool isPaused);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -93,15 +90,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     )
     {
         require(!isPathPaused[token][functionName], "Error: Path is paused.");
-        _;
-    }
-
-    modifier isNetworkNotPaused(
-        address token,
-        uint256 networkId
-    )
-    {
-        require(!isNetworkPaused[token][networkId], "Error: Network is paused.");
         _;
     }
 
@@ -391,7 +379,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     isAssetNotFrozen(token)
     isPathNotPaused(token, "depositTokens")
-    isNetworkNotPaused(token, networkId)
     {
         // Require that network is supported/activated
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
@@ -435,17 +422,5 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         isPathPaused[token][functionName] = isPaused;
         emit pathPauseStateChanged(token, functionName, isPaused);
-    }
-
-    function setNetworkPauseState(
-        address token,
-        uint256 networkId,
-        bool isPaused
-    )
-    public
-    onlyMaintainer
-    {
-        isNetworkPaused[token][networkId] = isPaused;
-        emit networkPauseStateChanged(token, networkId, isPaused);
     }
 }
