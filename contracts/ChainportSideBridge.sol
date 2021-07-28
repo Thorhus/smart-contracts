@@ -94,7 +94,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     initializer
     {
-
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
