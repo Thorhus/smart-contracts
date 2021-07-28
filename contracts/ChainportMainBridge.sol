@@ -67,7 +67,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
 
-    event pathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
+    event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -421,6 +421,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isPathPaused[token][functionName] = isPaused;
-        emit pathPauseStateChanged(token, functionName, isPaused);
+        emit PathPauseStateChanged(token, functionName, isPaused);
     }
 }
