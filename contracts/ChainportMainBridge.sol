@@ -69,6 +69,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
+    event BridgeFreezeStateChanged(bool isFrozen);
+
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -117,6 +119,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isFrozen = true;
+        emit BridgeFreezeStateChanged(true);
     }
 
     function unfreezeBridge()
@@ -124,6 +127,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isFrozen = false;
+        emit BridgeFreezeStateChanged(false);
     }
 
     function setAssetFreezeState(
