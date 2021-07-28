@@ -10,12 +10,15 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name]
     const config = conf[hre.network.name]
 
-    // Get congress registry from json
-    const congressMembersRegistryAddress = contracts["ChainportCongressMembersRegistry"]
-    const congressMembersRegistryInstance = await hre.ethers.getContractAt("ChainportCongressMembersRegistry", congressMembersRegistryAddress)
+    const congressName = "ChainportCongress"
+    const congressRegistryName = "ChainportCongressMembersRegistry"
 
-    const congressAddress = contracts["ChainportCongress"]
-    const congressInstance = await hre.ethers.getContractAt("ChainportCongress", congressAddress)
+    // Get congress registry from json
+    const congressMembersRegistryAddress = contracts[congressRegistryName]
+    const congressMembersRegistryInstance = await hre.ethers.getContractAt(congressRegistryName, congressMembersRegistryAddress)
+
+    const congressAddress = contracts[congressName]
+    const congressInstance = await hre.ethers.getContractAt(congressName, congressAddress)
     const connectedMembersRegistryAddress = await congressInstance.getMembersRegistry()
 
     // Check that congress members registry addresses are equal
