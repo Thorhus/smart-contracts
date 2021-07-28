@@ -15,6 +15,7 @@ contract ChainportSupplyManager is Initializable, ChainportMiddleware {
     mapping(address => uint256) public fundingAmountByBridgeAsset;
     mapping(address => address) public signerByBridgeAsset;
     mapping(address => address) public bridgeAssetBySigner;
+    mapping(date => asset => counter) rebalancingPerAssetPerDay;
 
     address public bridgeProxyAddress;
 
@@ -87,8 +88,8 @@ contract ChainportSupplyManager is Initializable, ChainportMiddleware {
 
 
     function fundBridge(
-
     ) public
+    onlyRebalancer
     {
         token = tokenBySigner[address(msg.sender)];
         uint256 memory fundingAmount = fundingAmountByBridgeAsset[address(token)];
