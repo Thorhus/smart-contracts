@@ -43,7 +43,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     event AssetFrozen(address asset, bool isAssetFrozen);
 
-    event pathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
+    event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
     event BridgeFreezeStateChanged(bool isFrozen);
 
@@ -264,6 +264,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isPathPaused[token][functionName] = isPaused;
-        emit pathPauseStateChanged(token, functionName, isPaused);
+        emit PathPauseStateChanged(token, functionName, isPaused);
     }
 }
