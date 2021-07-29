@@ -45,7 +45,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
-    event BridgeFreezeStateChanged(bool isFrozen);
+    event BridgeFreezed(bool isFrozen);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -92,7 +92,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isFrozen = true;
-        emit BridgeFreezeStateChanged(true);
+        emit BridgeFreezed(true);
     }
 
     function unfreezeBridge()
@@ -100,7 +100,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isFrozen = false;
-        emit BridgeFreezeStateChanged(false);
+        emit BridgeFreezed(false);
     }
 
     function mintNewToken(
