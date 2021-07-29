@@ -31,6 +31,13 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   defaultNetwork: 'local',
   networks: {
+    avalancheFuji: {
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      accounts: [PK],
+      chainId: 43113,
+      gasPrice: 225000000000,
+      timeout: 50000
+    },
     hecotest: {
       url: 'https://http-testnet.hecochain.com/',
       accounts: [PK],
@@ -136,7 +143,13 @@ module.exports = {
       gasPrice: 20000000000,
       timeout: 500000000
     },
-
+    avalancheMainnet: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      accounts: [PK],
+      chainId: 43114,
+      gasPrice: 225000000000,
+      timeout: 50000
+    },
     local: {
       url: 'http://localhost:8545',
     },
