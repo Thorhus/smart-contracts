@@ -119,7 +119,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isFrozen = true;
-        emit BridgeFreezeStateChanged(true);
+        emit BridgeFreezeStateChanged(true); //TODO rename to BridgeFreezed(true)
     }
 
     function unfreezeBridge()
@@ -127,7 +127,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isFrozen = false;
-        emit BridgeFreezeStateChanged(false);
+        emit BridgeFreezeStateChanged(false); //TODO rename to BridgeUnfreezed(true)
     }
 
     function setAssetFreezeState(
