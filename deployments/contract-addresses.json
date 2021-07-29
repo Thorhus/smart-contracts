@@ -34,7 +34,7 @@
         "ChainportCongressMembersRegistry": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
         "ChainportToken": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
         "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
-        "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
+        "Validator": "0x5B25CE73d3eA9239Ce66d92dc2c99d5CD6E1AB42",
         "ChainportMainBridge": "0x6888E9a82E5f3855aC20b1cf556209f158479876"
     },
     "binancetestStaging": {
