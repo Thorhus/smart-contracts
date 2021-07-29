@@ -35,7 +35,7 @@
         "ChainportToken": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
         "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
         "Validator": "0x5B25CE73d3eA9239Ce66d92dc2c99d5CD6E1AB42",
-        "ChainportMainBridge": "0x6888E9a82E5f3855aC20b1cf556209f158479876"
+        "ChainportMainBridge": "0xa2186864721c67b21663fF3Bf2d7D10EBb0CFF0A"
     },
     "binancetestStaging": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
@@ -43,7 +43,7 @@
         "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
         "MaintainersRegistry": "0x326eB9271F0427c31bD646381a59E04713Ab6FB2",
         "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportSideBridge": "0x508BA755F9cC73c4C8C94068f10bA55659217A4c"
+        "ChainportSideBridge": "0x6dfC5cF62Fae61b81123C7C65510A298d78FfeCe"
     },
     "polygonMumbaiStaging": {
         "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
@@ -51,7 +51,7 @@
         "ChainportToken": "0xE6874Ef951Ff95761c7969261B07e8fbd9b00F94",
         "MaintainersRegistry": "0x878FDF5412D59C3aB3Dc74CcA86eA7CAC6C052d2",
         "Validator": "0x478FE74a6b733f6C407E4A94123FD9E56841BBD0",
-        "ChainportSideBridge": "0x14F4290F86769522E7d6ED843dd8d861Aa77C942"
+        "ChainportSideBridge": "0x7f7c5c8B8A40871e55A2d0a9C27AB21F3C83762f"
     },
     "mainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
