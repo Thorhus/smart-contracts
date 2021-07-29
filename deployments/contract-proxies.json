@@ -52,5 +52,11 @@
         "Validator": "0x33b43965A288c3ab24740ac092D8A214B8DDD0EA",
         "ChainportSideBridge": "0xF9ac9365A23D837F97078DaD50638a12c9E256C8",
         "ProxyAdmin": "0x8637D273285fAa6794e3D4d1Ca180aD52575Dce6"
+    },
+    "avalancheFuji": {
+        "MaintainersRegistry": "0x62b0ec34aFa04F8dBc64d1D8C28B744002c83b85",
+        "Validator": "0x104F3152D8ebFC3f679392977356962Ff36566aC",
+        "ChainportSideBridge": "0x2245a40c3e4714d831eb651a86d003Ecc47848e4",
+        "ProxyAdmin": "0x3a535d5C5094420A6603560952f6b28d56434F48"
     }
 }
