@@ -598,5 +598,44 @@ describe("Main Bridge Test", function () {
                 expect(await mainBridgeInstance.isAboveThreshold(token.address, tokenAmount*55)).to.be.true;
             });
         });
+
+        describe("Path Pause Flow", function(){
+            it("Should pause path by maintainer", async function () {
+                await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+            });
+
+            it("Should not perform function when funnel is paused", async function () {
+
+                await mainBridgeInstance.connect(maintainer).activateNetwork(1);
+
+                await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount - 1, 1))
+                    .to.be.revertedWith("Error: Path is paused.");
+            });
+
+            it("Should not pause path by user", async function () {
+                await expect(mainBridgeInstance.connect(user1).setPathPauseState(token.address, "depositTokens", true))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.false;
+            });
+
+            it("Should unpause funnel by maintainer", async function () {
+                await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+                await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", false);
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.false;
+            });
+
+            it("Should not unpause path by user", async function () {
+                await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+                await expect(mainBridgeInstance.connect(user1).setPathPauseState(token.address, "depositTokens", false))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+                expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+            });
+        });
     });
 });
