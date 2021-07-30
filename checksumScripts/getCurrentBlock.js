@@ -13,6 +13,7 @@ function getRpcUrls() {
     }
     return JSON.parse(json)
 }
+
 async function main() {
     const network = getRpcUrls()[hre.network.name];
     console.log("RPC URL:"," ".repeat(standard - "RPC URL:".length),"Block Number:")
