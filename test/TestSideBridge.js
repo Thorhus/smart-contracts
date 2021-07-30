@@ -432,7 +432,7 @@ describe("Side Bridge Test", function () {
         });
 
         describe("Path Pause Flow", function(){
-            it("Should pause path by maintianer", async function () {
+            it("Should pause path by maintainer", async function () {
                 await sideBridgeInstance.connect(maintainer).setPathPauseState(token.address, "crossChainTransfer", true);
                 expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.true;
             });
