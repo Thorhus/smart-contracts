@@ -430,5 +430,58 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith('ERC20: burn amount exceeds allowance');
             });
         });
+
+        describe("Path Pause Flow", function(){
+            it("Should pause path by maintianer", async function () {
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(token.address, "crossChainTransfer", true);
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.true;
+            });
+
+            it("Should not perform function when funnel is paused", async function () {
+
+                // crossChainTransfer function setup preparation
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
+
+                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+
+                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
+
+                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
+
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintTokens(
+                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
+
+                // The test
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(bepToken.address, "crossChainTransfer", true);
+                expect(await sideBridgeInstance.isPathPaused(bepToken.address, "crossChainTransfer")).to.be.true;
+
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount-1, 1))
+                    .to.be.revertedWith("Error: Path is paused.");
+            });
+
+            it("Should not pause path by user", async function () {
+                await expect(sideBridgeInstance.connect(user1).setPathPauseState(token.address, "crossChainTransfer", true))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.false;
+            });
+
+            it("Should unpause funnel by maintainer", async function () {
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(token.address, "crossChainTransfer", true);
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.true;
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(token.address, "crossChainTransfer", false);
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.false;
+            });
+
+            it("Should not unpause path by user", async function () {
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(token.address, "crossChainTransfer", true);
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.true;
+                await expect(sideBridgeInstance.connect(user1).setPathPauseState(token.address, "crossChainTransfer", false))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+                expect(await sideBridgeInstance.isPathPaused(token.address, "crossChainTransfer")).to.be.true;
+            });
+        });
     });
 });
