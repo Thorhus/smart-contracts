@@ -1,48 +1,5 @@
 const { expect } = require("chai");
-const ethUtil = require("ethereumjs-util");
-
-function generateSignature(digest, privateKey) {
-    // prefix with "\x19Ethereum Signed Message:\n32"
-    // Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/890
-    const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(digest));
-
-    // sign message
-    const {v, r, s} = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
-
-    // generate signature by concatenating r(32), s(32), v(1) in this order
-    // Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/76fe1548aee183dfcc395364f0745fe153a56141/contracts/ECRecovery.sol#L39-L43
-    const vb = Buffer.from([v]);
-    const signature = Buffer.concat([r, s, vb]);
-
-    console.log(signature.toString());
-    return signature;
-}
-
-function createHash(nonce, beneficiary, amount, token, privateKey) {
-    // compute keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
-    const digestHash = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
-            ['uint256', 'address', 'uint256', 'address'],
-            [nonce, beneficiary, amount, token]
-        )
-    );
-
-    const digestMsg = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
-            ['string'],
-            ['bytes binding user withdrawal']
-        )
-    );
-
-    const digestFinal = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
-            ['bytes32', 'bytes32'],
-            [digestMsg, digestHash]
-        )
-    );
-
-    return generateSignature(digestFinal, privateKey);
-}
+const { signatoryAddress, signatoryPk, createHash } = require('./testHelpers')
 
 describe("Main Bridge Test", function () {
 
@@ -51,10 +8,6 @@ describe("Main Bridge Test", function () {
         tokenAmount = 50, nonceIncrease = 1, decimals = 18, freezeLength = 60, safetyThreshold = 30;
 
     const zeroAddress = "0x000000000000000000000000000000000000000000";
-
-    const signatoryAddress = "0xA9664FDf800930e5E5E879bCf8CE290943F1E30D";
-    // *** Dummy PK only for testing purposes ***
-    const signatoryPk = "32c069bf3d38a060eacdc072eecd4ef63f0fc48895afbacbe185c97037789875";
 
     beforeEach(async function() {
 

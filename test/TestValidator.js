@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { signatoryAddress, signatoryPk, createHash } = require('./testHelpers')
 
 describe("Validator", function () {
 
@@ -22,8 +23,9 @@ describe("Validator", function () {
 
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
 
-        validator = await ethers.getContractFactory("Validator");
+        validator = await ethers.getContractFactory("Validator2");
         validatorInstance = await validator.deploy();
+        await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address);
 
         sideBridge = await ethers.getContractFactory("ChainportSideBridge");
         sideBridgeInstance = await sideBridge.deploy();
@@ -31,9 +33,7 @@ describe("Validator", function () {
 
     describe("Main functions", function () {
 
-        beforeEach(async function () {
-            await validatorInstance.initialize(validatorInstance.address, chainportCongress.address, maintainersRegistryInstance.address);
-        });
+        let releaseAmount = 50;
 
         describe("Set signatory address", async function () {
             it("Should not set zero address (by congress)", async function () {
@@ -64,6 +64,43 @@ describe("Validator", function () {
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd",
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36")
                 ).to.be.false;
+            });
+
+            it("Should verify signature", async () => {
+                await validatorInstance.hash(1,
+                    maintainer.address,
+                    releaseAmount,
+                    token.address).then(console.log);
+
+                await validatorInstance.recoverSignature(
+                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
+                    1,
+                    maintainer.address,
+                    releaseAmount,
+                    token.address
+                ).then(console.log)
+                console.log(await validatorInstance.signatoryAddress())
+
+                expect(await validatorInstance.verifyWithdraw(
+                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
+                    1,
+                    maintainer.address,
+                    releaseAmount,
+                    token.address
+                )).to.be.true;
+            });
+        });
+
+        describe("Recover signature", async function () {
+            xit("Should return recovered signature", async () => {
+                await validatorInstance.recoverSignature(
+                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
+                    1,
+                    maintainer.address,
+                    releaseAmount,
+                    token.address
+                ).then(console.log)
+                console.log(await validatorInstance.signatoryAddress())
             });
         });
     });
