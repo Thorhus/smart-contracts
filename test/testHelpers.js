@@ -19,8 +19,22 @@ function generateSignature(digest, privateKey) {
     const vb = Buffer.from([v]); // v is uint by default
     const signature = Buffer.concat([r, s, vb]);
 
+    const sigString = signature.toString('hex');
+    console.log(sigString);
+
+    const last2 = sigString.slice(-2);
+    console.log(last2);
+
+    let last2Modifier = parseInt(last2,16) + 32;
+    console.log(last2Modifier);
+    console.log(last2Modifier.toString(16));
+
+    const finalSig = sigString.slice(0, sigString.length-2) + last2Modifier.toString(16);
+    console.log(finalSig);
+
+    // hex(int(signature[n - 2:], 16) + 32)
     //console.log(signature.toString('hex'));
-    return(signature);
+    return('0x' + finalSig);
 }
 
 function createHash(nonce, beneficiary, amount, token, privateKey) {
@@ -31,14 +45,12 @@ function createHash(nonce, beneficiary, amount, token, privateKey) {
             [nonce, beneficiary, amount, token]
         )
     );
-    console.log("First hash", digestHash);
     const digestMsg = ethers.utils.keccak256(
         ethers.utils.solidityPack(
             ['string'],
             ['bytes binding user withdrawal']
         )
     );
-    console.log("Second hash", digestMsg);
     const digestFinal = ethers.utils.keccak256(
         ethers.utils.solidityPack(
             ['bytes32', 'bytes32'],
