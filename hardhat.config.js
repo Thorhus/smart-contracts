@@ -3,6 +3,7 @@ require('@nomiclabs/hardhat-ethers');
 require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 require("@tenderly/hardhat-tenderly");
+require('ethereumjs-util')
 require("solidity-coverage");
 require('dotenv').config()
 
