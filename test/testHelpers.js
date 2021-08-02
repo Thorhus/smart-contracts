@@ -5,13 +5,13 @@ const signatoryAddress = "0xA9664FDf800930e5E5E879bCf8CE290943F1E30D";
 // *** Dummy PK only for testing purposes ***
 const signatoryPk = "32c069bf3d38a060eacdc072eecd4ef63f0fc48895afbacbe185c97037789875";
 
-function generateSignature(digest, privateKey) {
+function generateSignature(digest) {
     // prefix with "\x19Ethereum Signed Message:\n32"
     // Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/890
     const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(digest));
 
     // sign message
-    const {v, r, s} = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
+    const {v, r, s} = ethUtil.ecsign(prefixedHash, Buffer.from(signatoryPk, 'hex'))
     //console.log(v,r,s);
 
     // generate signature by concatenating r(32), s(32), v(1) in this order
@@ -37,7 +37,7 @@ function generateSignature(digest, privateKey) {
     return('0x' + finalSig);
 }
 
-function createHash(nonce, beneficiary, amount, token, privateKey) {
+function createHash(nonce, beneficiary, amount, token) {
     // compute keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
     const digestHash = ethers.utils.keccak256(
         ethers.utils.solidityPack(
@@ -63,7 +63,7 @@ function createHash(nonce, beneficiary, amount, token, privateKey) {
     // let result = web3.eth.accounts.sign(digestFinal, privateKey);
     // console.log("result", result)
     // return result.signature;
-    return generateSignature(digestFinal, privateKey);
+    return generateSignature(digestFinal);
 }
 
 module.exports = {
