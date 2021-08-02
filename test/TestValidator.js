@@ -23,7 +23,7 @@ describe("Validator", function () {
 
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
 
-        validator = await ethers.getContractFactory("Validator2");
+        validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
         await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address);
 
@@ -67,20 +67,6 @@ describe("Validator", function () {
             });
 
             it("Should verify signature", async () => {
-                await validatorInstance.hash(1,
-                    maintainer.address,
-                    releaseAmount,
-                    token.address).then(console.log);
-
-                await validatorInstance.recoverSignature(
-                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
-                    1,
-                    maintainer.address,
-                    releaseAmount,
-                    token.address
-                ).then(console.log)
-                console.log(await validatorInstance.signatoryAddress())
-
                 expect(await validatorInstance.verifyWithdraw(
                     createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
                     1,
@@ -91,8 +77,15 @@ describe("Validator", function () {
             });
         });
 
+        describe("Recover signature from hash", async () => {
+            xit("Case", async () => {
+                expect(await validatorInstance.recoverSigFromHash())
+                    .to.be.true;
+            })
+        });
+
         describe("Recover signature", async function () {
-            xit("Should return recovered signature", async () => {
+            it("Should return recovered signature", async () => {
                 await validatorInstance.recoverSignature(
                     createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
                     1,
