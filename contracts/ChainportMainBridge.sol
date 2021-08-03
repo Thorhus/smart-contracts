@@ -397,10 +397,10 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         uint256 balanceAfter = IERC20(token).balanceOf(address(this));
 
         // Require that balanceBefore with amount equals balanceAfter
-        uint256 actualBalance = balanceAfter.sub(balanceBefore);
+        uint256 actualAmount = balanceAfter.sub(balanceBefore);
 
         // Emit event
-        emit TokensDeposited(token, msg.sender, actualBalance, networkId);
+        emit TokensDeposited(token, msg.sender, actualAmount, networkId);
     }
 
     // Function to activate already added supported network
