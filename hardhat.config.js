@@ -68,7 +68,7 @@ module.exports = {
       timeout: 50000
     },
     polygonMainnet: {
-      url: 'http://matic-mainnet.tenderly.co',
+      url: "https://rpc-mainnet.matic.network",
       accounts: [PK],
       chainId: 137,
       gasPrice: 41000000000,
@@ -124,10 +124,10 @@ module.exports = {
     },
     mainnet: {
       // Infura public nodes
-      url: 'https://mainnet.tenderly.co',
+      url: 'https://mainnet.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8',
       accounts: [PK],
       chainId: 1,
-      gasPrice: 25000000000,
+      gasPrice: 35000000000,
       timeout: 500000000
     },
     binanceMainnet: {
