@@ -10,32 +10,32 @@
         "ChainportCongressMembersRegistry": "0xDA61b22c426966768F017e40A99aE570830Dc99c",
         "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
         "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
-        "Validator": "0x570BbC3cfD1846fb160D751F41ADaB1188d560C8",
-        "ChainportMainBridge": "0x0Ae87eDfd6fb9F931C8572420dEd0Df4E76a6A66"
+        "Validator": "0x8EB6ea84De39D35C373ef276Cb0C9E1f393cB717",
+        "ChainportMainBridge": "0x2bb46723Fd67dB36fEeb70D65637215a3377129D"
     },
     "binancetest": {
         "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
         "ChainportCongressMembersRegistry": "0x6381d6d8377393231988C314052EE216199e7641",
         "ChainportToken": "0xb965b288fb7d225c185Ac0e288ed291d2F923eEb",
         "MaintainersRegistry": "0x4e89b05487f89c3f2c03e8e3215284A7f4c59ae9",
-        "Validator": "0x7303CD0e18B657dF967E039AA9E5a9034A5d9F40",
-        "ChainportSideBridge": "0x359E9B5f106fA68612cDd90F8D16693F2F5c02Bd"
+        "Validator": "0x59cba29063E96C43e068f97aF330972a1897b1c1",
+        "ChainportSideBridge": "0xa09d5da6371Dae3e3e7046f55116C11d8B6222e6"
     },
     "polygonMumbai": {
         "ChainportCongress": "0x5bA1426905912913E5aA8F896cA5Df0f8af7DAEB",
         "ChainportCongressMembersRegistry": "0x6d681aAc3f66EaDB99BCC396ad6397c7d4072Fc9",
         "ChainportToken": "0x3a17E4dB7BA26d3D326A780732AF7Ade73E43374",
         "MaintainersRegistry": "0x1e1c854501a6C640B1E2b134268D3F453d6A8313",
-        "Validator": "0xfE7240388aFC53e42F7d98cDEF9E16Ef9A2B95f8",
-        "ChainportSideBridge": "0x2111d444BD080c10D02B2e2bd756E2578E939844"
+        "Validator": "0x87185afcF2451eE021bAC4620788f06B11cD31d8",
+        "ChainportSideBridge": "0x22Af306876992c5547952fCa40159Eae7400c765"
     },
     "ropstenStaging": {
         "ChainportCongress": "0x1DeE7Be5415F6Fdcc8515cA06AE8d9aFb550aBCa",
         "ChainportCongressMembersRegistry": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
         "ChainportToken": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
         "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
-        "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportMainBridge": "0x6888E9a82E5f3855aC20b1cf556209f158479876"
+        "Validator": "0x5B25CE73d3eA9239Ce66d92dc2c99d5CD6E1AB42",
+        "ChainportMainBridge": "0xa2186864721c67b21663fF3Bf2d7D10EBb0CFF0A"
     },
     "binancetestStaging": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
@@ -43,7 +43,7 @@
         "ChainportToken": "0xB301b8a6A86eD69ef336B9d692e870C60Af97296",
         "MaintainersRegistry": "0x326eB9271F0427c31bD646381a59E04713Ab6FB2",
         "Validator": "0xFDf202f9eFE8DD49766CE1BeD6EC2eAFa9E513e8",
-        "ChainportSideBridge": "0x508BA755F9cC73c4C8C94068f10bA55659217A4c"
+        "ChainportSideBridge": "0x6dfC5cF62Fae61b81123C7C65510A298d78FfeCe"
     },
     "polygonMumbaiStaging": {
         "ChainportCongress": "0x5Ea02Cd2ff0863Fe659a8BaC3c4c9C64Fd3CE9Ad",
@@ -51,7 +51,7 @@
         "ChainportToken": "0xE6874Ef951Ff95761c7969261B07e8fbd9b00F94",
         "MaintainersRegistry": "0x878FDF5412D59C3aB3Dc74CcA86eA7CAC6C052d2",
         "Validator": "0x478FE74a6b733f6C407E4A94123FD9E56841BBD0",
-        "ChainportSideBridge": "0x14F4290F86769522E7d6ED843dd8d861Aa77C942"
+        "ChainportSideBridge": "0x7f7c5c8B8A40871e55A2d0a9C27AB21F3C83762f"
     },
     "mainnet": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",

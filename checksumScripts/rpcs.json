@@ -1,0 +1,46 @@
+{
+  "binanceMainnet": {
+    "binance-ds":"https://bsc-dataseed.binance.org/",
+    "binance-ds1":"https://bsc-dataseed1.binance.org/",
+    "binance-ds2":"https://bsc-dataseed2.binance.org/",
+    "binance-ds3":"https://bsc-dataseed3.binance.org/",
+    "binance-ds4":"https://bsc-dataseed4.binance.org/",
+    "defibit-ds1":"https://bsc-dataseed1.defibit.io/",
+    "defibit-ds2":"https://bsc-dataseed2.defibit.io/",
+    "defibit-ds3":"https://bsc-dataseed3.defibit.io/",
+    "defibit-ds4":"https://bsc-dataseed4.defibit.io/",
+    "ninicoin-ds1":"https://bsc-dataseed1.ninicoin.io/",
+    "ninicoin-ds2":"https://bsc-dataseed2.ninicoin.io/",
+    "ninicoin-ds3":"https://bsc-dataseed3.ninicoin.io/",
+    "ninicoin-ds4":"https://bsc-dataseed4.ninicoin.io/"
+  },
+  "mainnet": {
+    "linkpool": "https://main-light.eth.linkpool.io/",
+    "infura": "https://mainnet.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8"
+  },
+  "polygonMainnet": {
+    "matic":"https://rpc-mainnet.matic.network",
+    "chainstacklabs":"https://matic-mainnet.chainstacklabs.com",
+    "maticvigil":"https://rpc-mainnet.maticvigil.com",
+    "quiknode":"https://rpc-mainnet.matic.quiknode.pro",
+    "bwarelabs":"https://matic-mainnet-full-rpc.bwarelabs.com",
+    "bwarelabs2":"https://matic-mainnet-archive-rpc.bwarelabs.com"
+  },
+  "binancetest": {
+    "b1":"https://data-seed-prebsc-1-s1.binance.org:8545/",
+    "b2":"https://data-seed-prebsc-2-s1.binance.org:8545/",
+    "b3":"https://data-seed-prebsc-1-s2.binance.org:8545/",
+    "b4":"https://data-seed-prebsc-2-s2.binance.org:8545/",
+    "b5":"https://data-seed-prebsc-1-s3.binance.org:8545/",
+    "b6":"https://data-seed-prebsc-2-s3.binance.org:8545/"
+  },
+  "ropsten": {
+    "infura":"https://ropsten.infura.io/v3/4fcc38c2bed84e8590473abd8e9f51e8"
+  },
+  "polygonMumbai": {
+    "p1":"https://rpc-mumbai.matic.today",
+    "p2":"https://matic-mumbai.chainstacklabs.com",
+    "p3":"https://rpc-mumbai.maticvigil.com",
+    "p4":"https://matic-testnet-archive-rpc.bwarelabs.com"
+  }
+}
