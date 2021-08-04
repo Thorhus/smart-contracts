@@ -399,6 +399,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Actual amount is exact quantity of tokens received
         uint256 actualAmount = balanceAfter.sub(balanceBefore);
 
+        // Require that actual amount is less or equal to amount
+        require(actualAmount <= amount, "Error: Amounts do not match.");
+
         // Emit event
         emit TokensDeposited(token, msg.sender, actualAmount, networkId);
     }
