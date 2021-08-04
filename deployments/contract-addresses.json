@@ -11,7 +11,7 @@
         "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
         "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
         "Validator": "0x8EB6ea84De39D35C373ef276Cb0C9E1f393cB717",
-        "ChainportMainBridge": "0x2bb46723Fd67dB36fEeb70D65637215a3377129D"
+        "ChainportMainBridge": "0x702198af7d9be724e00010Cd8f998FB7713d5119"
     },
     "binancetest": {
         "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
@@ -35,7 +35,7 @@
         "ChainportToken": "0x33e6a5FB807bb361C4FF3b539B9fBb019A6EEb13",
         "MaintainersRegistry": "0x3CAd20EFBa95E9c10ed90bb49F65eA22163dA7d4",
         "Validator": "0x5B25CE73d3eA9239Ce66d92dc2c99d5CD6E1AB42",
-        "ChainportMainBridge": "0xa2186864721c67b21663fF3Bf2d7D10EBb0CFF0A"
+        "ChainportMainBridge": "0x9cCDF2B978Bec317158C84ABBCf96fa4E8DDbCEd"
     },
     "binancetestStaging": {
         "ChainportCongress": "0xB6b4C7aC240b1f176c5589d064733066a83884a1",
