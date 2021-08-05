@@ -400,7 +400,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         uint256 actualAmount = balanceAfter.sub(balanceBefore);
 
         // Require that actual amount is less or equal to amount
-        require(actualAmount <= amount, "Error: Amounts do not match.");
+        require(actualAmount <= amount, "Error: Inflationary tokens are not supported.");
 
         // Emit event
         emit TokensDeposited(token, msg.sender, actualAmount, networkId);
