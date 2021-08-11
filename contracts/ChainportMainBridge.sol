@@ -387,11 +387,23 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Require that network is supported/activated
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
 
+        // Get balance before transfer
+        uint256 balanceBefore = IERC20(token).balanceOf(address(this));
+
         // Transfer funds from user to bridge
         IERC20(token).safeTransferFrom(address(msg.sender), address(this), amount);
 
+        // Get balance after transfer
+        uint256 balanceAfter = IERC20(token).balanceOf(address(this));
+
+        // Actual amount is exact quantity of tokens received
+        uint256 actualAmount = balanceAfter.sub(balanceBefore);
+
+        // Require that actual amount is less or equal to amount
+        require(actualAmount <= amount, "Error: Inflationary tokens are not supported.");
+
         // Emit event
-        emit TokensDeposited(token, msg.sender, amount, networkId);
+        emit TokensDeposited(token, msg.sender, actualAmount, networkId);
     }
 
     // Function to activate already added supported network
