@@ -48,6 +48,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
 
+    // Address of the cold wallet required for the safe storage of the funds
+    address public coldWallet;
+
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
 
@@ -70,6 +73,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
 
     event BridgeFreezed(bool isFrozen);
+    event ColdWalletChanged(address newColdWallet);
 
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
@@ -202,7 +206,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         bytes memory signature,
         address token,
         uint256 amount,
-        address beneficiary,
         uint256 nonce
     )
     public
@@ -212,6 +215,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isAssetNotFrozen(token)
     isPathNotPaused(token, "releaseTokensByMaintainer")
     {
+        require(coldWallet != address(0), "Error: Cold wallet not set.");
+
         require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
 
         require(isSignatureUsed[signature] == false, "Error: Already used signature.");
@@ -221,12 +226,12 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, coldWallet, amount, token);
         require(isMessageValid == true, "Error: Signature is not valid.");
 
-        IERC20(token).safeTransfer(beneficiary, amount);
+        IERC20(token).safeTransfer(coldWallet, amount);
 
-        emit TokensClaimed(token, beneficiary, amount);
+        emit TokensClaimed(token, coldWallet, amount);
     }
 
     function releaseTokensTimelockPassed(
@@ -438,5 +443,23 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         isPathPaused[token][functionName] = isPaused;
         emit PathPauseStateChanged(token, functionName, isPaused);
+    }
+
+    function setColdWallet(
+        address newColdWallet
+    )
+    public
+    onlyChainportCongress
+    {
+        // Require that address is not malformed
+        require(
+            newColdWallet != address(0),
+            "Error: Cannot set zero address as cold wallet address."
+        );
+        // Set coldWallet new address
+        coldWallet = newColdWallet;
+
+        // Emit the event
+        emit ColdWalletChanged(newColdWallet);
     }
 }
