@@ -3,16 +3,18 @@ const { signatoryAddress, signatoryPk, createHash } = require('./testHelpers')
 
 describe("Main Bridge Test", function () {
 
-    let maintainersRegistry, maintainersRegistryInstance, mainBridge, mainBridgeInstance,
+    let maintainersRegistry, maintainersRegistryInstance, mainBridge, mainBridgeInstance, coldWallet,
         validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
         tokenAmount = 50, nonceIncrease = 1, decimals = 18, freezeLength = 60, safetyThreshold = 30;
 
-    const zeroAddress = "0x000000000000000000000000000000000000000000";
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     beforeEach(async function() {
 
-        [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
+        [chainportCongress, user1, user2, maintainer, coldWallet, ...maintainers] = await ethers.getSigners();
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
+
+        coldWallet = coldWallet.address;
 
         maintainersRegistryInstance = await maintainersRegistry.deploy();
         for(let i = 0; i < maintainers.length; i++) {
@@ -356,12 +358,15 @@ describe("Main Bridge Test", function () {
 
             describe("Release Tokens By Maintainer", function (){
 
+                beforeEach(async () => {
+                    await mainBridgeInstance.connect(chainportCongress).setColdWallet(coldWallet);
+                });
+
                 it("Should not withdraw when singature length is not right (by maintainer)", async function () {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         "0x00",
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         await mainBridgeInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     )).to.be.revertedWith("bad signature length");
                 });
@@ -371,7 +376,6 @@ describe("Main Bridge Test", function () {
                         "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         await mainBridgeInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     );
                 });
@@ -381,7 +385,6 @@ describe("Main Bridge Test", function () {
                         "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd", // Needs proper signature
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         await mainBridgeInstance.functionNameToNonce("releaseTokensByMaintainer") + 1
                     );
                 });
@@ -391,47 +394,42 @@ describe("Main Bridge Test", function () {
                     expect(await mainBridgeInstance.isFrozen()).to.equal(true);
 
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
-                        createHash(1, maintainer.address, releaseAmount, token.address),
+                        createHash(1, coldWallet, releaseAmount, token.address),
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         1
                     )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
                 });
 
                 it("Should not withdraw when amount is less or equal to zero (by maintainer)", async function () {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
-                        createHash(1, maintainer.address, 0, token.address),
+                        createHash(1, coldWallet, 0, token.address),
                         token.address,
                         0,
-                        maintainer.address,
                         1
                     )).to.be.revertedWith("Amount is not greater than zero.");
                 });
 
                 it("Should withdraw tokens using signature (by maintainer)", async function () {
                     await mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
-                        createHash(1, maintainer.address, releaseAmount, token.address),
+                        createHash(1, coldWallet, releaseAmount, token.address),
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         1
                     );
                 });
 
                 it("Should not withdraw tokens using signature used (by maintainer)", async function () {
                     await mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
-                        createHash(1, maintainer.address, releaseAmount, token.address),
+                        createHash(1, coldWallet, releaseAmount, token.address),
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         1
                     );
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
-                        createHash(1, maintainer.address, releaseAmount, token.address),
+                        createHash(1, coldWallet, releaseAmount, token.address),
                         token.address,
                         releaseAmount,
-                        maintainer.address,
                         1
                     )).to.be.revertedWith("Already used signature.");
                 });
@@ -649,6 +647,19 @@ describe("Main Bridge Test", function () {
                 await expect(mainBridgeInstance.connect(user1).setPathPauseState(token.address, "depositTokens", false))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
+            });
+        });
+
+        describe("Set cold wallet function test", () => {
+            it("Should set new cold wallet by congress", async () => {
+                expect(await mainBridgeInstance.coldWallet()).to.equal(ZERO_ADDRESS);
+                await mainBridgeInstance.connect(chainportCongress).setColdWallet(coldWallet);
+                expect(await mainBridgeInstance.coldWallet()).to.equal(coldWallet);
+            });
+            it("Should not set new cold wallet by non congress wallet", async () => {
+                expect(await mainBridgeInstance.coldWallet()).to.equal(ZERO_ADDRESS);
+                await expect(mainBridgeInstance.connect(user1).setColdWallet(coldWallet))
+                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
     });
