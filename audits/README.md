@@ -10,9 +10,9 @@ ___
 ### File Links
 **Certik Audit** -> [File on repo](./Certik-2021_07_26.pdf)
 <br>
-**CyberUnit Audit** -> [File on repo](./CyberUnit-2021_5_13.pdf)
+**CyberUnit.Tech Audit** -> [File on repo](./CyberUnit.Tech-2021_6_14.pdf)
 ___
 ### Auditor Links
 **Certik** -> [Official website](https://www.certik.io/)
 <br>
-**CyberUnit** -> [Official website](https://cyberunit.tech/)
+**CyberUnit.Tech** -> [Official website](https://cyberunit.tech/)
