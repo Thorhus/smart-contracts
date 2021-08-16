@@ -478,13 +478,13 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Set cold wallet function test", () => {
-            it("Should set new cold wallet by congress", async () => {
+        describe("Set fundManager contract test", () => {
+            it("Should set new fundManager address by congress", async () => {
                 expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await mainBridgeInstance.connect(chainportCongress).setFundManager(fundManager);
                 expect(await mainBridgeInstance.fundManager()).to.equal(fundManager);
             });
-            it("Should not set new cold wallet by non congress wallet", async () => {
+            it("Should not set new fundManager address by non congress wallet", async () => {
                 expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await expect(mainBridgeInstance.connect(user1).setFundManager(fundManager))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
