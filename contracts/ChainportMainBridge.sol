@@ -38,36 +38,27 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     uint256 public freezeLength;
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
-
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
-
     // Nonce mapping
     mapping(bytes32 => bool) public isNonceUsed;
-
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
-
     // Address of the FundManager contract
     address public fundManager;
 
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
-
     event AssetFrozen(address asset, bool isAssetFrozen);
-
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
-
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
-
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-
     event BridgeFreezed(bool isFrozen);
-
     event FundManagerChanged(address newFundManager);
     event FundsRebalanced(address target, address token, uint256 amount);
 
+    // Modifiers
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -187,10 +178,10 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // This is representing % of every asset on the contract
         // Example: 32% is safety threshold
         require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
-
         safetyThreshold = _safetyThreshold;
     }
 
+    // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
         address token,
         uint256 amount
@@ -226,7 +217,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
-
+        isNonceUsed[nonceHash] = true;
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
@@ -235,7 +226,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
-        isNonceUsed[nonceHash] = true;
         IERC20(token).safeTransfer(beneficiary, amount);
 
         emit TokensClaimed(token, beneficiary, amount);
@@ -307,6 +297,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit NetworkDeactivated(networkId);
     }
 
+    // Function to pause/unpause specific path/flow
     function setPathPauseState(
         address token,
         string memory functionName,
@@ -319,6 +310,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
+    // Function to change fundManager contract address
     function setFundManager(
         address newFundManager
     )
