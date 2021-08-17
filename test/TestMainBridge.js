@@ -295,6 +295,7 @@ describe("Main Bridge Test", function () {
                 it("Should not withdraw when amount is less or equal to zero (by maintainer)", async function () {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
+                        0,
                         0
                     )).to.be.revertedWith("Amount is not greater than zero.");
                 });
@@ -302,7 +303,8 @@ describe("Main Bridge Test", function () {
                 it("Should withdraw tokens (by maintainer)", async function () {
                     await mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
-                        releaseAmount
+                        releaseAmount,
+                        1
                     );
                 });
             });
