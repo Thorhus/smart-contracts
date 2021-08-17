@@ -167,12 +167,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Require that the fund manager has been set properly
         require(fundManager != address(0), "Error: Fund manager not set.");
 
-        // Require that nonce is not lower than the maximal nonce for the selected function
-        require(
-            nonce > functionNameToMaxNonce["releaseTokensByMaintainer"],
-            "Error: Nonce value is not valid."
-        );
-
         // Set new nonce as the maximal nonce for selected function
         functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce;
 
