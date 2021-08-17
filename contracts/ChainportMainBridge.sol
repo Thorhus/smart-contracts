@@ -173,6 +173,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             "Error: Nonce value is not valid."
         );
 
+        // Set new nonce as the maximal nonce for selected function
+        functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce;
+
         // Generate nonceHash and check if nonce has been used before or not
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
