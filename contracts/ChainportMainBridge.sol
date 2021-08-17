@@ -161,10 +161,12 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     isAmountGreaterThanZero(amount)
     {
-        require(fundManager != address(0), "Error: Cold wallet not set.");
+        require(fundManager != address(0), "Error: Fund manager not set.");
         IERC20(token).safeTransfer(fundManager, amount);
 
-        // rebalance event (target, token, amount)
+        // Increase nonce to track function executions
+        functionNameToNonce["releaseTokensByMaintainer"] = functionNameToNonce["releaseTokensByMaintainer"].add(1);
+
         emit FundsRebalanced(fundManager, token, amount);
     }
 
