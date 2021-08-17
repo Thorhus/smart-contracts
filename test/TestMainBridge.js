@@ -1,11 +1,11 @@
 const { expect } = require("chai");
-const { signatoryAddress, signatoryPk, createHash } = require('./testHelpers')
+const { signatoryAddress, createHash, generateSignature } = require('./testHelpers')
 
 describe("Main Bridge Test", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, mainBridge, mainBridgeInstance, fundManager,
         validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
-        tokenAmount = 50, nonceIncrease = 1, decimals = 18, freezeLength = 60, safetyThreshold = 30;
+        tokenAmount = 50, nonceIncrease = 1, decimals = 18;
 
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -36,27 +36,12 @@ describe("Main Bridge Test", function () {
         mainBridgeInstance = await mainBridge.deploy();
     });
 
-    describe("Initialization", function () {
-
-        it("Should not initialize when safetyThreshold is 0", async function () {
-            await expect(mainBridgeInstance.initialize(
-                maintainersRegistryInstance.address,
-                chainportCongress.address,
-                validatorInstance.address,
-                0,
-                0
-            )).to.be.revertedWith("Error: % is not valid.");
-        });
-
-        it("Should initialize", async function () {
-            await mainBridgeInstance.initialize(
-                maintainersRegistryInstance.address,
-                chainportCongress.address,
-                validatorInstance.address,
-                0,
-                30
-            )
-        });
+    it("Should initialize", async function () {
+        await mainBridgeInstance.initialize(
+            maintainersRegistryInstance.address,
+            chainportCongress.address,
+            validatorInstance.address
+        )
     });
 
     describe("Functions", function () {
@@ -65,9 +50,7 @@ describe("Main Bridge Test", function () {
             await mainBridgeInstance.initialize(
                 maintainersRegistryInstance.address,
                 chainportCongress.address,
-                validatorInstance.address,
-                60,
-                30
+                validatorInstance.address
             );
         });
 
@@ -85,13 +68,6 @@ describe("Main Bridge Test", function () {
                 expect(await mainBridgeInstance.signatureValidator()).to.equal(validatorInstance.address);
             });
 
-            it("Freeze length is set properly", async function () {
-                expect(await mainBridgeInstance.freezeLength()).to.equal(freezeLength);
-            });
-
-            it("Safety threshold is set properly", async function () {
-                expect(await mainBridgeInstance.safetyThreshold()).to.equal(safetyThreshold);
-            });
         });
 
         describe("Asset protection", function () {
@@ -221,46 +197,6 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Time Lock Setting", function () {
-
-            let newFreezeLength = 120;
-
-            it("Should set time lock (by congress)", async function () {
-                await mainBridgeInstance.connect(chainportCongress).setTimeLockLength(newFreezeLength);
-                expect(await mainBridgeInstance.freezeLength()).to.equal(newFreezeLength);
-            });
-
-            it("Should not set time lock (by user)", async function () {
-                await expect(mainBridgeInstance.connect(user1).setTimeLockLength(newFreezeLength))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should not set time lock (by maintainer)", async function () {
-                await expect(mainBridgeInstance.connect(maintainer).setTimeLockLength(newFreezeLength))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-        });
-
-        describe("Safety Threshold Setting", function () {
-
-            let newSafetyThreshold = 50;
-
-            it("Should set safety threshold (by congress)", async function () {
-                await mainBridgeInstance.connect(chainportCongress).setThreshold(newSafetyThreshold);
-                expect(await mainBridgeInstance.safetyThreshold()).to.equal(newSafetyThreshold);
-            });
-
-            it("Should not set safety threshold (by user)", async function () {
-                await expect(mainBridgeInstance.connect(user1).setThreshold(newSafetyThreshold))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should not set safety threshold (by maintainer)", async function () {
-                await expect(mainBridgeInstance.connect(maintainer).setThreshold(newSafetyThreshold))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-        });
-
         describe("Token Depositing", function () {
 
             beforeEach(async function () {
@@ -375,7 +311,7 @@ describe("Main Bridge Test", function () {
 
                 it("Should release tokens", async function () {
                     await mainBridgeInstance.connect(user1).releaseTokens(
-                        createHash(1, user1.address, releaseAmount, token.address),
+                        generateSignature(createHash(1, user1.address, releaseAmount, token.address)),
                         token.address,
                         releaseAmount,
                         1
@@ -411,30 +347,6 @@ describe("Main Bridge Test", function () {
                         await mainBridgeInstance.functionNameToNonce("releaseTokens") + 1
                     )).to.be.revertedWith("Amount is not greater than zero.");
                 });
-            });
-
-        });
-
-        describe("Checking amount compared to threshold", function () {
-
-            beforeEach(async function () {
-                let sideBridgeInstance = await ethers.getContractFactory("ChainportSideBridge");
-                sideBridgeInstance = await sideBridgeInstance.deploy();
-
-                await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
-
-                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await sideBridgeInstance.connect(maintainer)
-                    .mintTokens(token.address, mainBridgeInstance.address, tokenAmount*100, lastNonce + nonceIncrease);
-            });
-
-            it("Should check if amount is below safety threshold", async function () {
-                expect(await mainBridgeInstance.isAboveThreshold(token.address, tokenAmount*10)).to.be.false;
-            });
-
-            it("Should check if amount is above safety threshold", async function () {
-                expect(await mainBridgeInstance.isAboveThreshold(token.address, tokenAmount*55)).to.be.true;
             });
         });
 
@@ -479,11 +391,13 @@ describe("Main Bridge Test", function () {
         });
 
         describe("Set fundManager contract test", () => {
+
             it("Should set new fundManager address by congress", async () => {
                 expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await mainBridgeInstance.connect(chainportCongress).setFundManager(fundManager);
                 expect(await mainBridgeInstance.fundManager()).to.equal(fundManager);
             });
+
             it("Should not set new fundManager address by non congress wallet", async () => {
                 expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await expect(mainBridgeInstance.connect(user1).setFundManager(fundManager))
