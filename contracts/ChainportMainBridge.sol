@@ -47,6 +47,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Address of the FundManager contract
     address public fundManager;
 
+    mapping(string => uint256) public functionNameToMaxNonce;
+
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
     event AssetFrozen(address asset, bool isAssetFrozen);
@@ -155,17 +157,31 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
         address token,
-        uint256 amount
+        uint256 amount,
+        uint256 nonce
     )
     public
     onlyMaintainer
     isAmountGreaterThanZero(amount)
     {
+        // Require that the fund manager has been set properly
         require(fundManager != address(0), "Error: Fund manager not set.");
-        IERC20(token).safeTransfer(fundManager, amount);
 
-        // Increase nonce to track function executions
-        functionNameToNonce["releaseTokensByMaintainer"] = functionNameToNonce["releaseTokensByMaintainer"].add(1);
+        // Require that nonce is not lower than the maximal nonce for the selected function
+        require(
+            nonce > functionNameToMaxNonce["releaseTokensByMaintainer"],
+            "Error: Nonce value is not valid."
+        );
+
+        // Generate nonceHash and check if nonce has been used before or not
+        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));
+        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
+
+        // Specify that the nonce has been used now
+        isNonceUsed[nonceHash] = true;
+
+        // Transfer funds to fund manager
+        IERC20(token).safeTransfer(fundManager, amount);
 
         emit FundsRebalanced(fundManager, token, amount);
     }
