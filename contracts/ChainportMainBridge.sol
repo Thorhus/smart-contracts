@@ -87,19 +87,13 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     function initialize(
         address _maintainersRegistryAddress,
         address _chainportCongress,
-        address _signatureValidator,
-        uint256 _freezeLength,
-        uint256 _safetyThreshold
+        address _signatureValidator
     )
     public
     initializer
     {
-        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
-
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
         signatureValidator = IValidator(_signatureValidator);
-        freezeLength = _freezeLength;
-        safetyThreshold = _safetyThreshold;
     }
 
     function freezeBridge()
@@ -158,29 +152,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         isAssetProtected[tokenAddress] = true;
     }
 
-    // Function to set timelock
-    function setTimeLockLength(
-        uint256 length
-    )
-    public
-    onlyChainportCongress
-    {
-        freezeLength = length;
-    }
-
-    // Function to set minimal value that is considered important by quantity
-    function setThreshold(
-        uint256 _safetyThreshold
-    )
-    public
-    onlyChainportCongress
-    {
-        // This is representing % of every asset on the contract
-        // Example: 32% is safety threshold
-        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
-        safetyThreshold = _safetyThreshold;
-    }
-
     // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
         address token,
@@ -229,11 +200,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         IERC20(token).safeTransfer(beneficiary, amount);
 
         emit TokensClaimed(token, beneficiary, amount);
-    }
-
-    // Function to check if amount is above threshold
-    function isAboveThreshold(address token, uint256 amount) public view returns (bool) {
-        return amount >= getTokenBalance(token).mul(safetyThreshold).div(100);
     }
 
     // Get contract balance of specific token
