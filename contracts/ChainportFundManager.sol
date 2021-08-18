@@ -26,7 +26,7 @@ contract ChainportFundManager is ChainportMiddleware{
 
     // Events
     event RebalancerChanged(address newRebalancer);
-    event BridgeFunded(address token, uint256 amount);
+    event FundsRebalancedToHotBridge(address token, uint256 amount);
 
     // Modifiers
     modifier onlyRebalancer {
@@ -98,7 +98,7 @@ contract ChainportFundManager is ChainportMiddleware{
 
         // Perform safe transfer
         IERC20(token).safeTransfer(bridgeContract, amount);
-        emit BridgeFunded(token, amount);
+        emit FundsRebalancedToHotBridge(token, amount);
     }
 
 }
