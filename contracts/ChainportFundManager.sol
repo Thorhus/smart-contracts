@@ -22,11 +22,17 @@ contract ChainportFundManager is ChainportMiddleware {
     bool isContractFrozen;
     uint8 public threshold;
     address public rebalancer;
-    address public bridgeContract;
+    address public chainportBridge;
+    address _safeAddress;
+    mapping(address => uint256) tokenAddressToThreshold;
 
     // Events
     event RebalancerChanged(address newRebalancer);
+    event SafeAddressChanged(address newSafeAddress);
+    event ChainportBridgeChanged(address newChainportBridge);
     event FundsRebalancedToHotBridge(address token, uint256 amount);
+    event FundsRebalancedToSafeAddress(address token, uint256 amount);
+    event TokenThresholdSet(address token, uint256 threshold);
 
     // Modifiers
     modifier onlyRebalancer {
@@ -37,21 +43,18 @@ contract ChainportFundManager is ChainportMiddleware {
         _;
     }
 
-    modifier isContractNotFrozen {
-        require(!isContractFrozen, "Error: Contract is frozen.");
-        _;
-    }
-
     constructor(
         address _chainportCongress,
         address _maintainersRegistry,
         address _rebalancer,
-        address _bridgeContract
+        address _chainportBridge,
+        address safeAddress_
     )
     public{
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
         rebalancer = _rebalancer;
-        bridgeContract = _bridgeContract;
+        chainportBridge = _chainportBridge;
+        _safeAddress = safeAddress_;
     }
 
     // Functions
@@ -61,7 +64,6 @@ contract ChainportFundManager is ChainportMiddleware {
     )
     public
     onlyChainportCongress
-    isContractNotFrozen
     {
         // Require that address is not malformed
         require(
@@ -74,31 +76,92 @@ contract ChainportFundManager is ChainportMiddleware {
         emit RebalancerChanged(_rebalancer);
     }
 
+    function setChainportBridge(
+        address _chainportBridge
+    )
+    public
+    onlyChainportCongress
+    {
+        // Require that address is not malformed
+        require(
+            _chainportBridge != address(0),
+            "Error: Cannot set zero address as bridge contract."
+        );
+
+        // Set new rebalancer address
+        chainportBridge = _chainportBridge;
+        emit ChainportBridgeChanged(_chainportBridge);
+    }
+
+    // Function to set safe address by congress
+    function setSafeAddress(
+        address safeAddress_
+    )
+    public
+    onlyChainportCongress
+    {
+        // Require that address is not malformed
+        require(
+            safeAddress_ != address(0),
+            "Error: Cannot set zero address as safe address."
+        );
+
+        // Set new safe address
+        _safeAddress = safeAddress_;
+        emit SafeAddressChanged(safeAddress_);
+    }
+
+    function setTokenThresholdsByCongress(
+        address [] memory tokens,
+        uint256 [] memory thresholds
+    )
+    public
+    onlyChainportCongress
+    {
+        for(uint8 i; i < tokens.length; i++) {
+            // Require that array arguments are valid
+            require(tokens[i] != address(0), "Error: Token address is malformed.");
+            require(thresholds[i] != 0, "Error: Zero value cannot be set as threshold.");
+            // Set threshold for token
+            tokenAddressToThreshold[tokens[i]] = thresholds[i];
+            // Emit an event
+            emit TokenThresholdSet(tokens[i], thresholds[i]);
+        }
+    }
+
     // Function to transfer funds to bridge contract under right conditions
     function fundBridge(
-        address token,
-        uint256 amount
+        address [] memory tokens,
+        uint256 [] memory amounts
     )
     public
     onlyRebalancer
-    isContractNotFrozen
     {
-        // Check that amount is greater than zero
-        require(amount > 0, "Error: Amount is not greater than zero.");
-
-        // Get contract balances
-        uint256 bridgeBalance = IERC20(token).balanceOf(bridgeContract);
-        uint256 fundManagerBalance = IERC20(token).balanceOf(address(this));
-
-        // Require that only limited percent of the token resources will be available on bridge after transfer
-        require(
-            bridgeBalance.add(amount) < fundManagerBalance.add(bridgeBalance).div(100).mul(threshold),
-            "Error: Amount is over limit."
-        );
-
-        // Perform safe transfer
-        IERC20(token).safeTransfer(bridgeContract, amount);
-        emit FundsRebalancedToHotBridge(token, amount);
+        for(uint8 i; i < tokens.length; i++) {
+            // Require that valid amount is given
+            require(
+                amounts[i] > 0 && amounts[i] <= tokenAddressToThreshold[tokens[i]],
+                "Error: Amount is not valid."
+            );
+            // Perform safe transfer
+            IERC20(tokens[i]).safeTransfer(chainportBridge, amounts[i]);
+            emit FundsRebalancedToHotBridge(tokens[i], amounts[i]);
+        }
     }
 
+    function fundSafe(
+        address [] memory tokens,
+        uint256 [] memory amounts
+    )
+    public
+    onlyRebalancer
+    {
+        for(uint8 i; i < tokens.length; i++) {
+            // Require that valid amount is given
+            require(amounts[i] > 0, "Error: Amount is not greater than zero.");
+            // Perform safe transfer
+            IERC20(tokens[i]).safeTransfer(_safeAddress, amounts[i]);
+            emit FundsRebalancedToSafeAddress(tokens[i], amounts[i]);
+        }
+    }
 }
