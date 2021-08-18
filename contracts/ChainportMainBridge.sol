@@ -135,25 +135,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, true);
     }
 
-    function setAssetProtection(
-        address tokenAddress,
-        bool _isProtected
-    )
-    public
-    onlyChainportCongress
-    {
-        isAssetProtected[tokenAddress] = _isProtected;
-    }
-
-    function protectAssetByMaintainer(
-        address tokenAddress
-    )
-    public
-    onlyMaintainer
-    {
-        isAssetProtected[tokenAddress] = true;
-    }
-
     // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
         address token,
@@ -177,10 +158,13 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Specify that the nonce has been used now
         isNonceUsed[nonceHash] = true;
 
+        //TODO: add conditions on amount to make sure amount is less or equal to amount on the bridge
         // Transfer funds to fund manager
         IERC20(token).safeTransfer(fundManager, amount);
 
         emit FundsRebalanced(fundManager, token, amount);
+        //TODO: rename events: here to FundsRebalancedFromHotBridge
+        //TODO: in fundmanager contract: FundsRebalancedToHotBridge, FundsRebalancedToVault
     }
 
     // Function to release tokens
