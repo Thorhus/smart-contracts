@@ -11,7 +11,7 @@
         "ChainportToken": "0x0dcd072f856c5655e220e2AA2230f960106fCe0a",
         "MaintainersRegistry": "0x26F95137DB4dF1fb70EB8D1F45abcB0f5F10E251",
         "Validator": "0x8EB6ea84De39D35C373ef276Cb0C9E1f393cB717",
-        "ChainportMainBridge": "0xB8AC6f2370dCDF7e6e9356f24C883BD88CDE7EC8"
+        "ChainportMainBridge": "0x74E74f2faa88957f02Ec9c008fD77Ee2FC37D02D"
     },
     "binancetest": {
         "ChainportCongress": "0x3D553621819DA4106FFB4ef7a4F5BDc0DC782cC6",
