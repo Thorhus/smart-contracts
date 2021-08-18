@@ -58,7 +58,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
     event BridgeFreezed(bool isFrozen);
     event FundManagerChanged(address newFundManager);
-    event FundsRebalanced(address target, address token, uint256 amount);
+    event FundsRebalancedFromHotBridge(address target, address token, uint256 amount);
 
     // Modifiers
     modifier isBridgeNotFrozen {
@@ -158,13 +158,10 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Specify that the nonce has been used now
         isNonceUsed[nonceHash] = true;
 
-        //TODO: add conditions on amount to make sure amount is less or equal to amount on the bridge
         // Transfer funds to fund manager
         IERC20(token).safeTransfer(fundManager, amount);
 
-        emit FundsRebalanced(fundManager, token, amount);
-        //TODO: rename events: here to FundsRebalancedFromHotBridge
-        //TODO: in fundmanager contract: FundsRebalancedToHotBridge, FundsRebalancedToVault
+        emit FundsRebalancedFromHotBridge(fundManager, token, amount);
     }
 
     // Function to release tokens
