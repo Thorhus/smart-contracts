@@ -70,42 +70,6 @@ describe("Main Bridge Test", function () {
 
         });
 
-        describe("Asset protection", function () {
-
-            it("Should protect the asset (by congress)", async function () {
-                await mainBridgeInstance.connect(chainportCongress).setAssetProtection(token.address, true);
-                expect(await mainBridgeInstance.isAssetProtected(token.address)).to.equal(true);
-            });
-
-            it("Should remove protection on the asset (by congress)", async function () {
-                await mainBridgeInstance.connect(chainportCongress).setAssetProtection(token.address, true);
-                expect(await mainBridgeInstance.isAssetProtected(token.address)).to.equal(true);
-                await mainBridgeInstance.connect(chainportCongress).setAssetProtection(token.address, false);
-                expect(await mainBridgeInstance.isAssetProtected(token.address)).to.equal(false);
-            });
-
-            it("Should not protect the asset (by user)", async function () {
-                await expect(mainBridgeInstance.connect(user1).setAssetProtection(token.address, true))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should not remove protection on the asset (by user)", async function () {
-                await mainBridgeInstance.connect(chainportCongress).setAssetProtection(token.address, true);
-                expect(await mainBridgeInstance.isAssetProtected(token.address)).to.equal(true);
-                await expect(mainBridgeInstance.connect(user1).setAssetProtection(token.address, false))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
-            });
-
-            it("Should protect asset by maintainer", async function () {
-                await mainBridgeInstance.connect(maintainer).protectAssetByMaintainer(token.address);
-            });
-
-            it("Should not protect asset by maintainer (by user)", async function () {
-                await expect(mainBridgeInstance.connect(user1).protectAssetByMaintainer(token.address))
-                    .to.be.reverted;
-            });
-        });
-
         describe("Bridge Freezing Operations", function () {
 
             it("Should freeze the bridge (by maintainer)", async function () {
