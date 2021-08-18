@@ -13,7 +13,7 @@ import "./ChainportMiddleware.sol";
  * Github: markolazic01
  */
 
-contract ChainportFundManager is ChainportMiddleware{
+contract ChainportFundManager is ChainportMiddleware {
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
