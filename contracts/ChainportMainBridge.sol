@@ -38,39 +38,29 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     uint256 public freezeLength;
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
-
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
-
     // Nonce mapping
     mapping(bytes32 => bool) public isNonceUsed;
-
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
+    // Address of the FundManager contract
+    address public fundManager;
+
+    mapping(string => uint256) public functionNameToMaxNonce;
 
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
-
-    event CreatedPendingWithdrawal(address token, address beneficiary, uint256 amount, uint256 unlockingTime);
-
-    event WithdrawalApproved(address token, address beneficiary, uint256 amount);
-    event WithdrawalRejected(address token, address beneficiary, uint256 amount);
-
-    event TimeLockLengthChanged(uint256 newTimeLockLength);
-    event AssetProtected(address asset, bool isProtected);
-    event SafetyThresholdChanged(uint256 newSafetyThreshold);
-
     event AssetFrozen(address asset, bool isAssetFrozen);
-
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
-
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
-
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-
     event BridgeFreezed(bool isFrozen);
+    event FundManagerChanged(address newFundManager);
+    event FundsRebalancedFromHotBridge(address target, address token, uint256 amount);
 
+    // Modifiers
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -99,19 +89,13 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     function initialize(
         address _maintainersRegistryAddress,
         address _chainportCongress,
-        address _signatureValidator,
-        uint256 _freezeLength,
-        uint256 _safetyThreshold
+        address _signatureValidator
     )
     public
     initializer
     {
-        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
-
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistryAddress);
         signatureValidator = IValidator(_signatureValidator);
-        freezeLength = _freezeLength;
-        safetyThreshold = _safetyThreshold;
     }
 
     function freezeBridge()
@@ -151,123 +135,33 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, true);
     }
 
-    function setAssetProtection(
-        address tokenAddress,
-        bool _isProtected
-    )
-    public
-    onlyChainportCongress
-    {
-        isAssetProtected[tokenAddress] = _isProtected;
-        emit AssetProtected(tokenAddress, _isProtected);
-    }
-
-    function protectAssetByMaintainer(
-        address tokenAddress
-    )
-    public
-    onlyMaintainer
-    {
-        isAssetProtected[tokenAddress] = true;
-        emit AssetProtected(tokenAddress, true);
-    }
-
-    // Function to set timelock
-    function setTimeLockLength(
-        uint256 length
-    )
-    public
-    onlyChainportCongress
-    {
-        freezeLength = length;
-        emit TimeLockLengthChanged(length);
-    }
-
-    // Function to set minimal value that is considered important by quantity
-    function setThreshold(
-        uint256 _safetyThreshold
-    )
-    public
-    onlyChainportCongress
-    {
-        // This is representing % of every asset on the contract
-        // Example: 32% is safety threshold
-        require(_safetyThreshold > 0 && _safetyThreshold < 100, "Error: % is not valid.");
-
-        safetyThreshold = _safetyThreshold;
-        emit SafetyThresholdChanged(_safetyThreshold);
-    }
-
+    // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
-        bytes memory signature,
         address token,
         uint256 amount,
-        address beneficiary,
         uint256 nonce
     )
     public
     onlyMaintainer
-    isBridgeNotFrozen
     isAmountGreaterThanZero(amount)
-    isAssetNotFrozen(token)
-    isPathNotPaused(token, "releaseTokensByMaintainer")
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
+        // Require that the fund manager has been set properly
+        require(fundManager != address(0), "Error: Fund manager not set.");
 
-        require(isSignatureUsed[signature] == false, "Error: Already used signature.");
-        isSignatureUsed[signature] = true;
+        // Set new nonce as the maximal nonce for selected function
+        functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce;
 
+        // Generate nonceHash and check if nonce has been used before or not
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
+
+        // Specify that the nonce has been used now
         isNonceUsed[nonceHash] = true;
 
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token);
-        require(isMessageValid == true, "Error: Signature is not valid.");
+        // Transfer funds to fund manager
+        IERC20(token).safeTransfer(fundManager, amount);
 
-        IERC20(token).safeTransfer(beneficiary, amount);
-
-        emit TokensClaimed(token, beneficiary, amount);
-    }
-
-    function releaseTokensTimelockPassed(
-        bytes memory signature,
-        address token,
-        uint256 amount,
-        uint256 nonce
-    )
-    public
-    isBridgeNotFrozen
-    isAmountGreaterThanZero(amount)
-    isAssetNotFrozen(token)
-    isPathNotPaused(token, "releaseTokens")
-    {
-        require(isSignatureUsed[signature] == false, "Error: Signature already used");
-        isSignatureUsed[signature] = true;
-
-        bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
-        require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
-        isNonceUsed[nonceHash] = true;
-
-        // Check if freeze time has passed and same user is calling again
-        if(isTokenHavingPendingWithdrawal[token] == true) {
-            PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
-            if(p.amount == amount && p.beneficiary == msg.sender && p.unlockingTime <= block.timestamp) {
-                // Verify the signature user is submitting
-                bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, p.beneficiary, amount, token);
-                require(isMessageValid == true, "Error: Signature is not valid.");
-
-                // Clear up the state and remove pending flag
-                delete tokenToPendingWithdrawal[token];
-                delete isTokenHavingPendingWithdrawal[token];
-
-                IERC20(token).safeTransfer(p.beneficiary, p.amount);
-
-                emit TokensClaimed(token, p.beneficiary, p.amount);
-                emit WithdrawalApproved(token, p.beneficiary, p.amount);
-            }
-        } else {
-            revert("Invalid function call");
-        }
+        emit FundsRebalancedFromHotBridge(fundManager, token, amount);
     }
 
     // Function to release tokens
@@ -290,7 +184,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
-
+        isNonceUsed[nonceHash] = true;
 
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
@@ -299,72 +193,9 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
+        IERC20(token).safeTransfer(beneficiary, amount);
 
-        if(isAboveThreshold(token, amount) && isAssetProtected[token] == true) {
-
-            PendingWithdrawal memory p = PendingWithdrawal({
-                amount: amount,
-                beneficiary: beneficiary,
-                unlockingTime: now.add(freezeLength)
-            });
-
-            tokenToPendingWithdrawal[token] = p;
-            isTokenHavingPendingWithdrawal[token] = true;
-
-            // Fire an event
-            emit CreatedPendingWithdrawal(token, beneficiary, amount, p.unlockingTime);
-        } else {
-            isNonceUsed[nonceHash] = true;
-
-            IERC20(token).safeTransfer(beneficiary, amount);
-
-            emit TokensClaimed(token, beneficiary, amount);
-        }
-    }
-
-    // Function for congress to approve withdrawal and transfer funds
-    function approveWithdrawalAndTransferFunds(
-        address token
-    )
-    public
-    onlyChainportCongress
-    isBridgeNotFrozen
-    {
-        require(isTokenHavingPendingWithdrawal[token] == true);
-        // Get current pending withdrawal attempt
-        PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
-        // Clear up the state and remove pending flag
-        delete tokenToPendingWithdrawal[token];
-        delete isTokenHavingPendingWithdrawal[token];
-
-        // Transfer funds to user
-        IERC20(token).safeTransfer(p.beneficiary, p.amount);
-
-        // Emit events
-        emit TokensClaimed(token, p.beneficiary, p.amount);
-        emit WithdrawalApproved(token, p.beneficiary, p.amount);
-    }
-
-    // Function to reject withdrawal from congress
-    function rejectWithdrawal(
-        address token
-    )
-    public
-    onlyChainportCongress
-    isBridgeNotFrozen
-    {
-        require(isTokenHavingPendingWithdrawal[token] == true);
-        // Get current pending withdrawal attempt
-        PendingWithdrawal memory p = tokenToPendingWithdrawal[token];
-        emit WithdrawalRejected(token, p.beneficiary, p.amount);
-        // Clear up the state and remove pending flag
-        delete tokenToPendingWithdrawal[token];
-        delete isTokenHavingPendingWithdrawal[token];
-    }
-
-    // Function to check if amount is above threshold
-    function isAboveThreshold(address token, uint256 amount) public view returns (bool) {
-        return amount >= getTokenBalance(token).mul(safetyThreshold).div(100);
+        emit TokensClaimed(token, beneficiary, amount);
     }
 
     // Get contract balance of specific token
@@ -428,6 +259,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit NetworkDeactivated(networkId);
     }
 
+    // Function to pause/unpause specific path/flow
     function setPathPauseState(
         address token,
         string memory functionName,
@@ -438,5 +270,24 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     {
         isPathPaused[token][functionName] = isPaused;
         emit PathPauseStateChanged(token, functionName, isPaused);
+    }
+
+    // Function to change fundManager contract address
+    function setFundManager(
+        address newFundManager
+    )
+    public
+    onlyChainportCongress
+    {
+        // Require that address is not malformed
+        require(
+            newFundManager != address(0),
+            "Error: Cannot set zero address as fundManager address."
+        );
+        // Set fundManager new address
+        fundManager = newFundManager;
+
+        // Emit the event
+        emit FundManagerChanged(fundManager);
     }
 }
