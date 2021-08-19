@@ -63,11 +63,11 @@ function createHash(nonce, beneficiary, amount, token) {
     // let result = web3.eth.accounts.sign(digestFinal, privateKey);
     // console.log("result", result)
     // return result.signature;
-    return generateSignature(digestFinal);
+    return digestFinal;
 }
 
 module.exports = {
     signatoryAddress,
-    signatoryPk,
-    createHash
+    createHash,
+    generateSignature
 }

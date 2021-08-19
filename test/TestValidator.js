@@ -1,11 +1,13 @@
 const { expect } = require("chai");
-const { signatoryAddress, signatoryPk, createHash } = require('./testHelpers')
+const { signatoryAddress, createHash, generateSignature } = require('./testHelpers')
 
 describe("Validator", function () {
 
     let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
-    tokenAmount = 50, nonceIncrease = 1, decimals = 18, zeroAddress = "0x0000000000000000000000000000000000000000";
+    decimals = 18;
+
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
@@ -37,7 +39,7 @@ describe("Validator", function () {
 
         describe("Set signatory address", async function () {
             it("Should not set zero address (by congress)", async function () {
-                await expect(validatorInstance.setSignatoryAddress(zeroAddress)).to.be.reverted;
+                await expect(validatorInstance.setSignatoryAddress(ZERO_ADDRESS)).to.be.reverted;
             });
 
             it("Should set signatory address (by congress)", async function() {
@@ -66,9 +68,16 @@ describe("Validator", function () {
                 ).to.be.false;
             });
 
+            it("Should verify signature with recoverSigFromHash function", async () => {
+                expect(await validatorInstance.recoverSigFromHash(
+                        createHash(1, maintainer.address, releaseAmount, token.address),
+                        generateSignature(createHash(1, maintainer.address, releaseAmount, token.address))
+                    )).to.be.true;
+            });
+
             it("Should verify signature", async () => {
                 expect(await validatorInstance.verifyWithdraw(
-                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
+                    generateSignature(createHash(1, maintainer.address, releaseAmount, token.address)),
                     1,
                     maintainer.address,
                     releaseAmount,
@@ -87,7 +96,7 @@ describe("Validator", function () {
         describe("Recover signature", async function () {
             it("Should return recovered signature", async () => {
                 await validatorInstance.recoverSignature(
-                    createHash(1, maintainer.address, releaseAmount, token.address, signatoryPk),
+                    generateSignature(createHash(1, maintainer.address, releaseAmount, token.address)),
                     1,
                     maintainer.address,
                     releaseAmount,
