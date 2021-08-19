@@ -76,6 +76,7 @@ contract ChainportFundManager is ChainportMiddleware {
         emit RebalancerChanged(_rebalancer);
     }
 
+    // Function to set chainportBridge address by congress
     function setChainportBridge(
         address _chainportBridge
     )
@@ -111,6 +112,7 @@ contract ChainportFundManager is ChainportMiddleware {
         emit SafeAddressChanged(safeAddress_);
     }
 
+    // Function to set thresholds for tokens
     function setTokenThresholdsByCongress(
         address [] calldata tokens,
         uint256 [] calldata thresholds
@@ -129,7 +131,7 @@ contract ChainportFundManager is ChainportMiddleware {
         }
     }
 
-    // Function to transfer funds to bridge contract under right conditions
+    // Function to transfer funds to bridge contract
     function fundBridgeByRebalancer(
         address [] calldata tokens,
         uint256 [] calldata amounts
@@ -149,6 +151,7 @@ contract ChainportFundManager is ChainportMiddleware {
         }
     }
 
+    // Function to transfer funds to the safe address
     function fundSafeByRebalancer(
         address [] calldata tokens,
         uint256 [] calldata amounts
