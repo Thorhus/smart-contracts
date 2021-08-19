@@ -58,6 +58,11 @@ contract ChainportFundManager is ChainportMiddleware {
     }
 
     // Functions
+    // Function to get safeAddress by rebalancer
+    function getSafeAddress() external onlyRebalancer view returns (address) {
+        return _safeAddress;
+    }
+
     // Function to set rebalancer by congress
     function setRebalancer(
         address _rebalancer
