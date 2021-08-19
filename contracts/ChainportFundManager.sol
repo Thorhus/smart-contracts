@@ -130,7 +130,7 @@ contract ChainportFundManager is ChainportMiddleware {
     }
 
     // Function to transfer funds to bridge contract under right conditions
-    function fundBridge(
+    function fundBridgeByRebalancer(
         address [] memory tokens,
         uint256 [] memory amounts
     )
@@ -149,7 +149,7 @@ contract ChainportFundManager is ChainportMiddleware {
         }
     }
 
-    function fundSafe(
+    function fundSafeByRebalancer(
         address [] memory tokens,
         uint256 [] memory amounts
     )
