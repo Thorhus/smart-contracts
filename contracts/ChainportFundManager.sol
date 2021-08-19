@@ -62,7 +62,7 @@ contract ChainportFundManager is ChainportMiddleware {
     function setRebalancer(
         address _rebalancer
     )
-    public
+    external
     onlyChainportCongress
     {
         // Require that address is not malformed
@@ -79,7 +79,7 @@ contract ChainportFundManager is ChainportMiddleware {
     function setChainportBridge(
         address _chainportBridge
     )
-    public
+    external
     onlyChainportCongress
     {
         // Require that address is not malformed
@@ -97,7 +97,7 @@ contract ChainportFundManager is ChainportMiddleware {
     function setSafeAddress(
         address safeAddress_
     )
-    public
+    external
     onlyChainportCongress
     {
         // Require that address is not malformed
@@ -112,10 +112,10 @@ contract ChainportFundManager is ChainportMiddleware {
     }
 
     function setTokenThresholdsByCongress(
-        address [] memory tokens,
-        uint256 [] memory thresholds
+        address [] calldata tokens,
+        uint256 [] calldata thresholds
     )
-    public
+    external
     onlyChainportCongress
     {
         for(uint8 i; i < tokens.length; i++) {
@@ -131,10 +131,10 @@ contract ChainportFundManager is ChainportMiddleware {
 
     // Function to transfer funds to bridge contract under right conditions
     function fundBridgeByRebalancer(
-        address [] memory tokens,
-        uint256 [] memory amounts
+        address [] calldata tokens,
+        uint256 [] calldata amounts
     )
-    public
+    external
     onlyRebalancer
     {
         for(uint8 i; i < tokens.length; i++) {
@@ -150,10 +150,10 @@ contract ChainportFundManager is ChainportMiddleware {
     }
 
     function fundSafeByRebalancer(
-        address [] memory tokens,
-        uint256 [] memory amounts
+        address [] calldata tokens,
+        uint256 [] calldata amounts
     )
-    public
+    external
     onlyRebalancer
     {
         for(uint8 i; i < tokens.length; i++) {
