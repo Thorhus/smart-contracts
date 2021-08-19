@@ -20,7 +20,6 @@ contract ChainportFundManager is ChainportMiddleware {
 
     // Global state variables
     bool isContractFrozen;
-    uint8 public threshold;
     address public rebalancer;
     address public chainportBridge;
     address _safeAddress;
@@ -115,6 +114,23 @@ contract ChainportFundManager is ChainportMiddleware {
         // Set new safe address
         _safeAddress = safeAddress_;
         emit SafeAddressChanged(safeAddress_);
+    }
+
+    // Function to set token threshold by rebalancer
+    function setTokenThresholdByRebalancer(
+        address token,
+        uint256 threshold
+    )
+    external
+    onlyRebalancer
+    {
+        // Require that threshold has not been set
+        require(tokenAddressToThreshold[token] == 0, "Error: Token threshold already set.");
+        require(threshold > 0, "Error: Threshold cannot be set as zero value.");
+        // Set threshold for token
+        tokenAddressToThreshold[token] = threshold;
+        // Emit an event
+        emit TokenThresholdSet(token, threshold);
     }
 
     // Function to set thresholds for tokens
