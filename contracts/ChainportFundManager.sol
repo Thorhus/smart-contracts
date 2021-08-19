@@ -18,9 +18,9 @@ contract ChainportFundManager is ChainportMiddleware {
 
     // Global state variables
     bool isContractFrozen;
+    address _safeAddress;
     address public rebalancer;
     address public chainportBridge;
-    address _safeAddress;
     mapping(address => uint256) tokenAddressToThreshold;
 
     // Events
