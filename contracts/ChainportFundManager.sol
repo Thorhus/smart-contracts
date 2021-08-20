@@ -17,19 +17,33 @@ contract ChainportFundManager is ChainportMiddleware {
     using SafeERC20 for IERC20;
 
     // Global state variables
+    // Booleans
     bool isContractFrozen;
+    // Uints
+    uint8 public dailyTransferLimit;
+    // Addresses
     address _safeAddress;
     address public rebalancer;
     address public chainportBridge;
+    address [] public tokensList;
+    // Mappings
     mapping(address => uint256) tokenAddressToThreshold;
+    mapping(address => uint256) tokenAddressToDailyLimit;
+    mapping(address => uint256) tokenAddressToTransferTimestamp;
+    mapping(address => uint16) tokenAddressToDailyTransfer;
 
     // Events
+    // Global state variable value change
     event RebalancerChanged(address newRebalancer);
     event SafeAddressChanged(address newSafeAddress);
     event ChainportBridgeChanged(address newChainportBridge);
+    // Fund rebalancing
     event FundsRebalancedToHotBridge(address token, uint256 amount);
     event FundsRebalancedToSafeAddress(address token, uint256 amount);
+    // Token related
     event TokenThresholdSet(address token, uint256 threshold);
+    event TokenAddedToList(address token);
+    event TokenTransferedToSafety(address token);
 
     // Modifiers
     modifier onlyRebalancer {
@@ -45,19 +59,32 @@ contract ChainportFundManager is ChainportMiddleware {
         address _maintainersRegistry,
         address _rebalancer,
         address _chainportBridge,
-        address safeAddress_
+        address safeAddress_,
+        uint8 _dailyTransferLimit
     )
     public{
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
         rebalancer = _rebalancer;
         chainportBridge = _chainportBridge;
         _safeAddress = safeAddress_;
+        dailyTransferLimit = _dailyTransferLimit;
     }
 
     // Functions
     // Function to get safeAddress by rebalancer
     function getSafeAddress() external onlyRebalancer view returns (address) {
         return _safeAddress;
+    }
+
+    // Set daily transfer limit per token
+    function setDailyTransferLimit(
+        uint8 _dailyTransferLimit
+    )
+    public
+    onlyChainportCongress
+    {
+        require(_dailyTransferLimit != 0, "Error: Zero cannot be set as daily transfer limit.");
+        dailyTransferLimit = _dailyTransferLimit;
     }
 
     // Function to set rebalancer by congress
@@ -139,7 +166,7 @@ contract ChainportFundManager is ChainportMiddleware {
     external
     onlyChainportCongress
     {
-        for(uint8 i; i < tokens.length; i++) {
+        for(uint16 i; i < tokens.length; i++) {
             // Require that array arguments are valid
             require(tokens[i] != address(0), "Error: Token address is malformed.");
             require(thresholds[i] != 0, "Error: Zero value cannot be set as threshold.");
@@ -147,6 +174,27 @@ contract ChainportFundManager is ChainportMiddleware {
             tokenAddressToThreshold[tokens[i]] = thresholds[i];
             // Emit an event
             emit TokenThresholdSet(tokens[i], thresholds[i]);
+        }
+    }
+
+    // Function to set tokensList by congress
+    function setTokensList(
+        address [] calldata tokens
+    )
+    external
+    onlyChainportCongress
+    {
+        // Set the new token addresses
+        for(uint16 i; i < tokens.length; i++) {
+            require(tokens[i] != address(0), "Error: TokenAddress is malformed.");
+            tokensList[i] = tokens[i];
+            emit TokenAddedToList(tokens[i]);
+        }
+        // Check if there is a leftover and override it with zero address
+        if(tokens.length < tokensList.length) {
+            for(uint16 i = uint16(tokens.length); i < tokensList.length; i++) {
+                tokensList[i] = address(0);
+            }
         }
     }
 
@@ -158,12 +206,24 @@ contract ChainportFundManager is ChainportMiddleware {
     external
     onlyRebalancer
     {
-        for(uint8 i; i < tokens.length; i++) {
+        for(uint16 i; i < tokens.length; i++) {
             // Require that valid amount is given
             require(
                 amounts[i] > 0 && amounts[i] <= tokenAddressToThreshold[tokens[i]],
                 "Error: Amount is not valid."
             );
+            // Set the timestamp for the token (86400 == 1 day)
+            if(tokenAddressToTransferTimestamp[tokens[i]] < block.timestamp - 86400) {
+                tokenAddressToTransferTimestamp[tokens[i]] = block.timestamp;
+                tokenAddressToDailyTransfer[tokens[i]] = 0;
+            }
+            // Require that transfer limit for token hasn't been reached in past 24hrs
+            require(
+                tokenAddressToDailyTransfer[tokens[i]] < dailyTransferLimit,
+                "Error: Daily transfer limit has been reached."
+            );
+            // Increase tokenAddressToDailyTransfer for token
+            tokenAddressToDailyTransfer[tokens[i]] = uint16(tokenAddressToTransferTimestamp[tokens[i]].add(1));
             // Perform safe transfer
             IERC20(tokens[i]).safeTransfer(chainportBridge, amounts[i]);
             emit FundsRebalancedToHotBridge(tokens[i], amounts[i]);
@@ -178,12 +238,26 @@ contract ChainportFundManager is ChainportMiddleware {
     external
     onlyRebalancer
     {
-        for(uint8 i; i < tokens.length; i++) {
+        for(uint16 i; i < tokens.length; i++) {
             // Require that valid amount is given
             require(amounts[i] > 0, "Error: Amount is not greater than zero.");
             // Perform safe transfer
             IERC20(tokens[i]).safeTransfer(_safeAddress, amounts[i]);
             emit FundsRebalancedToSafeAddress(tokens[i], amounts[i]);
+        }
+    }
+
+    // Function to transfer all funds to the safe address in case of emergency
+    function emergencyWithdraw()
+    public
+    onlyChainportCongress
+    {
+        for(uint16 i; i < tokensList.length; i++) {
+            // Get contract balance of specific token
+            uint256 fullBalance = IERC20(tokensList[i]).balanceOf(address(this));
+            // Perform the safe transfer
+            IERC20(tokensList[i]).safeTransfer(_safeAddress, fullBalance);
+            emit TokenTransferedToSafety(tokensList[i]);
         }
     }
 }
