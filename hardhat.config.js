@@ -3,10 +3,10 @@ require('@nomiclabs/hardhat-ethers');
 require('@nomiclabs/hardhat-web3');
 require('@openzeppelin/hardhat-upgrades');
 require('@tenderly/hardhat-tenderly');
-require('ethereumjs-util')
+require('@chainlink/contracts');
+require('ethereumjs-util');
 require('solidity-coverage');
-require('chainlink');
-require('dotenv').config()
+require('dotenv').config();
 
 let PK = process.env.PK
 
