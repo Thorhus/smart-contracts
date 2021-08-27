@@ -101,6 +101,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	function getAPIConsumerSettings()
 	external
 	onlyMaintainer
+	view
 	returns(address, address, string memory, bytes32, uint256)
 	{
 		return (
@@ -114,7 +115,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Function to make request for main bridge token supply
 	function getMainBridgeTokenSupply(
-		address originalToken
+		address originalTokenAddress
 	)
 	public
 	onlyMaintainer
@@ -127,7 +128,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=",
 			toAsciiString(mainBridgeContractEthereum),
 			"&address=",
-			toAsciiString(originalToken),
+			toAsciiString(originalTokenAddress),
 			"&tag=latest",
 			"&apikey=",
 			projectAPIToken
