@@ -125,9 +125,9 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
 		string memory requestString = string(abi.encodePacked(
-			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=",
+			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x",
 			toAsciiString(mainBridgeContractEthereum),
-			"&address=",
+			"&address=0x",
 			toAsciiString(originalTokenAddress),
 			"&tag=latest",
 			"&apikey=",
