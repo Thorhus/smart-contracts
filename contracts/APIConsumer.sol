@@ -13,8 +13,9 @@ import "./ChainportMiddleware.sol";
 contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Global state variables
-	address private mainBridgeContractEthereum;
+	address private mainBridgeContractAddress;
 	address private oracleAddress;
+	string private mainBridgeContractAddressString;
 	string private projectAPIToken;
 	bytes32 private jobId;
 	uint256 private fee;
@@ -25,7 +26,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	constructor(
 		address _chainportCongress,
 		address _maintainersRegistry,
-		address _mainBridgeContractEthereum,
+		address _mainBridgeContractAddress,
 		address _oracleAddress,
 		string memory _projectAPIToken,
 		bytes32 _jobId,
@@ -35,8 +36,9 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	{
 		setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
 		setPublicChainlinkToken();
-		checkAddress(_mainBridgeContractEthereum);
-		mainBridgeContractEthereum = _mainBridgeContractEthereum;
+		checkAddress(_mainBridgeContractAddress);
+		mainBridgeContractAddressString = toAsciiString(_mainBridgeContractAddress);
+		mainBridgeContractAddress = _mainBridgeContractAddress;
 		checkAddress(_oracleAddress);
 		oracleAddress = _oracleAddress;
 		projectAPIToken = _projectAPIToken;
@@ -46,14 +48,15 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Setter functions
 	// Function to set main bridge contract/proxy address
-	function setMainBridgeContractEthereum(
-		address _mainBridgeContractEthereum
+	function setMainBridgeContractAddress(
+		address _mainBridgeContractAddress
 	)
 	external
 	onlyChainportCongress
 	{
-		checkAddress(_mainBridgeContractEthereum);
-		mainBridgeContractEthereum = _mainBridgeContractEthereum;
+		checkAddress(_mainBridgeContractAddress);
+		mainBridgeContractAddressString = toAsciiString(_mainBridgeContractAddress);
+		mainBridgeContractAddress = _mainBridgeContractAddress;
 	}
 
 	// Function to set oracle address by congress
@@ -105,7 +108,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	returns(address, address, string memory, bytes32, uint256)
 	{
 		return (
-			mainBridgeContractEthereum,
+			mainBridgeContractAddress,
 			oracleAddress,
 			projectAPIToken,
 			jobId,
@@ -126,7 +129,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 		string memory requestString = string(abi.encodePacked(
 			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x",
-			toAsciiString(mainBridgeContractEthereum),
+			mainBridgeContractAddressString,
 			"&address=0x",
 			toAsciiString(originalTokenAddress),
 			"&tag=latest",
