@@ -129,9 +129,9 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 		string memory requestString = string(abi.encodePacked(
 			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x",
-			mainBridgeContractAddressString,
-			"&address=0x",
 			toAsciiString(originalTokenAddress),
+			"&address=0x",
+			mainBridgeContractAddressString,
 			"&tag=latest",
 			"&apikey=",
 			projectAPIToken
