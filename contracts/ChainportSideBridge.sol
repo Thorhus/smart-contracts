@@ -137,6 +137,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress
     isPathNotPaused(token, "mintTokens")
     {
+        //uint256 tokensupply = ChainLinkClient(_clientAddress).getMainBridgeTokenSupply(token);
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
