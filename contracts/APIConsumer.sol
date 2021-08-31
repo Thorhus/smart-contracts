@@ -14,6 +14,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Global state variables
 	address _mainBridgeContractAddress;
+	address _sideBridgeContractAddress;
 	address _oracleAddress;
 	string _mainBridgeContractAddressString;
 	string _projectAPIToken;
@@ -26,10 +27,19 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	// Events
 	event RequestFulfilled(bytes32 requestId, bytes32 result);
 
+	modifier onlyChainportSideBridge{
+		require(
+			msg.sender == _sideBridgeContractAddress,
+			"Error: Only ChainportSideBridge can call this function."
+		);
+		_;
+	}
+
 	constructor(
 		address chainportCongress_,
 		address maintainersRegistry_,
 		address mainBridgeContractAddress_,
+		address sideBridgeContractAddress_,
 		address oracleAddress_,
 		string memory projectAPIToken_,
 		string memory path_,
@@ -43,6 +53,8 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		checkAddress(mainBridgeContractAddress_);
 		_mainBridgeContractAddressString = toAsciiString(mainBridgeContractAddress_);
 		_mainBridgeContractAddress = mainBridgeContractAddress_;
+		checkAddress(sideBridgeContractAddress_);
+		_sideBridgeContractAddress = sideBridgeContractAddress_;
 		checkAddress(oracleAddress_);
 		_oracleAddress = oracleAddress_;
 		_projectAPIToken = projectAPIToken_;
@@ -62,6 +74,17 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		checkAddress(mainBridgeContractAddress_);
 		_mainBridgeContractAddressString = toAsciiString(mainBridgeContractAddress_);
 		_mainBridgeContractAddress = mainBridgeContractAddress_;
+	}
+
+	// Function to set side bridge contract/proxy address
+	function setSideBridgeContractAddress(
+		address sideBridgeContractAddress_
+	)
+	external
+	onlyChainportCongress
+	{
+		checkAddress(sideBridgeContractAddress_);
+		_sideBridgeContractAddress = sideBridgeContractAddress_;
 	}
 
 	// Function to set oracle address by congress
@@ -110,10 +133,11 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	external
 	onlyMaintainer
 	view
-	returns(address, address, string memory, string memory, bytes32, uint256)
+	returns(address, address, address, string memory, string memory, bytes32, uint256)
 	{
 		return (
 			_mainBridgeContractAddress,
+			_sideBridgeContractAddress,
 			_oracleAddress,
 			_projectAPIToken,
 			_path,
@@ -127,7 +151,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		address originalTokenAddress
 	)
 	public
-	onlyMaintainer
+	onlyChainportSideBridge
 	returns(bytes32 requestId)
 	{
 		// Create struct of a request as in chainlink
@@ -160,8 +184,9 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	onlyMaintainer
 	returns(bytes32 requestId)
 	{
-		// Create request struct
+		// Create request
 		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
+		// Add request method and path of result
 		request.add("get", requestString);
 		request.add("path", pathString);
 
