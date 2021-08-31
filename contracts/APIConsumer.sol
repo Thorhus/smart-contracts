@@ -13,106 +13,112 @@ import "./ChainportMiddleware.sol";
 contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Global state variables
-	address private mainBridgeContractAddress;
-	address private oracleAddress;
-	string private mainBridgeContractAddressString;
-	string private projectAPIToken;
-	bytes32 private jobId;
-	uint256 private fee;
+	address _mainBridgeContractAddress;
+	address _oracleAddress;
+	string _mainBridgeContractAddressString;
+	string _projectAPIToken;
+	string _path;
+	bytes32 _jobId;
+	uint256 _fee;
+
+	bytes32 latestResult;
 
 	// Events
-	event RequestFulfilled(bool);
+	event RequestFulfilled(bytes32 requestId, bytes32 result);
 
 	constructor(
-		address _chainportCongress,
-		address _maintainersRegistry,
-		address _mainBridgeContractAddress,
-		address _oracleAddress,
-		string memory _projectAPIToken,
-		bytes32 _jobId,
-		uint256 _fee
+		address chainportCongress_,
+		address maintainersRegistry_,
+		address mainBridgeContractAddress_,
+		address oracleAddress_,
+		string memory projectAPIToken_,
+		string memory path_,
+		bytes32 jobId_,
+		uint256 fee_
 	)
 	public
 	{
-		setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
+		setCongressAndMaintainers(chainportCongress_, maintainersRegistry_);
 		setPublicChainlinkToken();
-		checkAddress(_mainBridgeContractAddress);
-		mainBridgeContractAddressString = toAsciiString(_mainBridgeContractAddress);
-		mainBridgeContractAddress = _mainBridgeContractAddress;
-		checkAddress(_oracleAddress);
-		oracleAddress = _oracleAddress;
-		projectAPIToken = _projectAPIToken;
-		jobId = _jobId;
-		fee = _fee;
+		checkAddress(mainBridgeContractAddress_);
+		_mainBridgeContractAddressString = toAsciiString(mainBridgeContractAddress_);
+		_mainBridgeContractAddress = mainBridgeContractAddress_;
+		checkAddress(oracleAddress_);
+		_oracleAddress = oracleAddress_;
+		_projectAPIToken = projectAPIToken_;
+		_path = path_;
+		_jobId = jobId_;
+		_fee = fee_;
 	}
 
 	// Setter functions
 	// Function to set main bridge contract/proxy address
 	function setMainBridgeContractAddress(
-		address _mainBridgeContractAddress
+		address mainBridgeContractAddress_
 	)
 	external
 	onlyChainportCongress
 	{
-		checkAddress(_mainBridgeContractAddress);
-		mainBridgeContractAddressString = toAsciiString(_mainBridgeContractAddress);
-		mainBridgeContractAddress = _mainBridgeContractAddress;
+		checkAddress(mainBridgeContractAddress_);
+		_mainBridgeContractAddressString = toAsciiString(mainBridgeContractAddress_);
+		_mainBridgeContractAddress = mainBridgeContractAddress_;
 	}
 
 	// Function to set oracle address by congress
 	function setOracleAddress(
-		address _oracleAddress
+		address oracleAddress_
 	)
 	external
 	onlyChainportCongress
 	{
-		checkAddress(_oracleAddress);
-		oracleAddress = _oracleAddress;
+		checkAddress(oracleAddress_);
+		_oracleAddress = oracleAddress_;
 	}
 
 	// Function to set project API token
 	function setProjectAPIToken(
-		string calldata _projectAPIToken
+		string calldata projectAPIToken_
 	)
 	external
 	onlyChainportCongress
 	{
-		projectAPIToken = _projectAPIToken;
+		_projectAPIToken = projectAPIToken_;
 	}
 
 	// Function to set jobId
 	function setJobId(
-		bytes32 _jobId
+		bytes32 jobId_
 	)
 	external
 	onlyChainportCongress
 	{
-		jobId = _jobId;
+		_jobId = jobId_;
 	}
 
 	// Function to set fee
 	function setFee(
-		uint256 _fee
+		uint256 fee_
 	)
 	external
 	onlyChainportCongress
 	{
-		fee = _fee;
+		_fee = fee_;
 	}
 
-	// Getter function for private contract attributes
+	// Getter function for APIConsumer attributes
 	function getAPIConsumerSettings()
 	external
 	onlyMaintainer
 	view
-	returns(address, address, string memory, bytes32, uint256)
+	returns(address, address, string memory, string memory, bytes32, uint256)
 	{
 		return (
-			mainBridgeContractAddress,
-			oracleAddress,
-			projectAPIToken,
-			jobId,
-			fee
+			_mainBridgeContractAddress,
+			_oracleAddress,
+			_projectAPIToken,
+			_path,
+			_jobId,
+			_fee
 		);
 	}
 
@@ -125,29 +131,48 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	returns(bytes32 requestId)
 	{
 		// Create struct of a request as in chainlink
-		Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
 
 		string memory requestString = string(abi.encodePacked(
 			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x",
 			toAsciiString(originalTokenAddress),
 			"&address=0x",
-			mainBridgeContractAddressString,
+			_mainBridgeContractAddressString,
 			"&tag=latest",
 			"&apikey=",
-			projectAPIToken
+			_projectAPIToken
 		));
 		// Add string request to struct
 		request.add("get", requestString);
 		// Define wanted response value path
-		request.add("path", "result");
+		request.add("path", _path);
 
 		// Make request and return response
-		return sendChainlinkRequestTo(oracleAddress, request, fee);
+		return sendChainlinkRequestTo(_oracleAddress, request, _fee);
+	}
+
+	// Function to make custom request - beware of request being compatible with APIConsumer settings
+	function sendCustomGetRequest(
+		string calldata requestString,
+		string calldata pathString
+	)
+	external
+	onlyMaintainer
+	returns(bytes32 requestId)
+	{
+		// Create request struct
+		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
+		request.add("get", requestString);
+		request.add("path", pathString);
+
+		// Send request
+		return sendChainlinkRequestTo(_oracleAddress, request, _fee);
 	}
 
 	// Function to call on request response
-	function fulfill(bytes32 _requestId) public recordChainlinkFulfillment(_requestId) {
-		emit RequestFulfilled(true);
+	function fulfill(bytes32 _requestId, bytes32 _result) public recordChainlinkFulfillment(_requestId) {
+		latestResult = _result;
+		emit RequestFulfilled(_requestId, _result);
 	}
 
 	// Function to convert address type hex value to string
