@@ -22,7 +22,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	bytes32 _jobId;
 	uint256 _fee;
 
-	bytes32 latestResult;
+	bytes32 private latestResult;
 
 	// Events
 	event RequestFulfilled(bytes32 requestId, bytes32 result);
@@ -146,17 +146,24 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		);
 	}
 
+	// Function to get latestResult
+	function getLatestResult()
+	external
+	onlyChainportSideBridge
+	view
+	returns(bytes32 result){
+		return latestResult;
+	}
+
 	// Function to make request for main bridge token supply
 	function getMainBridgeTokenSupply(
 		address originalTokenAddress
 	)
-	public
+	external
 	onlyChainportSideBridge
 	returns(bytes32 requestId)
 	{
-		// Create struct of a request as in chainlink
-		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
-
+		// Create request suitable for getting token supply from Etherscan API
 		string memory requestString = string(abi.encodePacked(
 			"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x",
 			toAsciiString(originalTokenAddress),
@@ -166,28 +173,35 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 			"&apikey=",
 			_projectAPIToken
 		));
-		// Add string request to struct
-		request.add("get", requestString);
-		// Define wanted response value path
-		request.add("path", _path);
 
-		// Make request and return response
-		return sendChainlinkRequestTo(_oracleAddress, request, _fee);
+		return _makeRequest(requestString, "result", "get");
 	}
 
 	// Function to make custom request - beware of request being compatible with APIConsumer settings
-	function sendCustomGetRequest(
+	function sendCustomRequestByMaintainer(
 		string calldata requestString,
-		string calldata pathString
+		string calldata pathString,
+		string calldata method
 	)
 	external
 	onlyMaintainer
 	returns(bytes32 requestId)
 	{
+		return _makeRequest(requestString, pathString, method);
+	}
+
+	function _makeRequest(
+		string memory requestString,
+		string memory pathString,
+		string memory method
+	)
+	internal
+	returns(bytes32 requestId)
+	{
 		// Create request
 		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
 		// Add request method and path of result
-		request.add("get", requestString);
+		request.add(method, requestString);
 		request.add("path", pathString);
 
 		// Send request
@@ -205,11 +219,13 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		// Allocate memory for string to return
 		bytes memory s = new bytes(40);
 		for (uint i = 0; i < 20; i++) {
-			// Isolating a single byte 10110110
+			// Isolating a single byte 10110110 /-/ uint160 -> 20bytes -> address has 40 nibble's
+			// 2^8 -> uint8/single byte /-/ 19 -> 0..19 -> 20 bytes
+			// Uint8 takes first byte of the value calculated by division / bytes1 converts it to byte type
 			bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
-			// Get first nibble hex
+			// Get first nibble hex (higher)
 			bytes1 hi = bytes1(uint8(b) / 16);
-			// Get second nibble hex
+			// Get second nibble hex (lower)
 			bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
 			// Multiplying by 2 because every byte is 2 chars
 			// Set first char in the set of 2
