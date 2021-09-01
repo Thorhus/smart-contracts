@@ -173,7 +173,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 			"&apikey=",
 			_projectAPIToken
 		));
-
+		// Make request
 		return _makeRequest(requestString, "result", "get");
 	}
 
@@ -187,9 +187,11 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	onlyMaintainer
 	returns(bytes32 requestId)
 	{
+		// Make request
 		return _makeRequest(requestString, pathString, method);
 	}
 
+	// Core function used for making requests
 	function _makeRequest(
 		string memory requestString,
 		string memory pathString,
@@ -198,10 +200,11 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	internal
 	returns(bytes32 requestId)
 	{
-		// Create request
+		// Create request struct
 		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
-		// Add request method and path of result
+		// Call method and request
 		request.add(method, requestString);
+		// Add path / path should be separated with "."
 		request.add("path", pathString);
 
 		// Send request
@@ -210,6 +213,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Function to call on request response
 	function fulfill(bytes32 _requestId, bytes32 _result) public recordChainlinkFulfillment(_requestId) {
+		// Request response value (from path) is always stored in latestResult
 		latestResult = _result;
 		emit RequestFulfilled(_requestId, _result);
 	}
