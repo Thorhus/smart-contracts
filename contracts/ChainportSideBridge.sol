@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./BridgeMintableToken.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
-
+import "./interfaces/IAPIConsumer.sol";
 
 contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
@@ -30,6 +30,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => bool) public isAssetFrozen;
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
+    // API Consumer address
+    address public APIConsumerAddress;
+    // Mapping for reverse action of originalAssetToBridgeToken
+    mapping(address => address) public bridgeTokenToOriginalAsset;
+    // Mapping for token balances of original assets on main bridge
+    mapping(address => uint256) public originalAssetBalance;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -137,7 +143,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress
     isPathNotPaused(token, "mintTokens")
     {
-        //uint256 tokensupply = ChainLinkClient(_clientAddress).getMainBridgeTokenSupply(token);
+        require(
+            amount <= originalAssetBalance[bridgeTokenToOriginalAsset[token]],
+            "Error: Not enough funds on ChainportMainBridge."
+        );
+
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
@@ -146,6 +156,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
+
     //TODO work towards unifying burnTokens into xchaintransfer function
     function burnTokens(
         address bridgeToken,
@@ -233,6 +244,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
     }
 
+    // Set specified token freeze state
+    // TODO: Check if freeze asset function restrictions are well sorted
     function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
@@ -244,6 +257,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
+    // Function to freeze multiple assets by maintainer
     function freezeAssetsByMaintainer(
         address [] memory tokenAddresses
     )
@@ -256,6 +270,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to pause specified path
     function setPathPauseState(
         address token,
         string memory functionName,
@@ -267,4 +282,53 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         isPathPaused[token][functionName] = isPaused;
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
+
+    // Function to make request to get supply of specific token
+    function makeGetMainBridgeTokenSupplyRequest(
+        address bridgeToken
+    )
+    external
+    onlyMaintainer
+    {
+        // Instantiate APIConsumer through interface and make request
+        IAPIConsumer(APIConsumerAddress).getMainBridgeTokenSupply(bridgeTokenToOriginalAsset[bridgeToken]);
+    }
+
+    // Get latest response from APIConsumer
+    // Function made to overcome the delay between tx and response block
+    function getMainBridgeTokenSupplyRequestResponse(
+        address bridgeToken
+    )
+    external
+    onlyMaintainer
+    {
+        // Retrieve latest request response
+        originalAssetBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(IAPIConsumer(APIConsumerAddress).getLatestResult());
+    }
+
+    // Set APIConsumer contract address
+    function setAPIConsumer(
+        address _APIConsumerAddress
+    )
+    public
+    onlyMaintainer
+    {
+        require(_APIConsumerAddress != address(0), "Error: Address is malformed.");
+        APIConsumerAddress = _APIConsumerAddress;
+    }
+
+    // Set mapping bridgeToken -> originalAsset
+    function setBridgeTokenToOriginalAsset(
+        address [] calldata bridgeTokens,
+        address [] calldata originalAssets
+    )
+    external
+    onlyMaintainer
+    {
+        for(uint i = 0; i < bridgeTokens.length; i++){
+            require(bridgeTokens[i] != address(0) && originalAssets[i] != address(0));
+            bridgeTokenToOriginalAsset[bridgeTokens[i]] = originalAssets[i];
+        }
+    }
+
 }
