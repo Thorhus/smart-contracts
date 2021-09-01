@@ -18,7 +18,6 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	address _oracleAddress;
 	string _mainBridgeContractAddressString;
 	string _projectAPIToken;
-	string _path;
 	bytes32 _jobId;
 	uint256 _fee;
 
@@ -42,7 +41,6 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		address sideBridgeContractAddress_,
 		address oracleAddress_,
 		string memory projectAPIToken_,
-		string memory path_,
 		string memory jobId_,
 		uint256 fee_
 	)
@@ -58,7 +56,6 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		checkAddress(oracleAddress_);
 		_oracleAddress = oracleAddress_;
 		_projectAPIToken = projectAPIToken_;
-		_path = path_;
 		_jobId = stringToBytes32(jobId_);
 		_fee = fee_;
 	}
@@ -133,14 +130,13 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	external
 	onlyMaintainer
 	view
-	returns(address, address, address, string memory, string memory, bytes32, uint256)
+	returns(address, address, address, string memory, bytes32, uint256)
 	{
 		return (
 			_mainBridgeContractAddress,
 			_sideBridgeContractAddress,
 			_oracleAddress,
 			_projectAPIToken,
-			_path,
 			_jobId,
 			_fee
 		);
@@ -151,7 +147,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	external
 	onlyChainportSideBridge
 	view
-	returns(bytes32 result){
+	returns(bytes32){
 		return latestResult;
 	}
 
@@ -161,7 +157,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	)
 	external
 	onlyChainportSideBridge
-	returns(bytes32 requestId)
+	returns(bytes32)
 	{
 		// Create request suitable for getting token supply from Etherscan API
 		string memory requestString = string(abi.encodePacked(
@@ -185,7 +181,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	)
 	external
 	onlyMaintainer
-	returns(bytes32 requestId)
+	returns(bytes32)
 	{
 		// Make request
 		return _makeRequest(requestString, pathString, method);
@@ -198,7 +194,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		string memory method
 	)
 	internal
-	returns(bytes32 requestId)
+	returns(bytes32)
 	{
 		// Create request struct
 		Chainlink.Request memory request = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
@@ -241,7 +237,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	}
 
 	// Turn single byte to ascii char
-	function char(bytes1 b) internal pure returns (bytes1 c) {
+	function char(bytes1 b) internal pure returns (bytes1) {
 		// If is a number add it 0x30 to equalize ascii value
 		// If not a number add start of lower letters - 10 from ascii (0x67-0xA=0x57)
 		if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
