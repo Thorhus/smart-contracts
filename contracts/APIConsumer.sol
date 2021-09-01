@@ -43,7 +43,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		address oracleAddress_,
 		string memory projectAPIToken_,
 		string memory path_,
-		bytes32 jobId_,
+		string memory jobId_,
 		uint256 fee_
 	)
 	public
@@ -59,7 +59,7 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		_oracleAddress = oracleAddress_;
 		_projectAPIToken = projectAPIToken_;
 		_path = path_;
-		_jobId = jobId_;
+		_jobId = stringToBytes32(jobId_);
 		_fee = fee_;
 	}
 
@@ -110,12 +110,12 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 
 	// Function to set jobId
 	function setJobId(
-		bytes32 jobId_
+		string memory jobId_
 	)
 	external
 	onlyChainportCongress
 	{
-		_jobId = jobId_;
+		_jobId = stringToBytes32(jobId_);
 	}
 
 	// Function to set fee
@@ -246,6 +246,18 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 		// If not a number add start of lower letters - 10 from ascii (0x67-0xA=0x57)
 		if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
 		else return bytes1(uint8(b) + 0x57);
+	}
+
+	// Function to convert string to bytes32
+	function stringToBytes32(string memory s) internal pure returns (bytes32 result) {
+		// If byte is empty return 0x0
+		if(bytes(s).length == 0) {
+			return 0x0;
+		}
+		// Assembly convert result to bytes32
+		assembly {
+			result := mload(add(s, 32))
+		}
 	}
 
 	// Function to check the addresses
