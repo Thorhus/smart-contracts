@@ -174,13 +174,13 @@ contract APIConsumer is ChainlinkClient, ChainportMiddleware {
 	}
 
 	// Function to make custom request - beware of request being compatible with APIConsumer settings
-	function sendCustomRequestByMaintainer(
+	function makeCustomRequest(
 		string calldata requestString,
 		string calldata pathString,
 		string calldata method
 	)
 	external
-	onlyMaintainer
+	onlyChainportSideBridge
 	returns(bytes32)
 	{
 		// Make request
