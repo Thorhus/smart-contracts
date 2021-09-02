@@ -286,6 +286,17 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
+    // Function to get the latest response from APIConsumer contract
+    function getAPIConsumerLatestResponse()
+    public
+    view
+    onlyMaintainer
+    returns(bytes32)
+    {
+        // APIConsumer call through interface
+        return IAPIConsumer(APIConsumerAddress).getLatestResult();
+    }
+
     // Function to make request to get supply of specific token
     function makeGetMainBridgeTokenSupplyRequest(
         address bridgeToken
@@ -295,18 +306,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         // Instantiate APIConsumer through interface and make request
         IAPIConsumer(APIConsumerAddress).getMainBridgeTokenSupply(bridgeTokenToOriginalAsset[bridgeToken]);
-    }
-
-    // Get latest response from APIConsumer
-    // Function made to overcome the delay between tx and response block
-    function getMainBridgeTokenSupplyRequestResponse(
-        address bridgeToken
-    )
-    external
-    onlyMaintainer
-    {
-        // Retrieve latest request response
-        originalAssetBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(IAPIConsumer(APIConsumerAddress).getLatestResult());
     }
 
     // Function to make a custom request through APIConsumer
@@ -321,6 +320,18 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         // Send custom request
         IAPIConsumer(APIConsumerAddress).makeCustomRequest(requestString, pathString, method);
+    }
+
+    // Get latest response from APIConsumer
+    // Function made to overcome the delay between tx and response block
+    function setOriginalAssetBalance(
+        address bridgeToken
+    )
+    external
+    onlyMaintainer
+    {
+        // Retrieve latest request response
+        originalAssetBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(getAPIConsumerLatestResponse());
     }
 
     // Set APIConsumer contract address
