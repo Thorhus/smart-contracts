@@ -35,7 +35,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Mapping for reverse action of originalAssetToBridgeToken
     mapping(address => address) public bridgeTokenToOriginalAsset;
     // Mapping for token balances of original assets on main bridge
-    mapping(address => uint256) public originalAssetBalance;
+    mapping(address => uint256) public originalAssetLatestBalance;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -146,7 +146,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isPathNotPaused(token, "mintTokens")
     {
         require(
-            amount <= originalAssetBalance[bridgeTokenToOriginalAsset[token]],
+            amount <= originalAssetLatestBalance[bridgeTokenToOriginalAsset[token]],
             "Error: Not enough funds on ChainportMainBridge."
         );
 
@@ -324,14 +324,14 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     // Get latest response from APIConsumer
     // Function made to overcome the delay between tx and response block
-    function setOriginalAssetBalance(
+    function setOriginalAssetLatestBalance(
         address bridgeToken
     )
     external
     onlyMaintainer
     {
         // Retrieve latest request response
-        originalAssetBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(getAPIConsumerLatestResponse());
+        originalAssetLatestBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(getAPIConsumerLatestResponse());
     }
 
     // Set APIConsumer contract address
