@@ -37,6 +37,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Mapping for token balances of original assets on main bridge
     mapping(address => uint256) public originalAssetBalance;
 
+    // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
@@ -53,6 +54,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     event BridgeFreezed(bool isFrozen);
 
+    // Modifiers
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -82,7 +84,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         _;
     }
 
-    // Set initial addresses
+    // Set initial parameters
     function initialize(
         address _chainportCongress,
         address _maintainersRegistry
@@ -219,6 +221,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function used to set mapping for token addresses
+    // TODO: Check if can be removed
     function setOriginalAssetToBridgeToken(
         address [] memory mainBridgeTokenAddresses,
         address [] memory sideBridgeTokenAddresses
@@ -304,6 +307,20 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         // Retrieve latest request response
         originalAssetBalance[bridgeTokenToOriginalAsset[bridgeToken]] = uint256(IAPIConsumer(APIConsumerAddress).getLatestResult());
+    }
+
+    // Function to make a custom request through APIConsumer
+    // Make sure that APIConsumer settings are compatible with the request
+    function makeCustomRequest(
+        string memory requestString,
+        string memory pathString,
+        string memory method
+    )
+    external
+    onlyMaintainer
+    {
+        // Send custom request
+        IAPIConsumer(APIConsumerAddress).makeCustomRequest(requestString, pathString, method);
     }
 
     // Set APIConsumer contract address
