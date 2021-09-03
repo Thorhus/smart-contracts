@@ -31,9 +31,7 @@ async function main() {
     const chainportMainBridge = await upgrades.deployProxy(ChainportMainBridge,[
         maintainersRegistry.address,
         contracts.ChainportCongress,
-        validator.address,
-        config.timeLockLength, // 3600 secs timelock
-        config.safetyThreshold // safety threshold 20%
+        validator.address
     ]);
     await chainportMainBridge.deployed()
     saveContractProxies(hre.network.name, "ChainportMainBridge", chainportMainBridge.address);
