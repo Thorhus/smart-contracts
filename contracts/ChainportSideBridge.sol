@@ -35,7 +35,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Reversed mapping of originalAssetToBridgeToken
     mapping(address => address) public bridgeTokenToOriginalAsset;
     // Mapping for token minting thresholds
-    mapping(address => uint256) public tokenToMintingThreshold;
+    mapping(address => uint256) public bridgeTokenToMintingThreshold;
+    // Mapping for token minting threshold awareness
+    mapping(address => bool) public bridgeTokenToThresholdAwareness;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -123,8 +125,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
         // Create new token
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
-        originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
+        // Assign mapping values
+        (originalAssetToBridgeToken[originalTokenAddress], bridgeTokenToOriginalAsset[address(newToken)]) = (address(newToken), originalTokenAddress);
         isCreatedByTheBridge[address(newToken)] = true;
+
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
     }
 
@@ -144,6 +148,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isPathNotPaused(token, "mintTokens")
     {
         //TODO: Check supply before minting to assure the matching and disable additional minting
+        if(bridgeTokenToThresholdAwareness[token]) {
+            require(
+                amount < bridgeTokenToMintingThreshold[token],
+                "Error: Amount must be lower than the minting threshold."
+            );
+        }
         // Check if nonce is already used
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
@@ -284,4 +294,38 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to set minting thresholds for tokens
+    function setMintingThresholds(
+        address [] calldata originalAssets,
+        uint256 [] calldata thresholds
+    )
+    external
+    onlyChainportCongress
+    {
+        for(uint16 i; i < originalAssets.length; i++) {
+            require(
+                originalAssets[i] != address(0),
+                "Error: Asset address is malformed."
+            );
+            require(
+                thresholds[i] != 0,
+                "Error: Cannot set zero value as threshold."
+            );
+            bridgeTokenToMintingThreshold[originalAssetToBridgeToken[originalAssets[i]]] = thresholds[i];
+        }
+    }
+
+    // Function to set threshold awareness for tokens
+    function setBridgeTokenToThresholdAwareness(
+        address [] calldata bridgeTokens,
+        bool [] calldata thresholdsAwareness
+    )
+    external
+    onlyChainportCongress
+    {
+        for(uint16 i; i < bridgeTokens.length; i++) {
+            require(bridgeTokens[i] != address(0));
+            bridgeTokenToThresholdAwareness[bridgeTokens[i]] = thresholdsAwareness[i];
+        }
+    }
 }
