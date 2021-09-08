@@ -3,10 +3,14 @@ const { saveContractAddress, saveContractProxies } = require('./utils.js');
 const { hexify, upgrades } = require('../test/setup');
 const network = 'local';
 const config = require('../deployments/deploymentConfig.json')[network];
-const chains = ['Binance','Polygon'];
+const chains = ['Binance','Ethereum','Polygon'];
+
+let maintainer, users;
 
 async function main() {
     await hre.run('compile');
+
+    [maintainer, ...users] = await hre.ethers.getSigners();
 
     const ChainportCongress = await hre.ethers.getContractFactory('ChainportCongress');
     const ChainportCongressMembersRegistry = await hre.ethers.getContractFactory('ChainportCongressMembersRegistry');
@@ -37,7 +41,9 @@ async function main() {
     console.log('ChainportCongress.setMembersRegistry(',chainportCongressMembersRegistry.address,') set successfully.');
 
     // Maintainers registry
-    const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, chainportCongress.address]);
+    let maintainers = config.maintainers;
+    maintainers.push(maintainer.address)
+    const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [maintainers, chainportCongress.address]);
     await maintainersRegistry.deployed()
     saveContractProxies(network, 'MaintainersRegistry proxy deployed to:', maintainersRegistry.address);
     console.log('MaintainersRegistry Proxy deployed to:', maintainersRegistry.address);
@@ -70,6 +76,12 @@ async function main() {
         validator.address
     ]);
     await chainportMainBridge.deployed()
+    for(let j = 0; j < chains.length; j++){
+        if(chains[j] !== 'Ethereum'){
+            await chainportMainBridge.connect(maintainer).activateNetwork(j+1);
+            console.log('Network with id ' + (j+1).toString() + ' is activated.');
+        }
+    }
     saveContractProxies(network, 'ChainportMainBridge', chainportMainBridge.address);
     console.log('ChainportMainBridge proxy deployed to:', chainportMainBridge.address);
     const mainBridgeImplementattion = await admin.getProxyImplementation(chainportMainBridge.address);
@@ -78,11 +90,18 @@ async function main() {
 
     // SideBridge
     for(let i = 0; i < chains.length; i++) {
+        if(chains[i] === 'Ethereum') continue;
         const chainportSideBridge = await upgrades.deployProxy(ChainportSideBridge,[
             chainportCongress.address,
             maintainersRegistry.address
         ]);
         await chainportSideBridge.deployed();
+        for(let j = 0; j < chains.length; j++){
+            if(chains[i] !== chains[j]){
+                await chainportSideBridge.activateNetwork(j+1);
+                console.log('Network with id ' + (j+1).toString() + ' is activated.');
+            }
+        }
         saveContractProxies(network, 'ChainportSideBridge' + chains[i], chainportSideBridge.address);
         console.log('ChainportSideBridge' + chains[i] + 'proxy deployed to:', chainportSideBridge.address);
         let bridgeImplementation = await admin.getProxyImplementation(chainportSideBridge.address);
