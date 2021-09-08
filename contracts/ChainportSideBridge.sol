@@ -11,18 +11,20 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
-    mapping(address => address) public erc20ToBep20Address; // Name can't be changed because of upgrading conventions
-    mapping(string => uint256) public functionNameToNonce;  // Cannot be removed because of upgrading conventions
+    // Global state variables
+    // Mapping for new minted token addresses - outdated/unused
+    mapping(address => address) public erc20ToBep20Address;
+    // Mapping for tracking nonce per function - outdated/unused
+    mapping(string => uint256) public functionNameToNonce;
+    // Mapping for checking if token is created by the bridge
     mapping(address => bool) public isCreatedByTheBridge;
-
-    // Mapping if bridge is Frozen
+    // Bool for bridge frozen status
     bool public isFrozen;
-
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
     // Nonce check mapping
     mapping(bytes32 => bool) public isNonceUsed;
-    // New mapping replacement for old erc20ToBep20Address (multi network adaptation)
+    // New mapping replacement for old erc20ToBep20Address
     mapping(address => address) public originalAssetToBridgeToken;
     // Security variable used for maintainer one time actions check used for upgrading
     bool public maintainerWorkInProgress;
@@ -31,6 +33,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
 
+    // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
@@ -42,6 +45,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
     event BridgeFreezed(bool isFrozen);
 
+    // Modifiers
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -71,7 +75,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         _;
     }
 
-    // Set initial addresses
     function initialize(
         address _chainportCongress,
         address _maintainersRegistry
@@ -82,6 +85,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
+    // Function to freeze the bridge
     function freezeBridge()
     public
     onlyMaintainer
@@ -90,6 +94,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit BridgeFreezed(true);
     }
 
+    // Function to unfreeze the bridge
     function unfreezeBridge()
     public
     onlyChainportCongress
@@ -98,6 +103,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit BridgeFreezed(false);
     }
 
+    // Function to mint new token
     function mintNewToken(
         address originalTokenAddress,
         string memory tokenName,
@@ -109,15 +115,16 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     maintainerWorkNotInProgress
     {
+        // Require that token has not been minted already
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
-
+        // Create new token
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
-
         originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
         isCreatedByTheBridge[address(newToken)] = true;
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
     }
 
+    // Function to mint tokens by maintainer
     function mintTokens(
         address token,
         address receiver,
@@ -132,16 +139,20 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress
     isPathNotPaused(token, "mintTokens")
     {
+        //TODO: Check supply before minting to assure the matching and disable additional minting
+        // Check if nonce is already used
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
-
+        // Mint tokens to receiver
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
 
     //TODO work towards unifying burnTokens into xchaintransfer function
+    //TODO check if function can be removed
+    // Old version burn tokens function
     function burnTokens(
         address bridgeToken,
         uint256 amount
@@ -171,8 +182,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     isPathNotPaused(bridgeToken, "crossChainTransfer")
     {
+        // Require that network id is active
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
-
+        // Require that token is created by the bridge
         require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
@@ -217,8 +229,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
-    // Function to change maintainerWorkInProgress variable/flag
-    // Affects modifier
+    // Function to change maintainerWorkInProgress variable/flag - affects modifier
     function setMaintainerWorkInProgress(
         bool isMaintainerWorkInProgress
     )
@@ -229,7 +240,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
     }
 
-    //TODO: Check if restrictions are properly set
+    // Function to set single asset freeze state by congress
     function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
@@ -241,7 +252,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
-    //TODO: Check if restrictions are properly set
+    // Function to freeze multiple assets by maintainer
     function freezeAssetsByMaintainer(
         address [] memory tokenAddresses
     )
@@ -254,6 +265,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to set path pause state by maintainer
     function setPathPauseState(
         address token,
         string memory functionName,
