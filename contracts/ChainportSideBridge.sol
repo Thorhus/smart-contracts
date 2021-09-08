@@ -35,16 +35,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
     event TokensTransferred(address bridgeTokenAddress, address issuer, uint256 amount, uint256 networkId);
-
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
-
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
-
     event AssetFrozen(address asset, bool isAssetFrozen);
-
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-
     event BridgeFreezed(bool isFrozen);
 
     modifier isBridgeNotFrozen {
@@ -145,6 +140,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
+
     //TODO work towards unifying burnTokens into xchaintransfer function
     function burnTokens(
         address bridgeToken,
@@ -206,6 +202,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit NetworkDeactivated(networkId);
     }
 
+    //TODO: remove function
     // Function used to set mapping for token addresses
     function setOriginalAssetToBridgeToken(
         address [] memory mainBridgeTokenAddresses,
@@ -232,6 +229,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
     }
 
+    //TODO: Check if restrictions are properly set
     function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
@@ -243,6 +241,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
+    //TODO: Check if restrictions are properly set
     function freezeAssetsByMaintainer(
         address [] memory tokenAddresses
     )
