@@ -32,6 +32,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => bool) public isAssetFrozen;
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
+    // Reversed mapping of originalAssetToBridgeToken
+    mapping(address => address) public bridgeTokenToOriginalAsset;
+    // Mapping for token minting thresholds
+    mapping(address => uint256) public tokenToMintingThreshold;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -244,7 +248,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     {
-        for(uint i = 0; i < tokenAddresses.length; i++){
+        for(uint16 i; i < tokenAddresses.length; i++){
             isAssetFrozen[tokenAddresses[i]] = true;
             emit AssetFrozen(tokenAddresses[i], true);
         }
@@ -262,4 +266,22 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         isPathPaused[token][functionName] = isPaused;
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
+
+    // Function to set bridgeTokenToOriginalAsset
+    function setBridgeTokenToOriginalAsset(
+        address [] calldata bridgeTokens,
+        address [] calldata originalAssets
+    )
+    external
+    onlyMaintainer
+    {
+        for(uint16 i; i < bridgeTokens.length; i++) {
+            require(
+                bridgeTokens[i] != address(0) && originalAssets[i] != address(0),
+                "Error: Addresses are malformed."
+            );
+            bridgeTokenToOriginalAsset[bridgeTokens[i]] = originalAssets[i];
+        }
+    }
+
 }
