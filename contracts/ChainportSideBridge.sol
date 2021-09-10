@@ -126,7 +126,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         // Create new token
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
         // Assign mapping values
-        (originalAssetToBridgeToken[originalTokenAddress], bridgeTokenToOriginalAsset[address(newToken)]) = (address(newToken), originalTokenAddress);
+        originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
+        bridgeTokenToOriginalAsset[address(newToken)] = originalTokenAddress;
         isCreatedByTheBridge[address(newToken)] = true;
 
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
