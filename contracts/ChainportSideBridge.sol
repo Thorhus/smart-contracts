@@ -11,18 +11,19 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
 
-    mapping(address => address) public erc20ToBep20Address; // Name can't be changed because of upgrading conventions
-    mapping(string => uint256) public functionNameToNonce;  // Cannot be removed because of upgrading conventions
+    // Previous version unused mappings
+    mapping(address => address) public erc20ToBep20Address;
+    mapping(string => uint256) public functionNameToNonce;
+
+    // Boolean mapping for token bridge creation documentation
     mapping(address => bool) public isCreatedByTheBridge;
-
-    // Mapping if bridge is Frozen
+    // Boolean for bridge freeze state
     bool public isFrozen;
-
     // Network activity state mapping
     mapping(uint256 => bool) public isNetworkActive;
     // Nonce check mapping
     mapping(bytes32 => bool) public isNonceUsed;
-    // New mapping replacement for old erc20ToBep20Address (multi network adaptation)
+    // New mapping replacement for erc20ToBep20Address
     mapping(address => address) public originalAssetToBridgeToken;
     // Security variable used for maintainer one time actions check used for upgrading
     bool public maintainerWorkInProgress;
@@ -35,16 +36,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
     event TokensTransferred(address bridgeTokenAddress, address issuer, uint256 amount, uint256 networkId);
-
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
-
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
-
     event AssetFrozen(address asset, bool isAssetFrozen);
-
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-
     event BridgeFreezed(bool isFrozen);
 
     modifier isBridgeNotFrozen {
@@ -103,6 +99,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit BridgeFreezed(false);
     }
 
+    // Function to mint new token by maintainer
     function mintNewToken(
         address originalTokenAddress,
         string memory tokenName,
@@ -123,6 +120,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
     }
 
+    // Function to mint tokens by maintainer
     function mintTokens(
         address token,
         address receiver,
@@ -145,7 +143,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
+
     //TODO work towards unifying burnTokens into xchaintransfer function
+    // TODO: Check if function can be removed
     function burnTokens(
         address bridgeToken,
         uint256 amount
@@ -207,6 +207,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function used to set mapping for token addresses
+    // TODO: Check if function can be removed
     function setOriginalAssetToBridgeToken(
         address [] memory mainBridgeTokenAddresses,
         address [] memory sideBridgeTokenAddresses
