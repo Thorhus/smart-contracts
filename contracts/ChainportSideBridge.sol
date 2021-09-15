@@ -36,8 +36,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Stable coin address for router
     address public stableCoin;
     // Safety threshold for minting (usd)
-    uint256 public stableCoinDecimals;
+    uint8 public stableCoinDecimals;
+    // Minting usd value threshold
+    uint256 public usdThreshold;
 
+    // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
     event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
@@ -49,6 +52,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
     event BridgeFreezed(bool isFrozen);
 
+    // Modifiers
     modifier isBridgeNotFrozen {
         require(isFrozen == false, "Error: All Bridge actions are currently frozen.");
         _;
@@ -78,7 +82,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         _;
     }
 
-    // Set initial addresses
     function initialize(
         address _chainportCongress,
         address _maintainersRegistry
@@ -150,7 +153,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit TokensMinted(token, msg.sender, amount);
     }
 
-    //TODO work towards unifying burnTokens into xchaintransfer function
+    // TODO work towards unifying burnTokens into xchaintransfer function
     // TODO: Check if function can be removed
     function burnTokens(
         address bridgeToken,
@@ -212,8 +215,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit NetworkDeactivated(networkId);
     }
 
-    // Function to change maintainerWorkInProgress variable/flag
-    // Affects modifier
+    // Function to change maintainerWorkInProgress flag
+    // TODO: Check if can be removed along with modifiers
     function setMaintainerWorkInProgress(
         bool isMaintainerWorkInProgress
     )
@@ -259,7 +262,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
-    function setExchanges(address _router) external onlyChainportCongress {
+    function setExchange(address _router) external onlyChainportCongress {
         require(_router != address(0), "Error: Address is malformed.");
         router = _router;
     }
@@ -270,7 +273,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         stableCoinDecimals = IERC20(stableCoin).decimals();
     }
 
-    function getTokenValueInUsd(uint amount, address token) returns(uint[] memory amounts) {
+    function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
+        usdThreshold = _usdThreshold;
+    }
+
+    function getTokenValueInUsd(uint amount, address token) internal returns(uint[] memory amounts) {
         return UniswapV2Interface(exchange).getAmountsOut(amount, [token, stableCoin]);
     }
 }
