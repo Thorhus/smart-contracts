@@ -125,12 +125,13 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
-    maintainerWorkNotInProgress
+    maintainerWorkNotInProgress // TODO: Check for removal
     {
+        // Require that token wasn't already minted
         require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
-
+        // Mint new token
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
-
+        // Configure mappings
         originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
         bridgeTokenToOrginalAsset[address(newToken)] = originalTokenAddress;
         isCreatedByTheBridge[address(newToken)] = true;
@@ -149,18 +150,20 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAssetNotFrozen(token)
     isAmountGreaterThanZero(amount)
-    maintainerWorkNotInProgress
+    maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
     {
+        // Check the nonce
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
-
+        // Mint tokens to user
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
         emit TokensMinted(token, msg.sender, amount);
     }
 
+    // Old function for token burning
     // TODO work towards unifying burnTokens into xchaintransfer function
     // TODO: Check if function can be removed
     function burnTokens(
@@ -192,12 +195,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     isPathNotPaused(bridgeToken, "crossChainTransfer")
     {
+        // Check if network is supported && token was minted by the bridge
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
-
         require(isCreatedByTheBridge[bridgeToken], "Error: Token is not created by the bridge.");
+        // Burn tokens from user
         BridgeMintableToken token = BridgeMintableToken(bridgeToken);
         token.burnFrom(msg.sender, amount);
-
         emit TokensTransferred(bridgeToken, msg.sender, amount, networkId);
     }
 
@@ -334,7 +337,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
-    function getBridgeTokenThresholdFromPercent(address token) internal view returns(uint256){
+    function getBridgeTokenThresholdFromPercent(address token) internal view returns(uint256) {
         return originalAssetToBalance[bridgeTokenToOrginalAsset[token]].mul(percentThreshold).div(100);
     }
 }
