@@ -133,33 +133,6 @@ describe("Side Bridge Test", function () {
             });
         });
 
-        describe("Load original asset to bridge token mapping", function () {
-            beforeEach(async function () {
-                //Revert addresses to make a new array
-                let j = tokenAddresses.length - 1;
-                for(let i = 0; i < tokenAddresses.length; i++){
-                    revertedAddresses[i] = tokenAddresses[j];
-                    j--;
-                }
-            });
-            it("Should load mapping by maintainer", async function () {
-                await sideBridgeInstance.connect(maintainer).setOriginalAssetToBridgeToken(
-                    tokenAddresses,
-                    revertedAddresses
-                );
-                for(let i = 0; i < tokenAddresses.length; i++){
-                    expect(await sideBridgeInstance.originalAssetToBridgeToken(tokenAddresses[i]))
-                        .to.be.equal(revertedAddresses[i]);
-                }
-            });
-            it("Should not laod mapping by user", async function () {
-                await expect(sideBridgeInstance.connect(user1).setOriginalAssetToBridgeToken(
-                    tokenAddresses,
-                    revertedAddresses
-                )).to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
-            });
-        });
-
         describe("Network activation", function () {
 
             it("Should activate network (as maintainer)", async function () {
