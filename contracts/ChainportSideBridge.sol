@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./BridgeMintableToken.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
-
+import "./interfaces/UniswapV2Interface.sol";
 
 contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
@@ -31,6 +31,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => bool) public isAssetFrozen;
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
+    // Exchange router address
+    address public router;
+    // Stable coin address for router
+    address public stableCoin;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -266,5 +270,19 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         isPathPaused[token][functionName] = isPaused;
         emit PathPauseStateChanged(token, functionName, isPaused);
+    }
+
+    function setExchanges(address _router) external onlyChainportCongress {
+        require(_router != address(0), "Error: Address is malformed.");
+        router = _router;
+    }
+
+    function setStableCoin(address _stableCoin) external onlyChainportCongress {
+        require(_stableCoin != address(0), "Error: Address is malformed.");
+        stableCoin = _stableCoin;
+    }
+
+    function getTokenValueInUsd(uint amount, address token) returns(uint[] memory amounts) {
+        return UniswapV2Interface(exchange).getAmountsOut(amount, [token, stableCoin]);
     }
 }
