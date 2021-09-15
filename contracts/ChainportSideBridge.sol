@@ -210,21 +210,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit NetworkDeactivated(networkId);
     }
 
-    // Function used to set mapping for token addresses
-    // TODO: Check if function can be removed
-    function setOriginalAssetToBridgeToken(
-        address [] memory mainBridgeTokenAddresses,
-        address [] memory sideBridgeTokenAddresses
-    )
-    public
-    onlyMaintainer
-    {
-        for(uint i = 0; i < mainBridgeTokenAddresses.length; i++){
-            require(mainBridgeTokenAddresses[i] != address(0) && sideBridgeTokenAddresses[i] != address(0));
-            originalAssetToBridgeToken[mainBridgeTokenAddresses[i]] = sideBridgeTokenAddresses[i];
-        }
-    }
-
     // Function to change maintainerWorkInProgress variable/flag
     // Affects modifier
     function setMaintainerWorkInProgress(
