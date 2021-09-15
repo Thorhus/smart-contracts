@@ -35,6 +35,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     address public router;
     // Stable coin address for router
     address public stableCoin;
+    // Safety threshold for minting (usd)
+    uint256 public stableCoinDecimals;
 
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
     event TokensBurned(address tokenAddress, address issuer, uint256 amount);
@@ -265,6 +267,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function setStableCoin(address _stableCoin) external onlyChainportCongress {
         require(_stableCoin != address(0), "Error: Address is malformed.");
         stableCoin = _stableCoin;
+        stableCoinDecimals = IERC20(stableCoin).decimals();
     }
 
     function getTokenValueInUsd(uint amount, address token) returns(uint[] memory amounts) {
