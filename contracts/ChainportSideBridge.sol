@@ -39,6 +39,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     uint8 public stableCoinDecimals;
     // Minting usd value threshold
     uint256 public usdThreshold;
+    // Reversed mapping of originalAssetToBridgeToken
+    mapping(address => address) bridgeTokenToOrginalAsset;
+    // Mapping for main bridge balances
+    mapping(address => uint256) originalAssetToBalance;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -125,6 +129,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
 
         originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
+        bridgeTokenToOrginalAsset[address(newToken)] = originalTokenAddress;
         isCreatedByTheBridge[address(newToken)] = true;
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
     }
@@ -270,14 +275,55 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function setStableCoin(address _stableCoin) external onlyChainportCongress {
         require(_stableCoin != address(0), "Error: Address is malformed.");
         stableCoin = _stableCoin;
-        stableCoinDecimals = IERC20(stableCoin).decimals();
+        stableCoinDecimals = ERC20(stableCoin).decimals();
     }
 
     function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
         usdThreshold = _usdThreshold;
     }
 
-    function getTokenValueInUsd(uint amount, address token) internal returns(uint[] memory amounts) {
-        return UniswapV2Interface(exchange).getAmountsOut(amount, [token, stableCoin]);
+    function getTokenValueInUsd(uint amount, address token) internal view returns(uint[] memory amounts) {
+        address [] memory pair;
+        pair[0] = token;
+        pair[1] = stableCoin;
+        return UniswapV2Interface(router).getAmountsOut(amount, pair);
+    }
+
+    function setOriginalTokenBalancesOnMainBridge(
+        address [] calldata originalAssets,
+        uint256 [] calldata balances
+    )
+    external
+    onlyChainportCongress
+    {
+        for(uint16 i; i < originalAssets.length; i++) {
+            originalAssetToBalance[originalAssets[i]] = balances[i];
+        }
+    }
+
+    function backendAddNewTokenBalance(
+        address token,
+        uint256 balance
+    )
+    external
+    onlyMaintainer // TODO: Consider adding another authority entity
+    {
+        originalAssetToBalance[token] = balance;
+    }
+
+    function setBridgeTokenToOriginalAsset(
+        address [] calldata bridgeTokens,
+        address [] calldata originalAssets
+    )
+    external
+    onlyChainportCongress
+    {
+        for(uint16 i; i < bridgeTokens.length; i++) {
+            require(
+                bridgeTokens[i] != address(0) && originalAssets[i] != address(0),
+                "Error: Malformed addresses present."
+            );
+            bridgeTokenToOrginalAsset[bridgeTokens[i]] = originalAssets[i];
+        }
     }
 }
