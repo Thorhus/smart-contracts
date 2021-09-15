@@ -332,4 +332,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
             bridgeTokenToOrginalAsset[bridgeTokens[i]] = originalAssets[i];
         }
     }
+
+    function getBridgeTokenThresholdFromPercent(address token) internal view returns(uint256){
+        return originalAssetToBalance[bridgeTokenToOrginalAsset[token]].mul(percentThreshold).div(100);
+    }
 }
