@@ -9,8 +9,9 @@ import "./interfaces/UniswapV2Interface.sol";
 
 contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
-    IValidator public signatureValidator;
+    using SafeMath for uint;
 
+    IValidator public signatureValidator;
     // Previous version unused mappings
     mapping(address => address) public erc20ToBep20Address;
     mapping(string => uint256) public functionNameToNonce;
