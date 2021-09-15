@@ -40,9 +40,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Minting usd value threshold
     uint256 public usdThreshold;
     // Reversed mapping of originalAssetToBridgeToken
-    mapping(address => address) bridgeTokenToOrginalAsset;
+    mapping(address => address) public bridgeTokenToOrginalAsset;
     // Mapping for main bridge balances
-    mapping(address => uint256) originalAssetToBalance;
+    mapping(address => uint256) public originalAssetToBalance;
+    // Percentage threshold for token minting
+    uint8 public percentThreshold;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -280,6 +282,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
         usdThreshold = _usdThreshold;
+    }
+
+    function setPercentThreshold(uint8 _percentageThreshold) external onlyChainportCongress {
+        percentThreshold = _percentageThreshold;
     }
 
     function getTokenValueInUsd(uint amount, address token) internal view returns(uint[] memory amounts) {
