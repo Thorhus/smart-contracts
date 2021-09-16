@@ -25,7 +25,7 @@ contract ChainportExchange is ChainportMiddleware{
 
 	function getTokenValueInUsd(uint amount, address token) external view returns(uint [] memory amounts) {
 		require(stableCoin != address(0), "Error: StableCoin not set.");
-		address [] memory pair;
+		address [] memory pair = new address[](2);
 		pair[0] = token;
 		pair[1] = stableCoin;
 		require(router != address(0), "Error: Router not set.");
