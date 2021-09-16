@@ -177,7 +177,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
         catch Error(string memory _err) { emit Log(_err); }
         catch (bytes memory _err) { emit LogBytes(_err); }
-        if (!isSecured) { revert(); }
+        require(isSecured, "Error: Minting not secured.");
 
         // Mint tokens to user
         BridgeMintableToken ercToken = BridgeMintableToken(token);
