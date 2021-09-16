@@ -151,6 +151,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
     {
+        // Require that token was created by the bridge
+        require(isCreatedByTheBridge[token], "Error: Token was not created by the bridge.");
         bool isSecured;
         // Check the nonce
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
