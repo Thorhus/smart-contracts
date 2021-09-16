@@ -32,18 +32,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => bool) public isAssetFrozen;
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
-    // Exchange router address
-    address public router;
-    // Stable coin address for router
-    address public stableCoin;
-    // Safety threshold for minting (usd)
-    uint8 public stableCoinDecimals;
-    // Minting usd value threshold
-    uint256 public usdThreshold;
     // Reversed mapping of originalAssetToBridgeToken
     mapping(address => address) public bridgeTokenToOrginalAsset;
     // Mapping for main bridge balances
     mapping(address => uint256) public originalAssetToBalance;
+    // Minting usd value threshold
+    uint256 public usdThreshold;
     // Percentage threshold for token minting
     uint8 public percentThreshold;
     // Address of the chainport exchange
@@ -304,7 +298,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     function setChainportExchange(address _chainportExchange) external onlyChainportCongress {
         require(_chainportExchange != address(0), "Error: Address is malformed.");
-        chainportCongress = _chainportExchange;
+        chainportExchange = _chainportExchange;
     }
 
     function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
