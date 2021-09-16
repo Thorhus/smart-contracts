@@ -323,14 +323,14 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
-    function backendAddNewTokenBalance(
-        address token,
+    function addOriginalAssetBalance(
+        address originalAsset,
         uint256 balance
     )
     external
     onlyMaintainer // TODO: Consider adding another authority entity
     {
-        originalAssetToBalance[token] = balance;
+        originalAssetToBalance[originalAsset] = balance;
     }
 
     function setBridgeTokenToOriginalAsset(
