@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/Initializable.sol";
 import "./BridgeMintableToken.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
-import "./interfaces/UniswapV2Interface.sol";
+import "./interfaces/IChainportExchange.sol";
 
 contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
@@ -46,6 +46,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => uint256) public originalAssetToBalance;
     // Percentage threshold for token minting
     uint8 public percentThreshold;
+    // Address of the chainport exchange
+    address public chainportExchange;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -58,6 +60,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event AssetFrozen(address asset, bool isAssetFrozen);
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
     event BridgeFreezed(bool isFrozen);
+    event Log(string _err);
+    event LogBytes(bytes _err);
 
     // Modifiers
     modifier isBridgeNotFrozen {
@@ -153,13 +157,38 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
     {
+        bool isSecured;
         // Check the nonce
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
+
+        // Backend security measure
+        uint256 mainBridgeSupply = originalAssetToBalance[bridgeTokenToOrginalAsset[token]];
+        if (mainBridgeSupply != 0) {
+           require(
+               amount < mainBridgeSupply.mul(percentThreshold).div(100),
+               "Error: Token amount is too big."
+           );
+           isSecured = true;
+        }
+
+        try IChainportExchange(chainportExchange).getTokenValueInUsd(amount, token) returns (uint[] memory amounts) {
+            uint256 amountInUsd = amounts[1];
+            require(
+                amountInUsd < usdThreshold,
+                "Error: Token amount is too big."
+            );
+            isSecured = true;
+        }
+        catch Error(string memory _err) { emit Log(_err); }
+        catch (bytes memory _err) { emit LogBytes(_err); }
+        if (!isSecured) { revert(); }
+
         // Mint tokens to user
         BridgeMintableToken ercToken = BridgeMintableToken(token);
         ercToken.mint(receiver, amount);
+
         emit TokensMinted(token, msg.sender, amount);
     }
 
@@ -273,15 +302,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
-    function setExchange(address _router) external onlyChainportCongress {
-        require(_router != address(0), "Error: Address is malformed.");
-        router = _router;
-    }
-
-    function setStableCoin(address _stableCoin) external onlyChainportCongress {
-        require(_stableCoin != address(0), "Error: Address is malformed.");
-        stableCoin = _stableCoin;
-        stableCoinDecimals = ERC20(stableCoin).decimals();
+    function setChainportExchange(address _chainportExchange) external onlyChainportCongress {
+        require(_chainportExchange != address(0), "Error: Address is malformed.");
+        chainportCongress = _chainportExchange;
     }
 
     function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
@@ -290,13 +313,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     function setPercentThreshold(uint8 _percentageThreshold) external onlyChainportCongress {
         percentThreshold = _percentageThreshold;
-    }
-
-    function getTokenValueInUsd(uint amount, address token) internal view returns(uint[] memory amounts) {
-        address [] memory pair;
-        pair[0] = token;
-        pair[1] = stableCoin;
-        return UniswapV2Interface(router).getAmountsOut(amount, pair);
     }
 
     function setOriginalTokenBalancesOnMainBridge(
@@ -335,9 +351,5 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
             );
             bridgeTokenToOrginalAsset[bridgeTokens[i]] = originalAssets[i];
         }
-    }
-
-    function getBridgeTokenThresholdFromPercent(address token) internal view returns(uint256) {
-        return originalAssetToBalance[bridgeTokenToOrginalAsset[token]].mul(percentThreshold).div(100);
     }
 }
