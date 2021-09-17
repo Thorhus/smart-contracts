@@ -153,13 +153,15 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
-
+        // Require that signature has not been already used
         require(!isSignatureUsed[signature], "Error: Signature already used.");
         isSignatureUsed[signature] = true;
-
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, receiver, amount, token);
-        require(isMessageValid, "Error: Invalid signature.");
-
+        // Require that the signature is valid
+        require(
+            signatureValidator.verifyWithdraw(signature, nonce, receiver, amount, token),
+            "Error: Invalid signature."
+        );
+        // Try to gather token usd value
         try IChainportExchange(chainportExchange).getTokenValueInUsd(amount, token) returns (uint[] memory amounts) {
             uint256 amountInUsd = amounts[1];
             require(
