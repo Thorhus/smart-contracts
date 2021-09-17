@@ -32,16 +32,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(address => bool) public isAssetFrozen;
     // Mapping for freezing specific path: token -> functionName -> isPausedOrNot
     mapping(address => mapping(string => bool)) public isPathPaused;
-    // Reversed mapping of originalAssetToBridgeToken
-    mapping(address => address) public bridgeTokenToOrginalAsset;
-    // Mapping for main bridge balances
-    mapping(address => uint256) public originalAssetToBalance;
-    // Minting usd value threshold
-    uint256 public usdThreshold;
-    // Percentage threshold for token minting
-    uint8 public percentThreshold;
     // Address of the chainport exchange
     address public chainportExchange;
+    // Minting usd value threshold
+    uint256 public usdThreshold;
+    // Signature usage mapping
+    mapping(bytes => bool) isSignatureUsed;
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);
@@ -131,7 +127,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
         // Configure mappings
         originalAssetToBridgeToken[originalTokenAddress] = address(newToken);
-        bridgeTokenToOrginalAsset[address(newToken)] = originalTokenAddress;
         isCreatedByTheBridge[address(newToken)] = true;
         emit TokenCreated(address(newToken), originalTokenAddress, tokenName, tokenSymbol, decimals);
     }
@@ -141,7 +136,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         address token,
         address receiver,
         uint256 amount,
-        uint256 nonce
+        uint256 nonce,
+        bytes memory signature
     )
     public
     onlyMaintainer
@@ -153,21 +149,16 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     {
         // Require that token was created by the bridge
         require(isCreatedByTheBridge[token], "Error: Token was not created by the bridge.");
-        bool isSecured;
         // Check the nonce
         bytes32 nonceHash = keccak256(abi.encodePacked("mintTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
 
-        // Backend security measure
-        uint256 mainBridgeSupply = originalAssetToBalance[bridgeTokenToOrginalAsset[token]];
-        if (mainBridgeSupply != 0) {
-           require(
-               amount < mainBridgeSupply.mul(percentThreshold).div(100),
-               "Error: Token amount is too big."
-           );
-           isSecured = true;
-        }
+        require(!isSignatureUsed[signature], "Error: Signature already used.");
+        isSignatureUsed[signature] = true;
+
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, receiver, amount, token);
+        require(isMessageValid, "Error: Invalid signature.");
 
         try IChainportExchange(chainportExchange).getTokenValueInUsd(amount, token) returns (uint[] memory amounts) {
             uint256 amountInUsd = amounts[1];
@@ -175,11 +166,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
                 amountInUsd < usdThreshold,
                 "Error: Token amount is too big."
             );
-            isSecured = true;
-        }
-        catch Error(string memory _err) { emit Log(_err); }
+        } catch Error(string memory _err) { emit Log(_err); }
         catch (bytes memory _err) { emit LogBytes(_err); }
-        require(isSecured, "Error: Minting not secured.");
 
         // Mint tokens to user
         BridgeMintableToken ercToken = BridgeMintableToken(token);
@@ -252,7 +240,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to change maintainerWorkInProgress flag
-    // TODO: Check if can be removed along with modifiers
+    // TODO: Check if can be removed along with modifier
     function setMaintainerWorkInProgress(
         bool isMaintainerWorkInProgress
     )
@@ -307,45 +295,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         usdThreshold = _usdThreshold;
     }
 
-    function setPercentThreshold(uint8 _percentageThreshold) external onlyChainportCongress {
-        percentThreshold = _percentageThreshold;
-    }
-
-    function setOriginalTokenBalancesOnMainBridge(
-        address [] calldata originalAssets,
-        uint256 [] calldata balances
-    )
-    external
-    onlyChainportCongress
-    {
-        for(uint16 i; i < originalAssets.length; i++) {
-            originalAssetToBalance[originalAssets[i]] = balances[i];
-        }
-    }
-
-    function addOriginalAssetBalance(
-        address originalAsset,
-        uint256 balance
-    )
-    external
-    onlyMaintainer // TODO: Consider adding another authority entity
-    {
-        originalAssetToBalance[originalAsset] = balance;
-    }
-
-    function setBridgeTokenToOriginalAsset(
-        address [] calldata bridgeTokens,
-        address [] calldata originalAssets
-    )
-    external
-    onlyChainportCongress
-    {
-        for(uint16 i; i < bridgeTokens.length; i++) {
-            require(
-                bridgeTokens[i] != address(0) && originalAssets[i] != address(0),
-                "Error: Malformed addresses present."
-            );
-            bridgeTokenToOrginalAsset[bridgeTokens[i]] = originalAssets[i];
-        }
+    function setSignatureValidator(address _signatureValidator) external onlyChainportCongress {
+        signatureValidator = IValidator(_signatureValidator);
     }
 }
