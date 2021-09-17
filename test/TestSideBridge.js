@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const {signatoryAddress, generateSignature, createHash} = require("./testHelpers");
 
 describe("Side Bridge Test", function () {
 
@@ -43,6 +44,9 @@ describe("Side Bridge Test", function () {
 
         beforeEach(async function () {
             await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
+            await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address);
+            await sideBridgeInstance.connect(chainportCongress).setSignatureValidator(validatorInstance.address);
+            await sideBridgeInstance.connect(chainportCongress).setChainportExchange(token.address);
         });
 
         describe("Setting maintainers registry", function () {
@@ -190,13 +194,6 @@ describe("Side Bridge Test", function () {
                     .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
 
-            it("Should not mint tokens (by non bridge contract)", async function () {
-                // current bridge contract address is chainportCongress
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await expect(sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease))
-                    .to.be.revertedWith("Only Bridge contract can mint new tokens.");
-            });
-
             it("Should not change the bridge contract address (by user)", async function() {
                 expect(await token.sideBridgeContract()).to.equal(chainportCongress.address);
                 await expect(token.connect(user1).setSideBridgeContract(maintainer.address)).to.be.reverted;
@@ -209,37 +206,62 @@ describe("Side Bridge Test", function () {
             });
 
             it("Should mint tokens", async function () {
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
                 await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
+                await sideBridgeInstance.connect(maintainer).mintTokens(
+                    bridgeToken, user1.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken)));
             });
 
             it("Should not mint tokens (by user)", async function () {
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await expect(sideBridgeInstance.connect(user1).mintTokens(token.address, user2.address, tokenAmount, lastNonce + nonceIncrease))
-                    .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
+                await expect(sideBridgeInstance.connect(user1).mintTokens(
+                    bridgeToken, user1.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                )).to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
             it("Should not mint tokens with already used nonce", async function () {
-                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
-                sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, 435);
-                await expect(sideBridgeInstance.connect(maintainer).mintTokens(token.address, user1.address, tokenAmount, 435))
-                    .to.be.revertedWith('Error: Nonce already used.');
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                sideBridgeInstance.connect(maintainer).mintTokens(
+                    bridgeToken, user1.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                )
+                await expect(sideBridgeInstance.connect(maintainer).mintTokens(
+                    bridgeToken, user1.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                )).to.be.revertedWith('Error: Nonce already used.');
             });
 
             it("Should not mint tokens when amount is below or equal to zero", async function () {
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await expect(sideBridgeInstance.connect(maintainer).mintTokens(token.address, user2.address, 0, lastNonce + nonceIncrease))
-                    .to.be.revertedWith("Amount is not greater than zero.");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await expect(sideBridgeInstance.connect(maintainer).mintTokens(
+                    bridgeToken, user1.address, 0, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, 0, bridgeToken))
+                )).to.be.revertedWith("Amount is not greater than zero.");
             });
 
             it("Should not mint tokens when bridge is frozen", async function () {
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+
                 await sideBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await sideBridgeInstance.isFrozen()).to.equal(true);
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await expect(sideBridgeInstance.connect(maintainer)
-                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease))
-                    .to.be.revertedWith("Error: All Bridge actions are currently frozen.");
+
+                await expect(sideBridgeInstance.connect(maintainer).mintTokens(
+                    bridgeToken, user1.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });
 
@@ -247,21 +269,20 @@ describe("Side Bridge Test", function () {
 
             it("Should burn a token made by the bridge (by maintainer)", async function () {
 
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
-
-                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
 
-                await sideBridgeInstance.connect(maintainer).burnTokens(bepToken.address, 1);
+                let bridgeToken = await ethers.getContractAt("BridgeMintableToken", bridgeTokenAddress);
 
-                expect(await bepToken.balanceOf(maintainer.address)).to.equal(tokenAmount - 1);
+                await bridgeToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
+                await sideBridgeInstance.connect(maintainer).burnTokens(bridgeTokenAddress, 1);
+
+                expect(await bridgeToken.balanceOf(maintainer.address)).to.equal(tokenAmount - 1);
             });
 
             it("Should not burn a token if amount exceeds allowance", async function () {
