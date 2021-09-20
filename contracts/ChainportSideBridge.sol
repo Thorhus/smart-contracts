@@ -35,9 +35,14 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Address of the chainport exchange
     address public chainportExchange;
     // Minting usd value threshold
-    uint256 public usdThreshold;
+    uint256 public usdThreshold;  //TODO: rename mintUSDValueThresholdPerSafeGuardTimeframePerToken, settable by congress
     // Signature usage mapping
     mapping(bytes => bool) isSignatureUsed;
+
+    //TODO: when there is a mint request for a specific token, have a mapping token-->startSampleAt, if more than SAMPLE_SAFEGUARD_TIME_MIN (configurable by congress, default to 3), override value, set mint value in usd to mapping token-->totalMintedLastSafeGuardTimeFrame
+    //TODO: else, when getting the mint amount usd value, add to token-->totalMintedLastSafeGuardTimeFrame
+    //TODO:      if totalMintedLastSafeGuardTimeFrame > mintUSDValueThresholdPerSafeGuardTimeframePerToken, move that mint for congress approval
+
 
     // Events
     event TokensMinted(address tokenAddress, address issuer, uint256 amount);

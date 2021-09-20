@@ -7,6 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./ChainportMiddleware.sol";
 import "./interfaces/IValidator.sol";
 
+//TODO: make sure staging is in sync with master 1:1
+//TODO: make sure staging has: (1) security feature (withdrawTokensByMaintainer whitelisted only to gnosis safe/fund manager)
+//TODO: make sure staging does NOT have the fund manager code
+//TODO: make sure staging has all the new minter protection code
+
 contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     using SafeMath for uint256;
