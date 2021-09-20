@@ -1,15 +1,16 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 const { signatoryAddress, createHash, generateSignature } = require('./testHelpers')
 
-describe("Main Bridge Test", function () {
+describe("Main Bridge Test", () => {
 
     let maintainersRegistry, maintainersRegistryInstance, mainBridge, mainBridgeInstance, fundManager,
         validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
-        tokenAmount = 50, nonceIncrease = 1, decimals = 18;
+        tokenAmount = 50, nonceIncrease = 1, decimals = 18, releaseAmount = 20;
 
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-    beforeEach(async function() {
+    beforeEach(async () => {
 
         [chainportCongress, user1, user2, maintainer, fundManager, ...maintainers] = await ethers.getSigners();
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
@@ -26,7 +27,7 @@ describe("Main Bridge Test", function () {
         await maintainersRegistryInstance.initialize(maintainers, chainportCongress.address);
 
         token = await ethers.getContractFactory("BridgeMintableToken");
-        token = await token.deploy("", "", decimals);
+        token = await token.connect(chainportCongress).deploy("TestToken", "TT", decimals);
 
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
@@ -36,7 +37,7 @@ describe("Main Bridge Test", function () {
         mainBridgeInstance = await mainBridge.deploy();
     });
 
-    it("Should initialize", async function () {
+    it("Should initialize", async () => {
         await mainBridgeInstance.initialize(
             maintainersRegistryInstance.address,
             chainportCongress.address,
@@ -44,9 +45,9 @@ describe("Main Bridge Test", function () {
         )
     });
 
-    describe("Functions", function () {
+    describe("Functions", () => {
 
-        beforeEach(async function () {
+        beforeEach(async () => {
             await mainBridgeInstance.initialize(
                 maintainersRegistryInstance.address,
                 chainportCongress.address,
@@ -54,42 +55,42 @@ describe("Main Bridge Test", function () {
             );
         });
 
-        describe("Check if values are set properly", function () {
+        describe("Check if values are set properly", () => {
 
-            it("Maintainers registry is set properly", async function () {
+            it("Maintainers registry is set properly", async () => {
                 expect(await mainBridgeInstance.maintainersRegistry()).to.equal(maintainersRegistryInstance.address);
             });
 
-            it("Chainport congress address is set properly", async function () {
+            it("Chainport congress address is set properly", async () => {
                 expect(await mainBridgeInstance.chainportCongress()).to.equal(chainportCongress.address);
             });
 
-            it("Validator address is set properly", async function () {
+            it("Validator address is set properly", async () => {
                 expect(await mainBridgeInstance.signatureValidator()).to.equal(validatorInstance.address);
             });
 
         });
 
-        describe("Bridge Freezing Operations", function () {
+        describe("Bridge Freezing Operations", () => {
 
-            it("Should freeze the bridge (by maintainer)", async function () {
+            it("Should freeze the bridge (by maintainer)", async () => {
                 await mainBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(true);
             });
 
-            it("Should unfreeze the bridge (by congress)", async function () {
+            it("Should unfreeze the bridge (by congress)", async () => {
                 await mainBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(true);
                 await mainBridgeInstance.connect(chainportCongress).unfreezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(false);
             });
 
-            it("Should not let freeze the bridge (by user)", async function () {
+            it("Should not let freeze the bridge (by user)", async () => {
                 await expect(mainBridgeInstance.connect(user1).freezeBridge())
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
-            it("Should not let unfreeze the bridge (by user)", async function () {
+            it("Should not let unfreeze the bridge (by user)", async () => {
                 await mainBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(true);
                 await expect(mainBridgeInstance.connect(user1).unfreezeBridge())
@@ -97,52 +98,52 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Assete freezing operations", function () {
-            it("Freeze asset by maintainer", async function () {
+        describe("Assete freezing operations", () => {
+            it("Freeze asset by maintainer", async () => {
                 await expect(mainBridgeInstance.connect(maintainer).freezeAssetByMaintainer(token.address))
                     .to.emit(mainBridgeInstance, 'AssetFrozen')
                     .withArgs(token.address,true);
             });
 
-            it("Should not freeze asset by user", async function () {
+            it("Should not freeze asset by user", async () => {
                 await expect(mainBridgeInstance.connect(user1).freezeAssetByMaintainer(token.address))
                     .to.be.reverted;
             });
 
-            it("Should freeze asset by congress", async function () {
+            it("Should freeze asset by congress", async () => {
                  await expect(mainBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, true))
                      .to.emit(mainBridgeInstance, 'AssetFrozen')
                      .withArgs(token.address, true);
             });
 
-            it("Should not unfreeze asset by user or maintainer", async function () {
+            it("Should not unfreeze asset by user or maintainer", async () => {
                 await mainBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, true);
                 await expect(mainBridgeInstance.connect(user1).setAssetFreezeState(token.address, false))
                     .to.be.reverted;
             });
 
-            it("Should unfreeze asset by congress", async function () {
+            it("Should unfreeze asset by congress", async () => {
                 await expect(mainBridgeInstance.connect(chainportCongress).setAssetFreezeState(token.address, false))
                     .to.emit(mainBridgeInstance, 'AssetFrozen')
                     .withArgs(token.address, false);
             });
         });
 
-        describe("Network activation", function () {
+        describe("Network activation", () => {
 
-            it("Should activate network (as maintainer)", async function () {
+            it("Should activate network (as maintainer)", async () => {
                 await expect(mainBridgeInstance.connect(maintainer).activateNetwork(1))
                     .to.emit(mainBridgeInstance, 'NetworkActivated')
                     .withArgs(1);
                 expect(await mainBridgeInstance.isNetworkActive(1)).to.be.true;
             });
 
-            it("Should not activate network (as user)", async function () {
+            it("Should not activate network (as user)", async () => {
                 await expect(mainBridgeInstance.connect(user1).activateNetwork(1))
                     .to.be.revertedWith('ChainportUpgradables: Restricted only to Maintainer');
             });
 
-            it("Should deactivate network (as congress)", async function () {
+            it("Should deactivate network (as congress)", async () => {
                 await expect(mainBridgeInstance.connect(maintainer).activateNetwork(1))
                     .to.emit(mainBridgeInstance, 'NetworkActivated')
                     .withArgs(1);
@@ -153,7 +154,7 @@ describe("Main Bridge Test", function () {
                 expect(await mainBridgeInstance.isNetworkActive(1)).to.be.false;
             });
 
-            it("Should not deactivate network (as user)", async function () {
+            it("Should not deactivate network (as user)", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
                 expect(await mainBridgeInstance.isNetworkActive(1)).to.be.true;
                 await expect(mainBridgeInstance.connect(user1).deactivateNetwork(1))
@@ -161,54 +162,44 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Token Depositing", function () {
+        describe("Token Depositing", () => {
 
-            beforeEach(async function () {
-                let sideBridgeInstance = await ethers.getContractFactory("ChainportSideBridge");
-                sideBridgeInstance = await sideBridgeInstance.deploy();
-
-                await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
-
-                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await sideBridgeInstance.connect(maintainer)
-                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
-
-                await token.connect(user1).approve(mainBridgeInstance.address, tokenAmount);
-
+            beforeEach(async () => {
+                await token.connect(chainportCongress).mint(user1.address, 10 * tokenAmount);
+                await token.connect(user1).approve(mainBridgeInstance.address, 100 *tokenAmount);
             });
 
-            it("Should deposit the token to specified bridge", async function () {
+            it("Should deposit the token to specified bridge", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
                 await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount - 1, 1))
                     .to.emit(mainBridgeInstance, 'TokensDeposited')
                     .withArgs(token.address, user1.address , tokenAmount - 1, 1);
             });
 
-            it("Should not deposit the token to specified bridge (network not active)", async function () {
+            it("Should not deposit the token to specified bridge (network not active)", async () => {
                 await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount - 1, 1))
                     .to.be.revertedWith("Error: Network with this id is not supported.");
             });
 
-            it("Should not deposit the token if the amount to freeze is more than the account balance", async function () {
+            it("Should not deposit the token if the amount to freeze is more than the account balance", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
-                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount + 1, 1))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, 10*tokenAmount + 1, 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
             });
 
-            it("Should not deposit if amount is below or equal to zero", async function () {
+            it("Should not deposit if amount is below or equal to zero", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
                 await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, 0, 1))
                     .to.be.revertedWith("Amount is not greater than zero.");
             });
 
-            it("Should not deposit the token if exceeds balance", async function () {
+            it("Should not deposit the token if exceeds balance", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
-                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount + 1, 1))
+                await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, 10*tokenAmount + 1, 1))
                     .to.be.revertedWith("ERC20: transfer amount exceeds balance");
             });
 
-            it("Should not deposit the token if exceeds allowance", async function () {
+            it("Should not deposit the token if exceeds allowance", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
                 await token.connect(user1).approve(mainBridgeInstance.address, 0);
 
@@ -216,7 +207,7 @@ describe("Main Bridge Test", function () {
                     .to.be.revertedWith("ERC20: transfer amount exceeds allowance");
             });
 
-            it("Should not deposit the token if bridge is frozen", async function () {
+            it("Should not deposit the token if bridge is frozen", async () => {
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
                 await mainBridgeInstance.connect(maintainer).freezeBridge();
                 expect(await mainBridgeInstance.isFrozen()).to.equal(true);
@@ -226,37 +217,24 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Token Releasing (Withdrawal)", function () {
+        describe("Token Releasing (Withdrawal)", () => {
 
-            let releaseAmount = 20;
-
-            beforeEach(async function () {
-                let sideBridgeInstance = await ethers.getContractFactory("ChainportSideBridge");
-                sideBridgeInstance = await sideBridgeInstance.deploy();
-
-                await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
-
-                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
-                await sideBridgeInstance.connect(maintainer)
-                    .mintTokens(token.address, user1.address, tokenAmount, lastNonce + nonceIncrease);
-
+            beforeEach(async () => {
+                await token.connect(chainportCongress).mint(user1.address, 10 * tokenAmount);
                 await token.connect(user1).approve(mainBridgeInstance.address, tokenAmount);
-
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
-
                 await expect(mainBridgeInstance.connect(user1).depositTokens(token.address, tokenAmount, 1))
                     .to.emit(mainBridgeInstance, 'TokensDeposited')
                     .withArgs(token.address, user1.address , tokenAmount, 1);
             });
 
-            describe("Release Tokens By Maintainer", function (){
+            describe("Release Tokens By Maintainer", () => {
 
                 beforeEach(async () => {
                     await mainBridgeInstance.connect(chainportCongress).setFundManager(fundManager);
                 });
 
-                it("Should not withdraw when amount is less or equal to zero (by maintainer)", async function () {
+                it("Should not withdraw when amount is less or equal to zero (by maintainer)", async () => {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
                         0,
@@ -264,7 +242,7 @@ describe("Main Bridge Test", function () {
                     )).to.be.revertedWith("Amount is not greater than zero.");
                 });
 
-                it("Should withdraw tokens (by maintainer)", async function () {
+                it("Should withdraw tokens (by maintainer)", async () => {
                     await mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
                         releaseAmount,
@@ -273,9 +251,9 @@ describe("Main Bridge Test", function () {
                 });
             });
 
-            describe("Release Tokens", function () {
+            describe("Release Tokens", () => {
 
-                it("Should release tokens", async function () {
+                it("Should release tokens", async () => {
                     await mainBridgeInstance.connect(user1).releaseTokens(
                         generateSignature(createHash(1, user1.address, releaseAmount, token.address)),
                         token.address,
@@ -284,7 +262,7 @@ describe("Main Bridge Test", function () {
                     );
                 });
 
-                it("Should not withdraw when singature length is not right", async function () {
+                it("Should not withdraw when singature length is not right", async () => {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokens(
                         "0x00",
                         token.address,
@@ -293,7 +271,7 @@ describe("Main Bridge Test", function () {
                     )).to.be.revertedWith("bad signature length");
                 });
 
-                it("Should not withdraw when bridge is frozen (by maintainer)", async function () {
+                it("Should not withdraw when bridge is frozen (by maintainer)", async () => {
                     await mainBridgeInstance.connect(maintainer).freezeBridge();
                     expect(await mainBridgeInstance.isFrozen()).to.equal(true);
 
@@ -305,7 +283,7 @@ describe("Main Bridge Test", function () {
                     )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
                 });
 
-                it("Should not withdraw when amount is less or equal to zero", async function () {
+                it("Should not withdraw when amount is less or equal to zero", async () => {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokens(
                         "0x00",
                         token.address,
@@ -316,14 +294,14 @@ describe("Main Bridge Test", function () {
             });
         });
 
-        describe("Path Pause Flow", function(){
+        describe("Path Pause Flow", () => {
 
-            it("Should pause path by maintainer", async function () {
+            it("Should pause path by maintainer", async () => {
                 await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
             });
 
-            it("Should not perform function when funnel is paused", async function () {
+            it("Should not perform function when funnel is paused", async () => {
 
                 await mainBridgeInstance.connect(maintainer).activateNetwork(1);
 
@@ -334,20 +312,20 @@ describe("Main Bridge Test", function () {
                     .to.be.revertedWith("Error: Path is paused.");
             });
 
-            it("Should not pause path by user", async function () {
+            it("Should not pause path by user", async () => {
                 await expect(mainBridgeInstance.connect(user1).setPathPauseState(token.address, "depositTokens", true))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.false;
             });
 
-            it("Should unpause funnel by maintainer", async function () {
+            it("Should unpause funnel by maintainer", async () => {
                 await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
                 await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", false);
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.false;
             });
 
-            it("Should not unpause path by user", async function () {
+            it("Should not unpause path by user", async () => {
                 await mainBridgeInstance.connect(maintainer).setPathPauseState(token.address, "depositTokens", true);
                 expect(await mainBridgeInstance.isPathPaused(token.address, "depositTokens")).to.be.true;
                 await expect(mainBridgeInstance.connect(user1).setPathPauseState(token.address, "depositTokens", false))
