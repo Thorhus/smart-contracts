@@ -253,6 +253,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
     }
 
+    // Function to freeze or unfreeze asset by congress
     function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
@@ -264,6 +265,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
+    // Function to freeze multiple assets by maintainer
     function freezeAssetsByMaintainer(
         address [] memory tokenAddresses
     )
@@ -276,6 +278,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         }
     }
 
+    // Function to pause specific path for token
     function setPathPauseState(
         address token,
         string memory functionName,
@@ -288,15 +291,18 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
+    // Function to set the ChainportExchange contract which will serve for token value conversions
     function setChainportExchange(address _chainportExchange) external onlyChainportCongress {
         require(_chainportExchange != address(0), "Error: Address is malformed.");
         chainportExchange = _chainportExchange;
     }
 
+    // Function to set universal threshold for tokens
     function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
         usdThreshold = _usdThreshold;
     }
 
+    // Function to set the signature validator contract
     function setSignatureValidator(address _signatureValidator) external onlyChainportCongress {
         signatureValidator = IValidator(_signatureValidator);
     }
