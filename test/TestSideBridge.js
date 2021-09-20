@@ -287,29 +287,29 @@ describe("Side Bridge Test", function () {
 
             it("Should not burn a token if amount exceeds allowance", async function () {
 
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
 
-                await expect(sideBridgeInstance.connect(maintainer).burnTokens(bepToken, 1))
+                await expect(sideBridgeInstance.connect(maintainer).burnTokens(bridgeTokenAddress, 1))
                     .to.be.revertedWith("ERC20: burn amount exceeds allowance");
             });
 
             it("Should not burn a token if amount is below or equal to zero", async function () {
 
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepToken = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
 
-                await expect(sideBridgeInstance.connect(maintainer).burnTokens(bepToken, 0))
+                await expect(sideBridgeInstance.connect(maintainer).burnTokens(bridgeTokenAddress, 0))
                     .to.be.revertedWith("Amount is not greater than zero.");
             });
 
@@ -369,23 +369,22 @@ describe("Side Bridge Test", function () {
         describe("Cross chain transfer", function () {
             it("Should perform cross chain transfer", async function () {
 
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
-
-                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
+
+                let bridgeToken = await ethers.getContractAt("BridgeMintableToken", bridgeTokenAddress);
+                await bridgeToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
 
                 await sideBridgeInstance.connect(maintainer).activateNetwork(1);
 
-                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount-1, 1))
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bridgeTokenAddress, tokenAmount-1, 1))
                     .to.emit(sideBridgeInstance, 'TokensTransferred')
-                    .withArgs(bepToken.address, maintainer.address, tokenAmount-1, 1);
+                    .withArgs(bridgeTokenAddress, maintainer.address, tokenAmount-1, 1);
             });
 
             it("Should not perform cross chain transfer (network not activated)", async function () {
@@ -407,20 +406,18 @@ describe("Side Bridge Test", function () {
             });
 
             it("Should not perform cross chain transfer (Token amount exceeds allowance)", async function () {
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
-
-                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
+
+                let bridgeToken = await ethers.getContractAt("BridgeMintableToken", bridgeTokenAddress);
 
                 await sideBridgeInstance.connect(maintainer).activateNetwork(1);
-                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount+1, 1))
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bridgeTokenAddress, tokenAmount+1, 1))
                     .to.be.revertedWith('ERC20: burn amount exceeds allowance');
             });
         });
@@ -433,26 +430,21 @@ describe("Side Bridge Test", function () {
 
             it("Should not perform function when funnel is paused", async function () {
 
-                // crossChainTransfer function setup preparation
-                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "", "", decimals);
-
-                let bepTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
-
-                let bepToken = await ethers.getContractAt("BridgeMintableToken", bepTokenAddress);
-
-                await bepToken.connect(maintainer).approve(sideBridgeInstance.address, tokenAmount);
-
-                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens");
+                await sideBridgeInstance.connect(maintainer).mintNewToken(token.address, "TestToken", "TT", 18);
+                let bridgeTokenAddress = await sideBridgeInstance.originalAssetToBridgeToken(token.address);
+                let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
+                await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
-                    bepToken.address, maintainer.address, tokenAmount, lastNonce + nonceIncrease);
+                    bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
+                    generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
 
                 await sideBridgeInstance.connect(maintainer).activateNetwork(1);
 
                 // The test
-                await sideBridgeInstance.connect(maintainer).setPathPauseState(bepToken.address, "crossChainTransfer", true);
-                expect(await sideBridgeInstance.isPathPaused(bepToken.address, "crossChainTransfer")).to.be.true;
+                await sideBridgeInstance.connect(maintainer).setPathPauseState(bridgeTokenAddress, "crossChainTransfer", true);
+                expect(await sideBridgeInstance.isPathPaused(bridgeTokenAddress, "crossChainTransfer")).to.be.true;
 
-                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bepToken.address, tokenAmount-1, 1))
+                await expect(sideBridgeInstance.connect(maintainer).crossChainTransfer(bridgeTokenAddress, tokenAmount-1, 1))
                     .to.be.revertedWith("Error: Path is paused.");
             });
 
