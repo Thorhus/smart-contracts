@@ -20,17 +20,17 @@ function generateSignature(digest) {
     const signature = Buffer.concat([r, s, vb]);
 
     const sigString = signature.toString('hex');
-    console.log(sigString);
+    //console.log(sigString);
 
     const last2 = sigString.slice(-2);
-    console.log(last2);
+    //console.log(last2);
 
     let last2Modifier = parseInt(last2,16) + 32;
-    console.log(last2Modifier);
-    console.log(last2Modifier.toString(16));
+    //console.log(last2Modifier);
+    //console.log(last2Modifier.toString(16));
 
     const finalSig = sigString.slice(0, sigString.length-2) + last2Modifier.toString(16);
-    console.log(finalSig);
+    //console.log(finalSig);
 
     // hex(int(signature[n - 2:], 16) + 32)
     //console.log(signature.toString('hex'));
