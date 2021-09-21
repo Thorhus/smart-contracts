@@ -52,13 +52,14 @@ contract Validator is Initializable, ChainportMiddleware {
         uint256 nonce,
         address beneficiary,
         uint256 amount,
-        address token
-)
+        address token,
+        uint256 networkId
+    )
     external
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token);
+        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token, networkId);
         return messageSigner == signatoryAddress;
     }
 
@@ -74,7 +75,8 @@ contract Validator is Initializable, ChainportMiddleware {
         uint256 nonce,
         address beneficiary,
         uint256 amount,
-        address token
+        address token,
+        uint256 networkId
     )
     public
     pure
@@ -84,7 +86,7 @@ contract Validator is Initializable, ChainportMiddleware {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 recoverSignatureHash,
-                keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
+                keccak256(abi.encodePacked(nonce, beneficiary, amount, token, networkId))
             )
         );
 
