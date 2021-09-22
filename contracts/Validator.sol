@@ -40,6 +40,8 @@ contract Validator is Initializable, ChainportMiddleware {
         signatoryAddress = _signatoryAddress;
     }
 
+    //TODO: add function VerifyMint with the networkId and use it for the mint (make sure only callable by the side bridge)
+
     /**
      * @notice          Function to verify withdraw parameters and if signatory signed message
      * @param           signedMessage is the message to verify
@@ -47,6 +49,8 @@ contract Validator is Initializable, ChainportMiddleware {
      * @param           token is the address of the token being withdrawn
      * @param           amount is the amount of tokens user is attempting to withdraw
      */
+    //TODO: consider making this callable only by the main bridge
+    //TODO: keep the verifyWithdraw as was (without networkId)
     function verifyWithdraw(
         bytes calldata signedMessage,
         uint256 nonce,
@@ -78,7 +82,7 @@ contract Validator is Initializable, ChainportMiddleware {
         address token,
         uint256 networkId
     )
-    public
+    public //TODO: if only called internally move to internal/private
     pure
     returns (address)
     {

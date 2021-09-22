@@ -43,9 +43,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Official id of the deployment network
     uint256 officialNetworkId;
 
-    //TODO: when there is a mint request for a specific token, have a mapping token-->startSampleAt, if more than SAMPLE_SAFEGUARD_TIME_MIN (configurable by congress, default to 3), override value, set mint value in usd to mapping token-->totalMintedLastSafeGuardTimeFrame
-    //TODO: else, when getting the mint amount usd value, add to token-->totalMintedLastSafeGuardTimeFrame
-    //TODO:      if totalMintedLastSafeGuardTimeFrame > mintUSDValueThresholdPerSafeGuardTimeframePerToken, move that mint for congress approval
+        //TODO: when there is a mint request for a specific token, have a mapping token-->startSampleAt, if more than SAMPLE_SAFEGUARD_TIME_MIN (configurable by congress, default to 3), override value, set mint value in usd to mapping token-->totalMintedLastSafeGuardTimeFrame
+        //TODO: else, when getting the mint amount usd value, add to token-->totalMintedLastSafeGuardTimeFrame
+        //TODO:      if totalMintedLastSafeGuardTimeFrame > mintUSDValueThresholdPerSafeGuardTimeframePerToken, pause the mint path for that token
 
 
     // Events
@@ -167,6 +167,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
+    //TODO: add check for isTokenNotFrozenPerNetwork
     {
         // Require that token was created by the bridge
         require(isCreatedByTheBridge[token], "Error: Token was not created by the bridge.");
@@ -329,6 +330,9 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         signatureValidator = IValidator(_signatureValidator);
     }
 
+    //TODO: enable emergencyFreeze in the token contract itself, callable only by chainport side bridge
+    //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contrat itself
+    //TODO: the token contract should also have an unfreezeToken callable only by chainport congress
     // Function to freeze token per network by maintainer
     function freezeTokenForNetwork(uint256 networkId, address token) external onlyMaintainer {
         require(token != address(0), "Error: Token address malformed.");
