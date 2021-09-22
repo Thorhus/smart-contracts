@@ -177,8 +177,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isAssetNotFrozen(token)
     isPathNotPaused(token, "releaseTokens")
     {
-        require(isTokenHavingPendingWithdrawal[token] == false, "Error: Token is currently having pending withdrawal.");
-
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
