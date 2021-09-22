@@ -12,6 +12,17 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 contract BridgeMintableToken is ERC20Burnable {
 
     address public sideBridgeContract;
+    bool public isMintingFrozen;
+
+    event Mint(address indexed to, uint256 amount);
+
+    modifier onlySideBridgeContract {
+        require(
+            msg.sender == sideBridgeContract,
+            "Error: Only Bridge contract can mint new tokens."
+        );
+        _;
+    }
 
     constructor(
         string memory tokenName_,
@@ -25,15 +36,18 @@ contract BridgeMintableToken is ERC20Burnable {
         sideBridgeContract = msg.sender;
     }
 
-    event Mint(address indexed to, uint256 amount);
-
     function mint(
         address _to,
         uint256 _amount
     )
-    public
+    external
+    onlySideBridgeContract
     {
-        require(msg.sender == sideBridgeContract, "Only Bridge contract can mint new tokens.");
+        require(
+            !isMintingFrozen,
+            "Error: Minting is frozen for selected token."
+        );
+
         _mint(_to, _amount);
         emit Mint(_to, _amount);
     }
@@ -42,10 +56,21 @@ contract BridgeMintableToken is ERC20Burnable {
     function setSideBridgeContract(
         address _sideBridgeContract
     )
-    public
+    external
+    onlySideBridgeContract
     {
         require(msg.sender == sideBridgeContract);
         require(_sideBridgeContract != address(0));
         sideBridgeContract = _sideBridgeContract;
+    }
+
+    // Function to freeze minting for token
+    function setMintingFreezeState(
+        bool _isMintingFrozen
+    )
+    external
+    onlySideBridgeContract
+    {
+        isMintingFrozen = _isMintingFrozen;
     }
 }
