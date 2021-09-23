@@ -1,12 +1,12 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { signatoryAddress, generateSignature, createHash } = require("./testHelpers");
+const { signatoryAddress, generateSignature, createHashMint } = require("./testHelpers");
 
 describe("Side Bridge Test", () => {
 
     let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance, validator, validatorInstance,
         chainportCongress, maintainer, maintainers, user1, user2, token, contract,
-        tokenAmount = 50, nonceIncrease = 1, decimals = 18, tokenAddresses = [];
+        tokenAmount = 50, nonceIncrease = 1, decimals = 18, tokenAddresses = [], networkId = 2;
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     const mintTokens = async () => {
@@ -16,7 +16,7 @@ describe("Side Bridge Test", () => {
         await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
         await sideBridgeInstance.connect(maintainer).mintTokens(
             bridgeTokenAddress, maintainer.address, tokenAmount, lastNonce,
-            generateSignature(createHash(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress)));
+            generateSignature(createHashMint(lastNonce, maintainer.address, tokenAmount, bridgeTokenAddress, networkId)));
         return bridgeTokenAddress;
     }
 
@@ -53,9 +53,10 @@ describe("Side Bridge Test", () => {
 
         beforeEach(async () => {
             await sideBridgeInstance.initialize(chainportCongress.address, maintainersRegistryInstance.address);
-            await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address);
+            await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address, sideBridgeInstance.address);
             await sideBridgeInstance.connect(chainportCongress).setSignatureValidator(validatorInstance.address);
-            await sideBridgeInstance.connect(chainportCongress).setChainportExchange(token.address);
+            await sideBridgeInstance.setOfficialNetworkId(2);
+            //await sideBridgeInstance.connect(chainportCongress).setChainportExchange(token.address);
         });
 
         describe("Setting maintainers registry", () => {
@@ -160,7 +161,6 @@ describe("Side Bridge Test", () => {
                 await expect(sideBridgeInstance.connect(user1).activateNetwork(1))
                     .to.be.revertedWith('ChainportUpgradables: Restricted only to Maintainer');
             });
-
             it("Should deactivate network (as congress)", async () => {
                 await expect(sideBridgeInstance.connect(maintainer).activateNetwork(1))
                     .to.emit(sideBridgeInstance, 'NetworkActivated')
@@ -222,7 +222,7 @@ describe("Side Bridge Test", () => {
                 await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await sideBridgeInstance.connect(maintainer).mintTokens(
                     bridgeToken, user1.address, tokenAmount, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken)));
+                    generateSignature(createHashMint(lastNonce, user1.address, tokenAmount, bridgeToken, networkId)));
             });
 
             it("Should not mint tokens (by user)", async () => {
@@ -232,7 +232,7 @@ describe("Side Bridge Test", () => {
                 await token.connect(chainportCongress).setSideBridgeContract(sideBridgeInstance.address);
                 await expect(sideBridgeInstance.connect(user1).mintTokens(
                     bridgeToken, user1.address, tokenAmount, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                    generateSignature(createHashMint(lastNonce, user1.address, tokenAmount, bridgeToken, networkId))
                 )).to.be.revertedWith("ChainportUpgradables: Restricted only to Maintainer");
             });
 
@@ -242,11 +242,11 @@ describe("Side Bridge Test", () => {
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
                 sideBridgeInstance.connect(maintainer).mintTokens(
                     bridgeToken, user1.address, tokenAmount, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                    generateSignature(createHashMint(lastNonce, user1.address, tokenAmount, bridgeToken, networkId))
                 )
                 await expect(sideBridgeInstance.connect(maintainer).mintTokens(
                     bridgeToken, user1.address, tokenAmount, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                    generateSignature(createHashMint(lastNonce, user1.address, tokenAmount, bridgeToken, networkId))
                 )).to.be.revertedWith('Error: Nonce already used.');
             });
 
@@ -256,7 +256,7 @@ describe("Side Bridge Test", () => {
                 let lastNonce = await sideBridgeInstance.functionNameToNonce("mintTokens") + nonceIncrease;
                 await expect(sideBridgeInstance.connect(maintainer).mintTokens(
                     bridgeToken, user1.address, 0, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, 0, bridgeToken))
+                    generateSignature(createHashMint(lastNonce, user1.address, 0, bridgeToken, networkId))
                 )).to.be.revertedWith("Amount is not greater than zero.");
             });
 
@@ -270,7 +270,7 @@ describe("Side Bridge Test", () => {
 
                 await expect(sideBridgeInstance.connect(maintainer).mintTokens(
                     bridgeToken, user1.address, tokenAmount, lastNonce,
-                    generateSignature(createHash(lastNonce, user1.address, tokenAmount, bridgeToken))
+                    generateSignature(createHashMint(lastNonce, user1.address, tokenAmount, bridgeToken, networkId))
                 )).to.be.revertedWith("Error: All Bridge actions are currently frozen.");
             });
         });

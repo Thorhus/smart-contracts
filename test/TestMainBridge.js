@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { signatoryAddress, createHash, generateSignature } = require('./testHelpers')
+const { signatoryAddress, createHashWithdraw, generateSignature } = require('./testHelpers')
 
 describe("Main Bridge Test", () => {
 
@@ -29,12 +29,12 @@ describe("Main Bridge Test", () => {
         token = await ethers.getContractFactory("BridgeMintableToken");
         token = await token.connect(chainportCongress).deploy("TestToken", "TT", decimals);
 
-        validator = await ethers.getContractFactory("Validator");
-        validatorInstance = await validator.deploy();
-        await validatorInstance.initialize(signatoryAddress, user1.address, user2.address)
-
         mainBridge = await ethers.getContractFactory("ChainportMainBridge");
         mainBridgeInstance = await mainBridge.deploy();
+
+        validator = await ethers.getContractFactory("Validator");
+        validatorInstance = await validator.deploy();
+        await validatorInstance.initialize(signatoryAddress, user1.address, user2.address, mainBridgeInstance.address);
     });
 
     it("Should initialize", async () => {
@@ -255,7 +255,7 @@ describe("Main Bridge Test", () => {
 
                 it("Should release tokens", async () => {
                     await mainBridgeInstance.connect(user1).releaseTokens(
-                        generateSignature(createHash(1, user1.address, releaseAmount, token.address)),
+                        generateSignature(createHashWithdraw(1, user1.address, releaseAmount, token.address)),
                         token.address,
                         releaseAmount,
                         1

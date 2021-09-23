@@ -20,24 +20,24 @@ function generateSignature(digest) {
     const signature = Buffer.concat([r, s, vb]);
 
     const sigString = signature.toString('hex');
-    console.log(sigString);
+    //console.log(sigString);
 
     const last2 = sigString.slice(-2);
-    console.log(last2);
+    //console.log(last2);
 
     let last2Modifier = parseInt(last2,16) + 32;
-    console.log(last2Modifier);
-    console.log(last2Modifier.toString(16));
+    //console.log(last2Modifier);
+    //console.log(last2Modifier.toString(16));
 
     const finalSig = sigString.slice(0, sigString.length-2) + last2Modifier.toString(16);
-    console.log(finalSig);
+    //console.log(finalSig);
 
     // hex(int(signature[n - 2:], 16) + 32)
     //console.log(signature.toString('hex'));
     return('0x' + finalSig);
 }
 
-function createHash(nonce, beneficiary, amount, token) {
+function createHashWithdraw(nonce, beneficiary, amount, token) {
     // compute keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
     const digestHash = ethers.utils.keccak256(
         ethers.utils.solidityPack(
@@ -66,8 +66,38 @@ function createHash(nonce, beneficiary, amount, token) {
     return digestFinal;
 }
 
+function createHashMint(nonce, beneficiary, amount, token, networkId) {
+    // compute keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
+    const digestHash = ethers.utils.keccak256(
+        ethers.utils.solidityPack(
+            ['uint256', 'address', 'uint256', 'address', 'uint256'],
+            [nonce, beneficiary, amount, token, networkId]
+        )
+    );
+    const digestMsg = ethers.utils.keccak256(
+        ethers.utils.solidityPack(
+            ['string'],
+            ['bytes binding user withdrawal']
+        )
+    );
+    const digestFinal = ethers.utils.keccak256(
+        ethers.utils.solidityPack(
+            ['bytes32', 'bytes32'],
+            [digestMsg, digestHash]
+        )
+    );
+    console.log("Main hash", digestFinal);
+
+    // const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+    // let result = web3.eth.accounts.sign(digestFinal, privateKey);
+    // console.log("result", result)
+    // return result.signature;
+    return digestFinal;
+}
+
 module.exports = {
     signatoryAddress,
-    createHash,
+    createHashWithdraw,
+    createHashMint,
     generateSignature
 }

@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { signatoryAddress, createHash, generateSignature } = require('./testHelpers')
+const { signatoryAddress, createHashWithdraw, generateSignature } = require('./testHelpers')
 
 describe("Validator", function () {
 
@@ -11,7 +11,7 @@ describe("Validator", function () {
 
     beforeEach(async function() {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
-        [chainportCongress, user1, user2, maintainer, ...maintainers] = await ethers.getSigners();
+        [chainportCongress, user1, user2, bridgeContract, maintainer, ...maintainers] = await ethers.getSigners();
 
         token = await ethers.getContractFactory("BridgeMintableToken");
         token = await token.deploy("", "", decimals);
@@ -27,7 +27,7 @@ describe("Validator", function () {
 
         validator = await ethers.getContractFactory("Validator");
         validatorInstance = await validator.deploy();
-        await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address);
+        await validatorInstance.initialize(signatoryAddress, chainportCongress.address, maintainersRegistryInstance.address, bridgeContract.address);
 
         sideBridge = await ethers.getContractFactory("ChainportSideBridge");
         sideBridgeInstance = await sideBridge.deploy();
@@ -70,14 +70,14 @@ describe("Validator", function () {
 
             it("Should verify signature with recoverSigFromHash function", async () => {
                 expect(await validatorInstance.recoverSigFromHash(
-                        createHash(1, maintainer.address, releaseAmount, token.address),
-                        generateSignature(createHash(1, maintainer.address, releaseAmount, token.address))
+                        createHashWithdraw(1, maintainer.address, releaseAmount, token.address),
+                        generateSignature(createHashWithdraw(1, maintainer.address, releaseAmount, token.address))
                     )).to.be.true;
             });
 
             it("Should verify signature", async () => {
-                expect(await validatorInstance.verifyWithdraw(
-                    generateSignature(createHash(1, maintainer.address, releaseAmount, token.address)),
+                expect(await validatorInstance.connect(bridgeContract).verifyWithdraw(
+                    generateSignature(createHashWithdraw(1, maintainer.address, releaseAmount, token.address)),
                     1,
                     maintainer.address,
                     releaseAmount,
@@ -93,10 +93,10 @@ describe("Validator", function () {
             })
         });
 
-        describe("Recover signature", async function () {
+        xdescribe("Recover signature", async function () {
             it("Should return recovered signature", async () => {
                 await validatorInstance.recoverSignature(
-                    generateSignature(createHash(1, maintainer.address, releaseAmount, token.address)),
+                    generateSignature(createHashWithdraw(1, maintainer.address, releaseAmount, token.address)),
                     1,
                     maintainer.address,
                     releaseAmount,
