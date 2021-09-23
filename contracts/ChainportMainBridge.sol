@@ -53,8 +53,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     address public fundManager;
     // Mapping for getting maximal nonce per function
     mapping(string => uint256) public functionNameToMaxNonce;
-    // Official id of the deployment network
-    uint256 officialNetworkId;
 
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
@@ -194,7 +192,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // msg.sender is beneficiary address
         address beneficiary = msg.sender;
         // Verify the signature user is submitting
-        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token, officialNetworkId);
+        bool isMessageValid = signatureValidator.verifyWithdraw(signature, nonce, beneficiary, amount, token);
         // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
@@ -294,10 +292,5 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
         // Emit the event
         emit FundManagerChanged(fundManager);
-    }
-
-    // Function to set official network id
-    function setOfficialNetworkId(uint256 networkId) external onlyChainportCongress {
-        officialNetworkId = networkId;
     }
 }
