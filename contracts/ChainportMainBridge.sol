@@ -46,7 +46,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     mapping(address => mapping(string => bool)) public isPathPaused;
     // Address of the FundManager contract
     address public fundManager;
-
+    // Mapping for getting maximal nonce per function
     mapping(string => uint256) public functionNameToMaxNonce;
 
     // Events
@@ -196,11 +196,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit TokensClaimed(token, beneficiary, amount);
     }
 
-    // Get contract balance of specific token
-    function getTokenBalance(address token) internal view returns (uint256) {
-        return IERC20(token).balanceOf(address(this));
-    }
-
     // Function to deposit tokens to bridge on specified network
     function depositTokens(
         address token,
@@ -272,18 +267,18 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     // Function to change fundManager contract address
     function setFundManager(
-        address newFundManager
+        address _fundManager
     )
     public
     onlyChainportCongress
     {
         // Require that address is not malformed
         require(
-            newFundManager != address(0),
+            _fundManager != address(0),
             "Error: Cannot set zero address as fundManager address."
         );
         // Set fundManager new address
-        fundManager = newFundManager;
+        fundManager = _fundManager;
 
         // Emit the event
         emit FundManagerChanged(fundManager);
