@@ -38,8 +38,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     uint256 public mintingThresholdUsd;
     // Signature usage mapping
     mapping(bytes => bool) isSignatureUsed;
-    // Mapping for assets being frozen on single chain
-    mapping(uint256 => mapping(address => bool)) tokenFreezeStatePerNetwork;
     // Official id of the deployment network
     uint256 officialNetworkId;
 
@@ -89,18 +87,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     )
     {
         require(!isPathPaused[token][functionName], "Error: Path is paused.");
-        _;
-    }
-
-    modifier isTokenNotFrozenPerNetwork(
-        uint256 networkId,
-        address token
-    )
-    {
-        require(
-            !tokenFreezeStatePerNetwork[networkId][token],
-            "Error: Token actions are frozen on selected network."
-        );
         _;
     }
 
@@ -167,7 +153,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAmountGreaterThanZero(amount)
     maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
-    //TODO: add check for isTokenNotFrozenPerNetwork
     {
         // Require that token was created by the bridge
         require(isCreatedByTheBridge[token], "Error: Token was not created by the bridge.");
@@ -180,7 +165,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         isSignatureUsed[signature] = true;
         // Require that the signature is valid
         require(
-            signatureValidator.verifyWithdraw(signature, nonce, receiver, amount, token, officialNetworkId),
+            signatureValidator.verifyMint(signature, nonce, receiver, amount, token, officialNetworkId),
             "Error: Invalid signature."
         );
         // Try to gather token usd value
@@ -231,7 +216,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isAssetNotFrozen(bridgeToken)
     isAmountGreaterThanZero(amount)
     isPathNotPaused(bridgeToken, "crossChainTransfer")
-    isTokenNotFrozenPerNetwork(networkId, bridgeToken)
     {
         // Check if network is supported && token was minted by the bridge
         require(isNetworkActive[networkId], "Error: Network with this id is not supported.");
@@ -333,20 +317,18 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     //TODO: enable emergencyFreeze in the token contract itself, callable only by chainport side bridge
     //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contract itself
     //TODO: the token contract should also have an unfreezeToken callable only by chainport congress
-    // Function to freeze token per network by maintainer
-    function freezeTokenForNetwork(uint256 networkId, address token) external onlyMaintainer {
-        require(token != address(0), "Error: Token address malformed.");
-        tokenFreezeStatePerNetwork[networkId][token] = true;
-    }
 
     // Function to change token freeze state per network by congress
-    function setTokenFreezeStatePerNetwork(uint256 networkId, address token, bool state) external onlyChainportCongress {
+    function setTokenFreezeState(address token, bool state) external onlyChainportCongress {
         require(token != address(0), "Error: Token address malformed.");
-        tokenFreezeStatePerNetwork[networkId][token] = state;
+        require(isCreatedByTheBridge[token], "Error: Bad token.");
+
+        BridgeMintableToken(token).setMintingFreezeState(state);
     }
 
     // Function to set official network id
     function setOfficialNetworkId(uint256 networkId) external onlyChainportCongress {
+        require(networkId != 0, "Error: Bad network id.");
         officialNetworkId = networkId;
     }
 }
