@@ -104,7 +104,7 @@ contract Validator is Initializable, ChainportMiddleware {
     {
         bytes32 hash;
         // Generate hash
-        if (networkId != 0) {
+        if (networkId == 0) {
             hash = keccak256(
                 abi.encodePacked(
                     recoverSignatureHash,
