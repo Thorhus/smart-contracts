@@ -13,19 +13,29 @@ import "./ChainportMiddleware.sol";
 contract Validator is Initializable, ChainportMiddleware {
 
     address public signatoryAddress;
-
     bytes32 constant private recoverSignatureHash = keccak256(abi.encodePacked('bytes binding user withdrawal'));
+    address private chainportBridgeContract;
+
+    modifier onlyChainportBridge {
+        require(
+            msg.sender == chainportBridgeContract,
+            "Error: Action restricted only to Chainport Bridge."
+        );
+        _;
+    }
 
     // Set initial signatory address and Chainport congress
     function initialize(
         address _signatoryAddress,
         address _chainportCongress,
-        address _maintainersRegistry
+        address _maintainersRegistry,
+        address _chainportBridgeContract
     )
     public
     initializer
     {
         signatoryAddress = _signatoryAddress;
+        chainportBridgeContract = _chainportBridgeContract;
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
@@ -33,11 +43,21 @@ contract Validator is Initializable, ChainportMiddleware {
     function setSignatoryAddress(
         address _signatoryAddress
     )
-    public
+    external
     onlyChainportCongress
     {
         require(_signatoryAddress != address(0));
         signatoryAddress = _signatoryAddress;
+    }
+
+    function setChainportBridgeContract(
+        address _chainportBridgeContract
+    )
+    external
+    onlyChainportCongress
+    {
+        require(_chainportBridgeContract != address(0));
+        chainportBridgeContract = _chainportBridgeContract;
     }
 
     //TODO: add function VerifyMint with the networkId and use it for the mint (make sure only callable by the side bridge)
@@ -56,14 +76,14 @@ contract Validator is Initializable, ChainportMiddleware {
         uint256 nonce,
         address beneficiary,
         uint256 amount,
-        address token,
-        uint256 networkId
+        address token
     )
     external
+    onlyChainportBridge
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token, networkId);
+        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token, 0);
         return messageSigner == signatoryAddress;
     }
 
@@ -71,8 +91,8 @@ contract Validator is Initializable, ChainportMiddleware {
      * @notice          Function to can check who signed the message
      * @param           signedMessage is the message to verify
      * @param           beneficiary is the address of user for who we signed message
-     * @param           token is the address of the token being withdrawn
-     * @param           amount is the amount of tokens user is attempting to withdraw
+     * @param           token is the address of the token being withdrawn/minted
+     * @param           amount is the amount of tokens user is attempting to withdraw/mint
      */
     function recoverSignature(
         bytes memory signedMessage,
@@ -82,17 +102,27 @@ contract Validator is Initializable, ChainportMiddleware {
         address token,
         uint256 networkId
     )
-    public //TODO: if only called internally move to internal/private
+    internal
     pure
     returns (address)
     {
+        bytes32 hash;
         // Generate hash
-        bytes32 hash = keccak256(
-            abi.encodePacked(
-                recoverSignatureHash,
-                keccak256(abi.encodePacked(nonce, beneficiary, amount, token, networkId))
-            )
-        );
+        if (networkId != 0) {
+            hash = keccak256(
+                abi.encodePacked(
+                    recoverSignatureHash,
+                    keccak256(abi.encodePacked(nonce, beneficiary, amount, token))
+                )
+            );
+        } else {
+            hash = keccak256(
+                abi.encodePacked(
+                    recoverSignatureHash,
+                    keccak256(abi.encodePacked(nonce, beneficiary, amount, token, networkId))
+                )
+            );
+        }
 
         // Recover signer message from signature
         return recoverHash(hash,signedMessage,0);
@@ -166,4 +196,27 @@ contract Validator is Initializable, ChainportMiddleware {
 
     }
 
+    /**
+     * @notice          Function to verify minting parameters if signatory signed message
+     * @param           signedMessage is the message to verify
+     * @param           beneficiary is the address of user for who we signed message
+     * @param           token is the address of the token being minted
+     * @param           amount is the amount of tokens user is attempting to mint
+     */
+    function verifyMint(
+        bytes calldata signedMessage,
+        uint256 nonce,
+        address beneficiary,
+        uint256 amount,
+        address token,
+        uint256 networkId
+    )
+    external
+    onlyChainportBridge
+    view
+    returns (bool)
+    {
+        address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token, networkId);
+        return messageSigner == signatoryAddress;
+    }
 }
