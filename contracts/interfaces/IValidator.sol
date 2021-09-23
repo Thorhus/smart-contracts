@@ -9,6 +9,6 @@ pragma solidity ^0.6.12;
  */
 interface IValidator {
     //nonce, beneficiary, amount, token
-    function verifyWithdraw(bytes calldata signedMessage, uint256 nonce, address beneficiary, uint256 amount, address token, uint256 networkId) external view returns (bool);
-    function recoverSignature(bytes calldata signedMessage, uint256 nonce, address beneficiary, uint256 amount, address token, uint256 networkId) external view returns (address);
+    function verifyWithdraw(bytes calldata signedMessage, uint256 nonce, address beneficiary, uint256 amount, address token) external view returns (bool);
+    function verifyMint(bytes calldata signedMessage, uint256 nonce, address beneficiary, uint256 amount, address token, uint256 networkId) external view returns (bool);
 }
