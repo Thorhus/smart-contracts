@@ -59,7 +59,6 @@ contract BridgeMintableToken is ERC20Burnable {
     external
     onlySideBridgeContract
     {
-        require(msg.sender == sideBridgeContract);
         require(_sideBridgeContract != address(0));
         sideBridgeContract = _sideBridgeContract;
     }

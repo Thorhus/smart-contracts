@@ -35,7 +35,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     // Address of the chainport exchange
     address public chainportExchange;
     // Minting usd value threshold
-    uint256 public usdThreshold;  //TODO: rename mintUSDValueThresholdPerSafeGuardTimeframePerToken, settable by congress
+    uint256 public mintingThresholdUsd;
     // Signature usage mapping
     mapping(bytes => bool) isSignatureUsed;
     // Mapping for assets being frozen on single chain
@@ -187,7 +187,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         try IChainportExchange(chainportExchange).getTokenValueInUsd(amount, token) returns (uint[] memory amounts) {
             uint256 amountInUsd = amounts[1];
             require(
-                amountInUsd < usdThreshold,
+                amountInUsd < mintingThresholdUsd,
                 "Error: Token amount is too big."
             );
         } catch Error(string memory _err) { emit Log(_err); }
@@ -321,8 +321,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to set universal threshold for tokens
-    function setUsdThreshold(uint256 _usdThreshold) external onlyChainportCongress {
-        usdThreshold = _usdThreshold;
+    function setMintingThresholdUsd(uint256 _mintingThresholdUsd) external onlyChainportCongress {
+        mintingThresholdUsd = _mintingThresholdUsd;
     }
 
     // Function to set the signature validator contract
@@ -331,7 +331,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     //TODO: enable emergencyFreeze in the token contract itself, callable only by chainport side bridge
-    //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contrat itself
+    //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contract itself
     //TODO: the token contract should also have an unfreezeToken callable only by chainport congress
     // Function to freeze token per network by maintainer
     function freezeTokenForNetwork(uint256 networkId, address token) external onlyMaintainer {
