@@ -318,6 +318,14 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contract itself
     //TODO: the token contract should also have an unfreezeToken callable only by chainport congress
 
+    // Function to perform emergency token freeze
+    function emergencyTokenFreeze(address token) external onlyMaintainer {
+        require(token != address(0), "Error: Token address malformed.");
+        require(isCreatedByTheBridge[token], "Error: Bad token.");
+
+        BridgeMintableToken(token).setMintingFreezeState(true);
+    }
+
     // Function to change token freeze state per network by congress
     function setTokenFreezeState(address token, bool state) external onlyChainportCongress {
         require(token != address(0), "Error: Token address malformed.");
