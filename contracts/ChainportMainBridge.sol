@@ -56,7 +56,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event NetworkDeactivated(uint256 networkId);
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-    event BridgeFreezed(bool isFrozen);
+    event BridgeFrozen(bool isFrozen);
     event FundManagerChanged(address newFundManager);
     event FundsRebalancedFromHotBridge(address target, address token, uint256 amount);
 
@@ -103,7 +103,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isFrozen = true;
-        emit BridgeFreezed(true);
+        emit BridgeFrozen(true);
     }
 
     function unfreezeBridge()
@@ -111,7 +111,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         isFrozen = false;
-        emit BridgeFreezed(false);
+        emit BridgeFrozen(false);
     }
 
     function setAssetFreezeState(
