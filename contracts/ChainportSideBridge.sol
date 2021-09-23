@@ -40,10 +40,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(bytes => bool) isSignatureUsed;
     // Official id of the deployment network
     uint256 officialNetworkId;
+    // Mapping for latest token usd price
+    mapping(address => uint256) tokenToLatestUsdPrice;
 
         //TODO: when there is a mint request for a specific token, have a mapping token-->startSampleAt, if more than SAMPLE_SAFEGUARD_TIME_MIN (configurable by congress, default to 3), override value, set mint value in usd to mapping token-->totalMintedLastSafeGuardTimeFrame
         //TODO: else, when getting the mint amount usd value, add to token-->totalMintedLastSafeGuardTimeFrame
-        //TODO:      if totalMintedLastSafeGuardTimeFrame > mintUSDValueThresholdPerSafeGuardTimeframePerToken, pause the mint path for that token
+        //TODO:      if totalMintedLastSafeGuardTimeFrame > mintingThresholdUsd, pause the mint path for that token
 
 
     // Events
@@ -59,6 +61,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event BridgeFreezed(bool isFrozen);
     event Log(string _err);
     event LogBytes(bytes _err);
+    event MintingInterrupted(address tokenAddress, uint256 timestamp);
 
     // Modifiers
     modifier isBridgeNotFrozen {
@@ -154,6 +157,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress // TODO: Check for removal
     isPathNotPaused(token, "mintTokens")
     {
+        bool errorFlag;
         // Require that token was created by the bridge
         require(isCreatedByTheBridge[token], "Error: Token was not created by the bridge.");
         // Check the nonce
@@ -171,18 +175,25 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         // Try to gather token usd value
         try IChainportExchange(chainportExchange).getTokenValueInUsd(amount, token) returns (uint[] memory amounts) {
             uint256 amountInUsd = amounts[1];
-            require(
-                amountInUsd < mintingThresholdUsd,
-                "Error: Token amount is too big."
-            );
-        } catch Error(string memory _err) { emit Log(_err); }
-        catch (bytes memory _err) { emit LogBytes(_err); }
+            if (amountInUsd > mintingThresholdUsd) {
+                isPathPaused[token]["mintTokens"] = true;
+            }
+        } catch Error(string memory _err) { emit Log(_err); errorFlag = true;}
+        catch (bytes memory _err) { emit LogBytes(_err); errorFlag = true;}
 
-        // Mint tokens to user
-        BridgeMintableToken ercToken = BridgeMintableToken(token);
-        ercToken.mint(receiver, amount);
+        if (errorFlag) {
+            /// Add another check here
+        }
 
-        emit TokensMinted(token, msg.sender, amount);
+        if (!isPathPaused[token]["mintTokens"]) {
+            // Mint tokens to user
+            BridgeMintableToken ercToken = BridgeMintableToken(token);
+            ercToken.mint(receiver, amount);
+
+            emit TokensMinted(token, msg.sender, amount);
+        } else {
+            emit MintingInterrupted(token, block.timestamp);
+        }
     }
 
     // Old function for token burning
@@ -313,10 +324,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function setSignatureValidator(address _signatureValidator) external onlyChainportCongress {
         signatureValidator = IValidator(_signatureValidator);
     }
-
-    //TODO: enable emergencyFreeze in the token contract itself, callable only by chainport side bridge
-    //TODO: when maintainer calls this function below, trigger the emergencyFreeze on the token contract itself
-    //TODO: the token contract should also have an unfreezeToken callable only by chainport congress
 
     // Function to perform emergency token freeze
     function emergencyTokenFreeze(address token) external onlyMaintainer {
