@@ -45,7 +45,7 @@ contract BridgeMintableToken is ERC20Burnable {
     {
         require(
             !isMintingFrozen,
-            "Error: Minting action is frozen for selected token."
+            "Error: Minting action is currently frozen."
         );
 
         _mint(_to, _amount);

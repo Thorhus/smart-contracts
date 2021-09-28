@@ -68,6 +68,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
     event AssetFrozen(address asset, bool isAssetFrozen);
     event BridgeFrozen(bool isFrozen);
+    event TokenMintingFreezeStateChanged(address token, bool state);
 
     // Modifiers
     modifier isBridgeNotFrozen {
@@ -325,8 +326,8 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         BridgeMintableToken(token).setMintingFreezeState(true);
     }
 
-    // Function to change token freeze state per network by congress
-    function setTokenFreezeState(
+    // Function to freeze/unfreeze token minting by congress
+    function setTokenMintingFreezeState(
         address token,
         bool state
     )
@@ -334,9 +335,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyChainportCongress
     {
         require(token != address(0), "Error: Token address malformed.");
-        require(isCreatedByTheBridge[token], "Error: Bad token.");
+        require(isCreatedByTheBridge[token], "Error: Token not created by the bridge.");
 
         BridgeMintableToken(token).setMintingFreezeState(state);
+        emit TokenMintingFreezeStateChanged(token, state);
     }
 
     // Function to set official network id
