@@ -175,7 +175,9 @@ contract Validator is Initializable, ChainportMiddleware {
         {
             v := mload(add(sig, idx))
         }
-        if (v >= 32) { // handle case when signature was made with ethereum web3.eth.sign or getSign which is for signing ethereum transactions
+        if (v >= 32) {
+            // handle case when signature was made with ethereum web3.eth.sign or getSign..
+            //..which serve for signing ethereum transactions
             v -= 32;
             bytes memory prefix = "\x19Ethereum Signed Message:\n32"; // 32 is the number of bytes in the following hash
             hash = keccak256(abi.encodePacked(prefix, hash));
