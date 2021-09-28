@@ -58,15 +58,15 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         uint256 amount,
         uint256 networkId
     );
-    event NetworkActivated(uint256 networkId);
-    event NetworkDeactivated(uint256 networkId);
-    event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
-    event AssetFrozen(address asset, bool isAssetFrozen);
     event PathPauseStateChanged(
         address tokenAddress,
         string functionName,
         bool isPaused
     );
+    event NetworkActivated(uint256 networkId);
+    event NetworkDeactivated(uint256 networkId);
+    event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
+    event AssetFrozen(address asset, bool isAssetFrozen);
     event BridgeFrozen(bool isFrozen);
 
     // Modifiers
@@ -109,16 +109,19 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         setCongressAndMaintainers(_chainportCongress, _maintainersRegistry);
     }
 
+    // Function to freeze the bridge
     function freezeBridge()
-    public
+    external
     onlyMaintainer
     {
         isFrozen = true;
         emit BridgeFrozen(true);
     }
 
+    // Function to unfreeze the bridge
+    // TODO: Check if it is better to set state instead of only unfreezing
     function unfreezeBridge()
-    public
+    external
     onlyChainportCongress
     {
         isFrozen = false;
@@ -138,7 +141,10 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     maintainerWorkNotInProgress
     {
         // Require that token wasn't already minted
-        require(originalAssetToBridgeToken[originalTokenAddress] == address(0), "Error: Token already exists.");
+        require(
+            originalAssetToBridgeToken[originalTokenAddress] == address(0),
+            "Error: Token already exists."
+        );
         // Mint new token
         BridgeMintableToken newToken = new BridgeMintableToken(tokenName, tokenSymbol, decimals);
         // Configure mappings
@@ -228,7 +234,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function activateNetwork(
         uint256 networkId
     )
-    public
+    external
     onlyMaintainer
     {
         isNetworkActive[networkId] = true;
@@ -239,7 +245,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function deactivateNetwork(
         uint256 networkId
     )
-    public
+    external
     onlyChainportCongress
     {
         isNetworkActive[networkId] = false;
@@ -247,10 +253,11 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to set maintainerWorkInProgress flag
+    // TODO: Check for removal (including modifier)
     function setMaintainerWorkInProgress(
         bool isMaintainerWorkInProgress
     )
-    public
+    external
     onlyMaintainer
     {
         maintainerWorkInProgress = isMaintainerWorkInProgress;
@@ -262,7 +269,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         address tokenAddress,
         bool _isFrozen
     )
-    public
+    external
     onlyChainportCongress
     {
         isAssetFrozen[tokenAddress] = _isFrozen;
@@ -273,7 +280,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     function freezeAssetsByMaintainer(
         address [] memory tokenAddresses
     )
-    public
+    external
     onlyMaintainer
     {
         for(uint i = 0; i < tokenAddresses.length; i++){
@@ -296,12 +303,22 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to set the signature validator contract
-    function setSignatureValidator(address _signatureValidator) external onlyChainportCongress {
+    function setSignatureValidator(
+        address _signatureValidator
+    )
+    external
+    onlyChainportCongress
+    {
         signatureValidator = IValidator(_signatureValidator);
     }
 
     // Function to perform emergency token freeze
-    function emergencyTokenFreeze(address token) external onlyMaintainer {
+    function emergencyTokenFreeze(
+        address token
+    )
+    external
+    onlyMaintainer
+    {
         require(token != address(0), "Error: Token address malformed.");
         require(isCreatedByTheBridge[token], "Error: Bad token.");
 
@@ -309,7 +326,13 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to change token freeze state per network by congress
-    function setTokenFreezeState(address token, bool state) external onlyChainportCongress {
+    function setTokenFreezeState(
+        address token,
+        bool state
+    )
+    external
+    onlyChainportCongress
+    {
         require(token != address(0), "Error: Token address malformed.");
         require(isCreatedByTheBridge[token], "Error: Bad token.");
 
@@ -317,7 +340,12 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to set official network id
-    function setOfficialNetworkId(uint256 networkId) external onlyChainportCongress {
+    function setOfficialNetworkId(
+        uint256 networkId
+    )
+    external
+    onlyChainportCongress
+    {
         require(networkId != 0, "Error: Bad network id.");
         officialNetworkId = networkId;
     }
