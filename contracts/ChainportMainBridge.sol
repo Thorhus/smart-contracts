@@ -46,6 +46,8 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     mapping(address => mapping(string => bool)) public isPathPaused;
     // Address of the FundManager contract
     address public fundManager;
+    // Whitelisted addresses for releasing funds
+    mapping(address => bool) public isWhitelisted;
     // Mapping for getting maximal nonce per function
     mapping(string => uint256) public functionNameToMaxNonce;
 
@@ -58,6 +60,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
     event BridgeFrozen(bool isFrozen);
     event FundManagerChanged(address newFundManager);
+    event AddressWhitelisted(address whitelistedAddress, bool state);
     event FundsRebalancedFromHotBridge(address target, address token, uint256 amount);
 
     // Modifiers
@@ -138,6 +141,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     // Function to transfer funds to fundManager contract
     function releaseTokensByMaintainer(
         address token,
+        address safeBeneficiary,
         uint256 amount,
         uint256 nonce
     )
@@ -145,8 +149,11 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     isAmountGreaterThanZero(amount)
     {
-        // Require that the fund manager has been set properly
-        require(fundManager != address(0), "Error: Fund manager not set.");
+        // Require that the beneficiary is whitelisted
+        require(
+            isWhitelisted[safeBeneficiary] || safeBeneficiary == fundManager,
+            "Error: Beneficiary is not a safe address."
+        );
 
         // Set new nonce as the maximal nonce for selected function
         functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce;
@@ -158,10 +165,10 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Specify that the nonce has been used now
         isNonceUsed[nonceHash] = true;
 
-        // Transfer funds to fund manager
-        IERC20(token).safeTransfer(fundManager, amount);
+        // Transfer funds to beneficiary safe address
+        IERC20(token).safeTransfer(safeBeneficiary, amount);
 
-        emit FundsRebalancedFromHotBridge(fundManager, token, amount);
+        emit FundsRebalancedFromHotBridge(safeBeneficiary, token, amount);
     }
 
     // Function to release tokens
@@ -265,11 +272,11 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         emit PathPauseStateChanged(token, functionName, isPaused);
     }
 
-    // Function to change fundManager contract address
+    // Function to set fundManager contract address
     function setFundManager(
         address _fundManager
     )
-    public
+    external
     onlyChainportCongress
     {
         // Require that address is not malformed
@@ -277,10 +284,25 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
             _fundManager != address(0),
             "Error: Cannot set zero address as fundManager address."
         );
+
         // Set fundManager new address
         fundManager = _fundManager;
-
         // Emit the event
         emit FundManagerChanged(fundManager);
+    }
+
+    // Function to whitelist/blacklist addresses
+    function setAddressesWhitelistState(
+        address [] calldata addresses,
+        bool state
+    )
+    external
+    onlyChainportCongress
+    {
+        for(uint8 i; i < addresses.length; i++) {
+            require(addresses[i] != address(0));
+            isWhitelisted[addresses[i]] = state;
+            AddressWhitelisted(addresses[i], state);
+        }
     }
 }
