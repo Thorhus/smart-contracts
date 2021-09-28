@@ -1,0 +1,62 @@
+name: Mythx
+
+'on':
+  - push
+  - pull_request
+
+jobs:
+  mythx:
+    name: Submit to Mythx
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install pip3
+        run: |
+          python -m pip install --upgrade pip
+      - name: Install mythx CLI
+        run: |
+          pip3 install mythx-cli
+      - name: Install solc-select
+        run: |
+          pip3 install solc-select
+      - name: Install solc 0.6.12
+        run: |
+          solc-select install 0.6.12
+          solc-select use 0.6.12
+      - name: Operations
+        run: |
+          mkdir fcontracts &&
+          npx hardhat flatten contracts/BridgeMintableToken.sol | grep -v "SPDX" > fcontracts/BridgeMintableToken.sol &&
+          npx hardhat flatten contracts/ChainportMainBridge.sol | grep -v "SPDX" > fcontracts/ChainportMainBridge.sol &&
+          npx hardhat flatten contracts/ChainportSideBridge.sol | grep -v "SPDX" > fcontracts/ChainportSideBridge.sol &&
+          npx hardhat flatten contracts/Validator.sol | grep -v "SPDX" > fcontracts/Validator.sol
+      - name: Submit code to Mythx
+        run: |
+          mythx --api-key ${{ secrets.MYTHX_SECRET }} \
+            --yes \
+            analyze \
+            --mode quick \
+            --async \
+            --create-group \
+            --group-name "@chainport/smart-contracts@${{ github.sha }}" \
+            --solc-version 0.6.12 \
+            --check-properties \
+            fcontracts/BridgeMintableToken.sol --include BridgeMintableToken \
+            fcontracts/ChainportMainBridge.sol --include ChainportMainBridge \
+            fcontracts/ChainportSideBridge.sol --include ChainportSideBridge \
+            fcontracts/Validator.sol --include Validator
