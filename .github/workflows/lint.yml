@@ -1,4 +1,4 @@
-name: Solhint Lint
+name: Lint
 'on':
   - push
   - pull_request
@@ -20,7 +20,8 @@ jobs:
           node-version: '${{ matrix.node-version }}'
       - name: Install dependencies
         run: yarn install
-      - name: Install solhint
+      - name: Install solhint && ethlint
         run: npm install -g solhint && solhint --init
+        run: npm install -g ethlint && solium --init
       - name: Lint
-        run: solhint contracts/*.sol
+        run: solhint contracts/*.sol && solium -d contracts/
