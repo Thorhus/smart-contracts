@@ -88,7 +88,6 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         _;
     }
 
-    // Initialization function
     function initialize(
         address _maintainersRegistryAddress,
         address _chainportCongress,
@@ -184,9 +183,11 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     isAssetNotFrozen(token)
     isPathNotPaused(token, "releaseTokens")
     {
+        // Require that signature was not used already
         require(isSignatureUsed[signature] == false, "Error: Signature already used");
         isSignatureUsed[signature] = true;
 
+        // Check nonce
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokens", nonce));
         require(!isNonceUsed[nonceHash], "Error: Nonce already used.");
         isNonceUsed[nonceHash] = true;
@@ -198,6 +199,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         // Requiring that signature is valid
         require(isMessageValid == true, "Error: Signature is not valid.");
 
+        // Perform the transfer
         IERC20(token).safeTransfer(beneficiary, amount);
 
         emit TokensClaimed(token, beneficiary, amount);
