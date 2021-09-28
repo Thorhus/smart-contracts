@@ -20,8 +20,9 @@ jobs:
           node-version: '${{ matrix.node-version }}'
       - name: Install dependencies
         run: yarn install
-      - name: Install solhint && ethlint
+      - name: Install solhint
         run: npm install -g solhint && solhint --init
-        run: npm install -g ethlint && solium --init
+      -name: Install ethlint
+        run:npm install -g ethlint && solium --init
       - name: Lint
         run: solhint contracts/*.sol && solium -d contracts/
