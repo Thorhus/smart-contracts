@@ -1,24 +1,24 @@
 name: Solhint Lint
 'on':
+  - push
   - pull_request
 jobs:
   build:
-    name: Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version:
           - 12.x
     steps:
-      - name: Checkout Release from lens
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-      - name: 'Using Node.js ${{ matrix.node-version }}'
+          fetch-depth: 2
+      - name: 'Set up Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v1
         with:
           node-version: '${{ matrix.node-version }}'
-      - name: Install deps
+      - name: Install dependencies
         run: yarn install
       - name: Install solhint
         run: npm install -g solhint
