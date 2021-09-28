@@ -20,8 +20,6 @@ jobs:
           node-version: '${{ matrix.node-version }}'
       - name: Install dependencies
         run: yarn install
-      - name: Run tests
-        run: npm run test
       - name: Setup node
         run: npx hardhat node &
       - name: Run tests
