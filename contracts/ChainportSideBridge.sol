@@ -35,15 +35,38 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     uint256 officialNetworkId;
 
     // Events
-    event TokensMinted(address tokenAddress, address issuer, uint256 amount);
-    event TokensBurned(address tokenAddress, address issuer, uint256 amount);
-    event TokenCreated(address newTokenAddress, address ethTokenAddress, string tokenName, string tokenSymbol, uint8 decimals);
-    event TokensTransferred(address bridgeTokenAddress, address issuer, uint256 amount, uint256 networkId);
+    event TokensMinted(
+        address tokenAddress,
+        address issuer,
+        uint256 amount
+    );
+    event TokensBurned(
+        address tokenAddress,
+        address issuer,
+        uint256 amount
+    );
+    event TokenCreated(
+        address newTokenAddress,
+        address ethTokenAddress,
+        string tokenName,
+        string tokenSymbol,
+        uint8 decimals
+    );
+    event TokensTransferred(
+        address bridgeTokenAddress,
+        address issuer,
+        uint256 amount,
+        uint256 networkId
+    );
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
     event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
     event AssetFrozen(address asset, bool isAssetFrozen);
-    event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
+    event PathPauseStateChanged(
+        address tokenAddress,
+        string functionName,
+        bool isPaused
+    );
     event BridgeFrozen(bool isFrozen);
 
     // Modifiers
