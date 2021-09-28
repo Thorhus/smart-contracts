@@ -1,4 +1,4 @@
-name: Running Code Coverage
+name: Running Unit Tests
 'on':
   - push
   - pull_request
@@ -23,6 +23,6 @@ jobs:
       - name: Run tests
         run: npm run test
       - name: Setup node
-        run: npx hardhat node
+        run: npx hardhat node &
       - name: Run tests
         run: npx hardhat test
