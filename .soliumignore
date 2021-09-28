@@ -1,0 +1,8 @@
+node_modules
+contracts/Migrations.sol
+contracts/MaintainersRegistry.sol
+contracts/ChainportMiddleware.sol
+contracts/interfaces
+contracts/token
+contracts/libraries
+contracts/governance
