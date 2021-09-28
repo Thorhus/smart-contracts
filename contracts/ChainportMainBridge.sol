@@ -53,12 +53,12 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
 
     // Events
     event TokensClaimed(address tokenAddress, address issuer, uint256 amount);
-    event AssetFrozen(address asset, bool isAssetFrozen);
+    event AssetFrozen(address asset, bool state);
     event NetworkActivated(uint256 networkId);
     event NetworkDeactivated(uint256 networkId);
     event TokensDeposited(address tokenAddress, address issuer, uint256 amount, uint256 networkId);
-    event PathPauseStateChanged(address tokenAddress, string functionName, bool isPaused);
-    event BridgeFrozen(bool isFrozen);
+    event PathPauseStateChanged(address tokenAddress, string functionName, bool state);
+    event BridgeFrozen(bool state);
     event FundManagerChanged(address newFundManager);
     event AddressWhitelisted(address whitelistedAddress, bool state);
     event FundsRebalancedFromHotBridge(address target, address token, uint256 amount);
@@ -100,37 +100,42 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         signatureValidator = IValidator(_signatureValidator);
     }
 
+    // Function to freeze the bridge
     function freezeBridge()
-    public
+    external
     onlyMaintainer
     {
         isFrozen = true;
         emit BridgeFrozen(true);
     }
 
+    // Function to unfreeze the bridge
+    // TODO: Check if it is better to set state instead of only unfreezing
     function unfreezeBridge()
-    public
+    external
     onlyChainportCongress
     {
         isFrozen = false;
         emit BridgeFrozen(false);
     }
 
+    // Function to set asset freeze state by congress
     function setAssetFreezeState(
         address tokenAddress,
         bool _isFrozen
     )
-    public
+    external
     onlyChainportCongress
     {
         isAssetFrozen[tokenAddress] = _isFrozen;
         emit AssetFrozen(tokenAddress, _isFrozen);
     }
 
+    // Function to freeze asset by maintainer
     function freezeAssetByMaintainer(
         address tokenAddress
     )
-    public
+    external
     onlyMaintainer
     {
         isAssetFrozen[tokenAddress] = true;
@@ -243,7 +248,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     function activateNetwork(
         uint256 networkId
     )
-    public
+    external
     onlyMaintainer
     {
         isNetworkActive[networkId] = true;
@@ -254,7 +259,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
     function deactivateNetwork(
         uint256 networkId
     )
-    public
+    external
     onlyChainportCongress
     {
         isNetworkActive[networkId] = false;
@@ -267,7 +272,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         string memory functionName,
         bool isPaused
     )
-    public
+    external
     onlyMaintainer
     {
         isPathPaused[token][functionName] = isPaused;
@@ -304,7 +309,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         for(uint8 i; i < addresses.length; i++) {
             require(addresses[i] != address(0));
             isWhitelisted[addresses[i]] = state;
-            AddressWhitelisted(addresses[i], state);
+            emit AddressWhitelisted(addresses[i], state);
         }
     }
 }
