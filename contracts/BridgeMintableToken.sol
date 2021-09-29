@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
  */
 contract BridgeMintableToken is ERC20Burnable {
 
+    //TODO: add option to freeze all transfers, callable only by the congress or maintainer from sidebrdige
+
     address public sideBridgeContract;
     bool public isMintingFrozen;
 

@@ -160,7 +160,7 @@ contract ChainportMainBridge is Initializable, ChainportMiddleware {
         );
 
         // Set new nonce as the maximal nonce for selected function
-        functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce;
+        functionNameToMaxNonce["releaseTokensByMaintainer"] = nonce; //TODO consider renaming to functionNameToLatestNonce
 
         // Generate nonceHash and check if nonce has been used before or not
         bytes32 nonceHash = keccak256(abi.encodePacked("releaseTokensByMaintainer", nonce));

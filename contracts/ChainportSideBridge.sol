@@ -178,7 +178,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         isNonceUsed[nonceHash] = true;
         // Require that signature has not been already used
         require(!isSignatureUsed[signature], "Error: Signature already used.");
-        isSignatureUsed[signature] = true;
+        isSignatureUsed[signature] = true; //TODO: rename to isMintSignatureUsed
         // Require that the signature is valid
         require(
             signatureValidator.verifyMint(signature, nonce, receiver, amount, token, officialNetworkId),
@@ -232,6 +232,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to activate selected network
+    //TODO allow congress as well to activateNetwork
     function activateNetwork(
         uint256 networkId
     )
@@ -324,6 +325,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         require(isCreatedByTheBridge[token], "Error: Bad token.");
 
         BridgeMintableToken(token).setMintingFreezeState(true);
+        //TODO: also freeze transfers
     }
 
     // Function to freeze/unfreeze token minting by congress
@@ -338,6 +340,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         require(isCreatedByTheBridge[token], "Error: Token not created by the bridge.");
 
         BridgeMintableToken(token).setMintingFreezeState(state);
+        //TODO: also unfreeze transfers
         emit TokenMintingFreezeStateChanged(token, state);
     }
 
