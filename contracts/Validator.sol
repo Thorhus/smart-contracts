@@ -134,6 +134,7 @@ contract Validator is Initializable, ChainportMiddleware {
     //TODO: Check for removal
     function recoverSigFromHash(bytes32 hash, bytes memory signature)
     external
+    onlyMaintainer
     view
     returns (bool)
     {
