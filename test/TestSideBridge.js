@@ -135,7 +135,7 @@ describe("Side Bridge Test", () => {
             });
         });
 
-        describe("Maintainer work in progress", () => {
+        xdescribe("Maintainer work in progress", () => {
 
             it("Should set maintainer workInProgress by maintainer", async () => {
                 await sideBridgeInstance.connect(maintainer).setMaintainerWorkInProgress(true);
@@ -151,9 +151,7 @@ describe("Side Bridge Test", () => {
         describe("Network activation", () => {
 
             it("Should activate network (as maintainer)", async () => {
-                await expect(sideBridgeInstance.connect(maintainer).activateNetwork(1))
-                    .to.emit(sideBridgeInstance, 'NetworkActivated')
-                    .withArgs(1);
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
                 expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
             });
 
@@ -162,20 +160,16 @@ describe("Side Bridge Test", () => {
                     .to.be.revertedWith('ChainportUpgradables: Restricted only to Maintainer');
             });
             it("Should deactivate network (as congress)", async () => {
-                await expect(sideBridgeInstance.connect(maintainer).activateNetwork(1))
-                    .to.emit(sideBridgeInstance, 'NetworkActivated')
-                    .withArgs(1);
+                await sideBridgeInstance.connect(maintainer).activateNetwork(1);
                 expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
-                await expect(sideBridgeInstance.connect(chainportCongress).deactivateNetwork(1))
-                    .to.emit(sideBridgeInstance, 'NetworkDeactivated')
-                    .withArgs(1);
+                await sideBridgeInstance.connect(chainportCongress).setNetworkActivityState(1, false);
                 expect(await sideBridgeInstance.isNetworkActive(1)).to.be.false;
             });
 
             it("Should not deactivate network (as user)", async () => {
                 await sideBridgeInstance.connect(maintainer).activateNetwork(1);
                 expect(await sideBridgeInstance.isNetworkActive(1)).to.be.true;
-                await expect(sideBridgeInstance.connect(user1).deactivateNetwork(1))
+                await expect(sideBridgeInstance.connect(user1).setNetworkActivityState(1, false))
                     .to.be.revertedWith('ChainportUpgradables: Restricted only to ChainportCongress');
             });
         });

@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { signatoryAddress, createHashWithdraw, generateSignature } = require('./testHelpers')
 
-describe("Validator", function () {
+describe("Validator", () => {
 
     let maintainersRegistry, maintainersRegistryInstance, sideBridge, sideBridgeInstance,
     validator, validatorInstance, chainportCongress, maintainer, maintainers, user1, user2, token,
@@ -9,7 +9,7 @@ describe("Validator", function () {
 
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-    beforeEach(async function() {
+    beforeEach(async () => {
         maintainersRegistry = await ethers.getContractFactory("MaintainersRegistry");
         [chainportCongress, user1, user2, bridgeContract, maintainer, ...maintainers] = await ethers.getSigners();
 
@@ -33,35 +33,35 @@ describe("Validator", function () {
         sideBridgeInstance = await sideBridge.deploy();
     });
 
-    describe("Main functions", function () {
+    describe("Main functions", () => {
 
         let releaseAmount = 50;
 
-        describe("Set signatory address", async function () {
-            it("Should not set zero address (by congress)", async function () {
+        describe("Set signatory address", async () => {
+            it("Should not set zero address (by congress)", async () => {
                 await expect(validatorInstance.setSignatoryAddress(ZERO_ADDRESS)).to.be.reverted;
             });
 
-            it("Should set signatory address (by congress)", async function() {
+            it("Should set signatory address (by congress)", async () => {
                 await validatorInstance.setSignatoryAddress(validatorInstance.address);
                 expect(await(validatorInstance.signatoryAddress())).to.equal(validatorInstance.address);
             });
 
-            it("Should not set signatory address (by non congress)", async function () {
+            it("Should not set signatory address (by non congress)", async () => {
                 await expect(validatorInstance.connect(user1).setSignatoryAddress(user1.address))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
         });
 
-        describe("Verify withdraw", async function () {
-            it("Should not verify if message is signed using bad sig v (by invalid signer)", async function () {
-                await expect(validatorInstance.recoverSigFromHash(
+        describe("Verify withdraw", async () => {
+            it("Should not verify if message is signed using bad sig v (by invalid signer)", async () => {
+                await expect(validatorInstance.connect(maintainer).recoverSigFromHash(
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd",
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36")
                 ).to.be.revertedWith("bad sig v");
             });
 
-            xit("Should return false if message is signed (by invalid signer)", async function () {
+            xit("Should return false if message is signed (by invalid signer)", async () => {
                 expect(await validatorInstance.recoverSigFromHash(
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd",
                     "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cdcf36")
@@ -69,7 +69,7 @@ describe("Validator", function () {
             });
 
             it("Should verify signature with recoverSigFromHash function", async () => {
-                expect(await validatorInstance.recoverSigFromHash(
+                expect(await validatorInstance.connect(maintainer).recoverSigFromHash(
                         createHashWithdraw(1, maintainer.address, releaseAmount, token.address),
                         generateSignature(createHashWithdraw(1, maintainer.address, releaseAmount, token.address))
                     )).to.be.true;
@@ -93,7 +93,7 @@ describe("Validator", function () {
             })
         });
 
-        xdescribe("Recover signature", async function () {
+        xdescribe("Recover signature", async () => {
             it("Should return recovered signature", async () => {
                 await validatorInstance.recoverSignature(
                     generateSignature(createHashWithdraw(1, maintainer.address, releaseAmount, token.address)),

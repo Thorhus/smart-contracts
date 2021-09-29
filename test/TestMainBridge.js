@@ -53,6 +53,7 @@ describe("Main Bridge Test", () => {
                 chainportCongress.address,
                 validatorInstance.address
             );
+            await mainBridgeInstance.connect(chainportCongress).setFundManager(fundManager);
         });
 
         describe("Check if values are set properly", () => {
@@ -237,6 +238,7 @@ describe("Main Bridge Test", () => {
                 it("Should not withdraw when amount is less or equal to zero (by maintainer)", async () => {
                     await expect(mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
+                        fundManager,
                         0,
                         0
                     )).to.be.revertedWith("Amount is not greater than zero.");
@@ -245,6 +247,7 @@ describe("Main Bridge Test", () => {
                 it("Should withdraw tokens (by maintainer)", async () => {
                     await mainBridgeInstance.connect(maintainer).releaseTokensByMaintainer(
                         token.address,
+                        fundManager,
                         releaseAmount,
                         1
                     );
@@ -337,13 +340,11 @@ describe("Main Bridge Test", () => {
         describe("Set fundManager contract test", () => {
 
             it("Should set new fundManager address by congress", async () => {
-                expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await mainBridgeInstance.connect(chainportCongress).setFundManager(fundManager);
                 expect(await mainBridgeInstance.fundManager()).to.equal(fundManager);
             });
 
             it("Should not set new fundManager address by non congress wallet", async () => {
-                expect(await mainBridgeInstance.fundManager()).to.equal(ZERO_ADDRESS);
                 await expect(mainBridgeInstance.connect(user1).setFundManager(fundManager))
                     .to.be.revertedWith("ChainportUpgradables: Restricted only to ChainportCongress");
             });
