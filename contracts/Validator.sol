@@ -105,6 +105,7 @@ contract Validator is Initializable, ChainportMiddleware {
         bytes32 hash;
         // Generate hash
         if (networkId == 0) {
+            // For call by verifyWithdraw function
             hash = keccak256(
                 abi.encodePacked(
                     recoverSignatureHash,
@@ -112,6 +113,7 @@ contract Validator is Initializable, ChainportMiddleware {
                 )
             );
         } else {
+            // For call by verifyMint function
             hash = keccak256(
                 abi.encodePacked(
                     recoverSignatureHash,
@@ -152,9 +154,9 @@ contract Validator is Initializable, ChainportMiddleware {
     pure
     returns (address)
     {
-        // same as recoverHash in utils/sign.js
+        // Same as recoverHash in utils/sign.js
         // The signature format is a compact form of:
-        //   {bytes32 r}{bytes32 s}{uint8 v}
+        // {bytes32 r}{bytes32 s}{uint8 v}
         // Compact means, uint8 is not padded to 32 bytes.
         require (sig.length >= 65+idx, 'bad signature length');
         idx += 32;
