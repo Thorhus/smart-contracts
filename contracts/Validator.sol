@@ -215,6 +215,7 @@ contract Validator is Initializable, ChainportMiddleware {
     view
     returns (bool)
     {
+        require(networkId != 0, "Error: Network id not set.");
         address messageSigner = recoverSignature(signedMessage, nonce, beneficiary, amount, token, networkId);
         return messageSigner == signatoryAddress;
     }
