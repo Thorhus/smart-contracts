@@ -9,7 +9,7 @@ import "./interfaces/IValidator.sol";
 contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     IValidator public signatureValidator;
-    // Previous version unused mappings
+    // Previous version deprecated mappings
     mapping(address => address) public erc20ToBep20Address;
     mapping(string => uint256) public functionNameToNonce;
 
@@ -23,7 +23,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     mapping(bytes32 => bool) public isNonceUsed;
     // New mapping replacement for erc20ToBep20Address
     mapping(address => address) public originalAssetToBridgeToken;
-    // Security variable used for maintainer one time actions check used for upgrading
+    // Deprecated security feature
     bool public maintainerWorkInProgress;
     // Mapping for freezing the assets
     mapping(address => bool) public isAssetFrozen;
@@ -63,9 +63,7 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
         string functionName,
         bool isPaused
     );
-    event NetworkActivated(uint256 networkId);
-    event NetworkDeactivated(uint256 networkId);
-    event MaintainerWorkInProgress(bool isMaintainerWorkInProgress);
+    event NetworkActivityStateSet(uint256 networkId, bool state);
     event AssetFrozen(address asset, bool isAssetFrozen);
     event BridgeFrozen(bool isFrozen);
     event TokenMintingFreezeStateChanged(address token, bool state);
@@ -78,11 +76,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
 
     modifier isAmountGreaterThanZero(uint256 amount) {
         require(amount > 0, "Error: Amount is not greater than zero.");
-        _;
-    }
-
-    modifier maintainerWorkNotInProgress {
-        require(!maintainerWorkInProgress, "Maintainer actions are being performed at the moment.");
         _;
     }
 
@@ -139,7 +132,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     public
     onlyMaintainer
     isBridgeNotFrozen
-    maintainerWorkNotInProgress
     {
         // Require that token wasn't already minted
         require(
@@ -167,7 +159,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     isBridgeNotFrozen
     isAssetNotFrozen(token)
     isAmountGreaterThanZero(amount)
-    maintainerWorkNotInProgress
     isPathNotPaused(token, "mintTokens")
     {
         // Require that token was created by the bridge
@@ -232,7 +223,6 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     }
 
     // Function to activate selected network
-    //TODO allow congress as well to activateNetwork
     function activateNetwork(
         uint256 networkId
     )
@@ -240,30 +230,19 @@ contract ChainportSideBridge is Initializable, ChainportMiddleware {
     onlyMaintainer
     {
         isNetworkActive[networkId] = true;
-        emit NetworkActivated(networkId);
+        emit NetworkActivityStateSet(networkId, true);
     }
 
     // Function to deactivate selected network
-    function deactivateNetwork(
-        uint256 networkId
+    function setNetworkActivityState(
+        uint256 networkId,
+        bool state
     )
     external
     onlyChainportCongress
     {
-        isNetworkActive[networkId] = false;
-        emit NetworkDeactivated(networkId);
-    }
-
-    // Function to set maintainerWorkInProgress flag
-    // TODO: Check for removal (including modifier)
-    function setMaintainerWorkInProgress(
-        bool isMaintainerWorkInProgress
-    )
-    external
-    onlyMaintainer
-    {
-        maintainerWorkInProgress = isMaintainerWorkInProgress;
-        emit MaintainerWorkInProgress(isMaintainerWorkInProgress);
+        isNetworkActive[networkId] = state;
+        emit NetworkActivityStateSet(networkId, state);
     }
 
     // Function to freeze or unfreeze asset by congress
